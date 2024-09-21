@@ -35,9 +35,28 @@
 namespace tenno
 {
 
+/**
+ * @brief A fixed-size array
+ *
+ * @tparam T The type of the elements in the array
+ * @tparam N The size of the array
+ *
+ * # Example
+ * ```cpp
+ * auto arr = tenno::array<int, 5>();
+ * ```
+ * No memory allocation is performed, and the array is stored on the stack.
+ */
 template <typename T, tenno::size N> class array
 {
   public:
+    /**
+     * @brief The type of the elements in the array
+     */
+    using value_type = T;
+    /**
+     * @brief The underlying array
+     */
     T data[N];
 
     /**
@@ -95,6 +114,8 @@ template <typename T, tenno::size N> class array
         tenno::for_each(arr.begin(), arr.end(), [](T &elem) { elem = T(); });
         return arr;
     }
+
+    
 
     /**
      * @brief An iterator to iterate over the array

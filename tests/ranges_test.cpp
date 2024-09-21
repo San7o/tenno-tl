@@ -59,4 +59,11 @@ TEST(range_iterate, "iterating over tenno::range")
         ASSERT_EQ(*it, i);
         ++it;
     }
+
+    int sum = 0;
+    for (auto i : r)
+    {
+        sum += i;
+    }
+    ASSERT_EQ(sum, 10);
 }

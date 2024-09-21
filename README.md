@@ -14,6 +14,7 @@ Currently implemented:
 - [array](./include/tenno/array.hpp)
 - [ranges](./include/tenno/ranges.hpp)
 - [algorithm](./include/tenno/algorithm.hpp)
+- [expected](./include/tenno/expected.hpp)
 
 ## Building
 

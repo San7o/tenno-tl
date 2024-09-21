@@ -33,6 +33,11 @@ TEST(array_create, "creating tenno::array")
     [[maybe_unused]] auto arr = tenno::array<int, 5>();
 }
 
+TEST(array_value_type, "reading tenno::array::value_type")
+{
+    ASSERT_EQ(typeid(tenno::array<int, 5>::value_type), typeid(int));
+}
+
 TEST(array_size, "reading tenno::array.size()")
 {
     auto arr = tenno::array<int, 5>();
