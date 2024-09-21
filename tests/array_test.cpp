@@ -64,3 +64,76 @@ TEST(array_initialize_lize, "initialize tenno::array with a list")
     ASSERT_EQ(arr2.data[3], 2);
     ASSERT_EQ(arr2.data[4], 1);
 }
+
+TEST(array_iterator_begin, "tenno::array.begin()")
+{
+    auto arr = tenno::array<int, 5>{1, 2, 3, 4, 5};
+    auto it = arr.begin();
+    ASSERT_EQ(*it, 1);
+}
+
+TEST(array_iterator_dereference, "tenno::array::iterator::operator*()")
+{
+    auto arr = tenno::array<int, 3>{1, 2, 3};
+    auto it = arr.begin();
+    ASSERT_EQ(*it, 1);
+}
+
+TEST(array_iterator_end, "tenno::array.end()")
+{
+    auto arr = tenno::array<int, 3>{1, 2, 3};
+    auto it = arr.end();
+    ASSERT_NE(*it, 1);
+    ASSERT_NE(*it, 2);
+    ASSERT_NE(*it, 3);
+}
+
+TEST(array_iterator_increment, "tenno::array::iterator::operator++()")
+{
+    auto arr = tenno::array<int, 3>{1, 2, 3};
+    auto it = arr.begin();
+    ++it;
+    ASSERT_EQ(*it, 2);
+    ++it;
+    ASSERT_EQ(*it, 3);
+}
+
+TEST(array_interator_pre_increment, "tenno::array::iterator::operator++(int)")
+{
+    auto arr = tenno::array<int, 3>{1, 2, 3};
+    auto it = arr.begin();
+    auto it2 = it++;
+    ASSERT_EQ(*it2, 1);
+    ASSERT_EQ(*it, 2);
+}
+
+TEST(array_iterator_equality, "tenno::array::iterator::operator==()")
+{
+    auto arr = tenno::array<int, 3>{1, 2, 3};
+    auto it = arr.begin();
+    auto it2 = arr.begin();
+    ASSERT_EQ(it, it2);
+    ++it;
+    ASSERT_NE(it, it2);
+}
+
+TEST(array_iterator_inequality, "tenno::array::iterator::operator!=()")
+{
+    auto arr = tenno::array<int, 3>{1, 2, 3};
+    auto it = arr.begin();
+    auto it2 = arr.begin();
+    ASSERT_EQ(it, it2);
+    ++it;
+    ASSERT_NE(it, it2);
+}
+
+TEST(array_iteration, "iterating over tenno::array")
+{
+    auto arr = tenno::array<int, 3>{1, 2, 3};
+    auto sum = 0;
+    for (auto elem : arr)
+    {
+        sum += elem;
+    }
+    ASSERT_EQ(sum, 6);
+}

@@ -19,6 +19,7 @@ set(TENNO_HEADERS include)
 set(TENNO_COMPILE_OPTIONS -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow)
 set(TENNO_TEST_SOURCES
         tests/array_test.cpp
+        tests/ranges_test.cpp
         fuzz/array_fuzz.cpp
         benchmarks/array_benchmark.cpp
 )

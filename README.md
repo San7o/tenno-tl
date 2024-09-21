@@ -11,8 +11,9 @@ Design goals:
 - modern-looking and readable c++23 code
 
 Currently implemented:
-- [tenno::array<T,N>](./inlude/tenno/array.hpp) (work in progress)
-- [tenno::range(int from, int to)](./include/tenno/ranges) (work in progress)
+- [array](./include/tenno/array.hpp)
+- [ranges](./include/tenno/ranges.hpp)
+- [algorithm](./include/tenno/algorithm.hpp)
 
 ## Building
 

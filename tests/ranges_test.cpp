@@ -24,10 +24,39 @@
  *
  */
 
-#include <tenno/array.hpp>
 #include <valfuzz/valfuzz.hpp>
+#include <tenno/ranges.hpp>
 
-BENCHMARK(nth_fibonacci_benchmark, "Benchmarking tenno:array constructor")
+TEST(range_create, "creating tenno::range")
 {
-    RUN_BENCHMARK([[maybe_unused]] auto arr = tenno::array<int, 1000>());
+    [[maybe_unused]] auto r = tenno::range<int>(0, 5);
+}
+
+TEST(range_size, "reading tenno::range.size()")
+{
+    auto r = tenno::range<int>(0, 5);
+    ASSERT_EQ(r.size(), 5);
+}
+
+TEST(range_begin, "reading tenno::range.begin()")
+{
+    auto r = tenno::range<int>(0, 5);
+    ASSERT_EQ(*r.begin(), 0);
+}
+
+TEST(range_end, "reading tenno::range.end()")
+{
+    auto r = tenno::range<int>(0, 5);
+    ASSERT_EQ(*r.end(), 5);
+}
+
+TEST(range_iterate, "iterating over tenno::range")
+{
+    auto r = tenno::range<int>(0, 5);
+    auto it = r.begin();
+    for (int i = 0; i < 5; ++i)
+    {
+        ASSERT_EQ(*it, i);
+        ++it;
+    }
 }

@@ -26,17 +26,18 @@
 
 #pragma once
 
+#include <cstddef>          /* for std::ptrdiff_t */
 #include <initializer_list> /* brace-enclosed initializer list must use std */
+#include <iterator>         /* for std::forward_iterator_tag */
+#include <tenno/algorithm.hpp>
 #include <tenno/types.hpp>
 
 namespace tenno
 {
 
-template <typename T, tenno::size N>
-class array
+template <typename T, tenno::size N> class array
 {
-public:
-
+  public:
     T data[N];
 
     /**
@@ -61,10 +62,7 @@ public:
      */
     array(std::initializer_list<T> list)
     {
-        for (auto it = list.begin(); it != list.end(); ++it)
-        {
-            this->data[it - list.begin()] = *it;
-        }
+        tenno::copy(list.begin(), list.end(), this->data);
     }
 
     /**
@@ -78,7 +76,10 @@ public:
      * const tenno::size size = arr.size();
      * ```
      */
-    tenno::size size() const noexcept { return this->_size; }
+    tenno::size size() const noexcept
+    {
+        return this->_size;
+    }
 
     /**
      * @brief Initialize all elements of the array to the default value of T
@@ -88,19 +89,122 @@ public:
      * auto arr = tenno::array<int, 10>::init();
      * ```
      */
-    static tenno::array<T,N> init() noexcept
+    static tenno::array<T, N> init() noexcept
     {
         auto arr = tenno::array<T, N>();
-        //for (const auto i : tenno::range(0, N))
-        for (tenno::size i = 0; i < N; ++i)
-        {
-            arr.data[i] = T();
-        }
+        tenno::for_each(arr.begin(), arr.end(), [](T &elem) { elem = T(); });
         return arr;
     }
 
-private:
+    /**
+     * @brief An iterator to iterate over the array
+     */
+    struct Iterator
+    {
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = T;
+        using pointer = T *;
+        using reference = T &;
+
+        T *ptr;
+
+        /**
+         * @brief Construct a new Iterator object
+         *
+         * @param ptr The pointer to the element the iterator points to
+         */
+        Iterator(T *ptr) : ptr(ptr)
+        {
+        }
+
+        /**
+         * @brief Construct a new Iterator object
+         *
+         * @param other The other iterator to copy
+         */
+        Iterator &operator++()
+        {
+            ptr++;
+            return *this;
+        }
+
+        /**
+         * @brief Construct a new Iterator object
+         *
+         * @param other The other iterator to copy
+         */
+        Iterator operator++(int)
+        {
+            Iterator iterator = *this;
+            ++*this;
+            return iterator;
+        }
+
+        /**
+         * @brief Construct a new Iterator object
+         *
+         * @param other The other iterator to copy
+         */
+        bool operator==(const Iterator &other) const
+        {
+            return ptr == other.ptr;
+        }
+
+        /**
+         * @brief Construct a new Iterator object
+         *
+         * @param other The other iterator to copy
+         */
+        bool operator!=(const Iterator &other) const
+        {
+            return !(*this == other);
+        }
+
+        /**
+         * @brief dereference operator
+         *
+         * @return reference The reference to the element the iterator points to
+         */
+        reference operator*() const
+        {
+            return *ptr;
+        }
+    };
+
+    /**
+     * @brief Get an iterator to the beginning of the array
+     *
+     * @return Iterator The iterator to the beginning of the array
+     *
+     * # Example
+     * ```cpp
+     * auto arr = tenno::array<int, 5>();
+     * auto begin = arr.begin();
+     * ```
+     */
+    Iterator begin()
+    {
+        return Iterator(data);
+    }
+    /**
+     * @brief Get an iterator to the end of the array
+     *
+     * @return Iterator The iterator to the end of the array
+     *
+     * # Example
+     * ```cpp
+     * tenno::for_each(arr.begin(), arr.end(), [](int& elem) { elem = 0; });
+     * ```
+     */
+    Iterator end()
+    {
+        return Iterator(data + N);
+    }
+
+  private:
     const tenno::size _size = N;
+
 }; // class array
 
 } // namespace tenno

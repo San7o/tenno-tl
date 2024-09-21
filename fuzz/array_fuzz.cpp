@@ -29,6 +29,6 @@
 
 FUZZME(nth_fibonacci_fuzz, "Fuzzing tenno::array constructor")
 {
-    //auto n = (tenno::size) valfuzz::get_random<int>();
+    // auto n = (tenno::size) valfuzz::get_random<int>();
     tenno::array<int, 10> arr;
 }
