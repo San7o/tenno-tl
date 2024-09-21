@@ -1,0 +1,66 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2024 Giovanni Santini
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
+#include <tenno/array.hpp>
+#include <tenno/types.hpp>
+#include <valfuzz/valfuzz.hpp>
+
+TEST(array_create, "creating tenno::array")
+{
+    [[maybe_unused]] auto arr = tenno::array<int, 5>();
+}
+
+TEST(array_size, "reading tenno::array.size()")
+{
+    auto arr = tenno::array<int, 5>();
+    ASSERT_EQ(arr.size(), 5);
+}
+
+TEST(array_default_init, "initialize tenno::array with default values")
+{
+    auto arr = tenno::array<int, 5>::init();
+    ASSERT_EQ(arr.data[0], 0);
+    ASSERT_EQ(arr.data[1], 0);
+    ASSERT_EQ(arr.data[2], 0);
+    ASSERT_EQ(arr.data[3], 0);
+    ASSERT_EQ(arr.data[4], 0);
+}
+
+TEST(array_initialize_lize, "initialize tenno::array with a list")
+{
+    tenno::array<int, 5> arr{1, 2, 3, 4, 5};
+    ASSERT_EQ(arr.data[0], 1);
+    ASSERT_EQ(arr.data[1], 2);
+    ASSERT_EQ(arr.data[2], 3);
+    ASSERT_EQ(arr.data[3], 4);
+    ASSERT_EQ(arr.data[4], 5);
+    tenno::array<int, 5> arr2 = {5, 4, 3, 2, 1};
+    ASSERT_EQ(arr2.data[0], 5);
+    ASSERT_EQ(arr2.data[1], 4);
+    ASSERT_EQ(arr2.data[2], 3);
+    ASSERT_EQ(arr2.data[3], 2);
+    ASSERT_EQ(arr2.data[4], 1);
+}
