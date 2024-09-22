@@ -39,3 +39,38 @@ TEST(algorithm_copy, "copying tenno::array")
     ASSERT_EQ(arr2.data[3], 4);
     ASSERT_EQ(arr2.data[4], 5);
 }
+
+TEST(algorithm_for_each, "iterating over tenno::array with for_each")
+{
+    tenno::array<int, 5> arr{1, 2, 3, 4, 5};
+    int sum = 0;
+    tenno::for_each(arr.begin(), arr.end(), [&sum](int i) { sum += i; });
+    ASSERT_EQ(sum, 15);
+}
+
+TEST(algorithm_for_each_constexpr, "iterating over tenno::array with for_each constexpr")
+{
+    constexpr tenno::array<int, 5> arr{1, 2, 3, 4, 5};
+    constexpr const auto sum = [arr]() constexpr {
+        auto tmp = 0;
+        tenno::for_each(arr.begin(), arr.end(), [&tmp](int i) {
+            tmp += i;
+        });  
+        return tmp;
+    }();
+    static_assert(sum == 15);
+}
+
+TEST(algorithm_accumulate, "accumulating tenno::array")
+{
+    tenno::array<int, 5> arr{1, 2, 3, 4, 5};
+    auto sum = tenno::accumulate(arr.begin(), arr.end(), 0);
+    ASSERT_EQ(sum, 15);
+}
+
+TEST(algorithm_accumulate_constexpr, "accumulating tenno::array constexpr")
+{
+    constexpr tenno::array<int, 5> arr{1, 2, 3, 4, 5};
+    constexpr auto sum = tenno::accumulate(arr.begin(), arr.end(), 0);
+    static_assert(sum == 15);
+}
