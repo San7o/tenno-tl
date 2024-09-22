@@ -32,6 +32,11 @@
 namespace tenno
 {
 
+/**
+ * @brief A range of elements
+ *
+ * @tparam T The type of the elements in the range
+ */
 template <typename T> class range
 {
   public:

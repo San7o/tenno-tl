@@ -29,6 +29,11 @@
 namespace tenno
 {
 
+/**
+ * @brief An unexpected value
+ *
+ * @tparam E The type of the unexpected value
+ */
 template <typename E> class unexpected
 {
   public:
@@ -41,6 +46,12 @@ template <typename E> class unexpected
     }
 };
 
+/**
+ * @brief An expected value
+ *
+ * @tparam T The type of the expected value
+ * @tparam E The type of the unexpected value
+ */
 template <typename T, typename E> class expected
 {
   public:

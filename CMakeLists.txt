@@ -21,6 +21,7 @@ set(TENNO_TEST_SOURCES
         tests/array_test.cpp
         tests/ranges_test.cpp
         tests/expected_test.cpp
+        tests/algorithm_test.cpp
         fuzz/array_fuzz.cpp
         benchmarks/array_benchmark.cpp
 )

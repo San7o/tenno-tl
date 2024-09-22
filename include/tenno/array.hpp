@@ -162,7 +162,7 @@ template <typename T, tenno::size N> class array
          *
          * @param other The other iterator to copy
          */
-        constexpr Iterator operator++(int) noexcept
+        constexpr Iterator operator++(T) noexcept
         {
             Iterator iterator = *this;
             ++*this;

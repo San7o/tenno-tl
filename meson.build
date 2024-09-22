@@ -57,7 +57,10 @@ if get_option('TENNO_BUILD_TESTS')
   test_sources = files(
     'tests/array_test.cpp',
     'tests/expected_test.cpp',
-    'tests/ranges_test.cpp'
+    'tests/ranges_test.cpp',
+    'tests/algorithm_test.cpp',
+    'benchmarks/array_benchmark.cpp',
+    'fuzz/array_fuzz.cpp',
   )
   executable('tests',
     sources: test_sources,
