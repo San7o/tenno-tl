@@ -24,6 +24,7 @@
  *
  */
 
+#include <tenno/algorithm.hpp>
 #include <tenno/ranges.hpp>
 #include <valfuzz/valfuzz.hpp>
 
@@ -66,4 +67,19 @@ TEST(range_iterate, "iterating over tenno::range")
         sum += i;
     }
     ASSERT_EQ(sum, 10);
+}
+
+TEST(range_constexpr, "tenno::range is constexpr")
+{
+    constexpr auto r = tenno::range<int>(0, 5);
+    static_assert(r.size() == 5);
+    static_assert(*r.begin() == 0);
+    static_assert(*r.end() == 5);
+}
+
+TEST(range_constexpr_iterate, "tenno::range::Iterator is constexpr")
+{
+    constexpr auto r = tenno::range<int>(0, 5);
+    constexpr auto sum = tenno::accumulate(r.begin(), r.end(), 0);
+    static_assert(sum == 10);
 }

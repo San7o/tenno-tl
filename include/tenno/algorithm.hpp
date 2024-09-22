@@ -71,11 +71,38 @@ constexpr OutputIt copy(InputIt first, InputIt last, OutputIt d_first)
 template <class InputIt, class UnaryFunc>
 constexpr UnaryFunc for_each(InputIt first, InputIt last, UnaryFunc f)
 {
-    for (; first != last; ++first)
+    while (first != last)
     {
-        f(*first);
+        f(*first++);
     }
     return f;
+}
+
+/**
+ * @brief Applies the given function f to the result of dereferencing every
+ * element in the range [first, last) and returns the result.
+ *
+ * @tparam InputIt The type of the iterator to the first element in the range to
+ * apply the function to.
+ * @tparam UnaryFunc The type of the function to apply to the elements in the
+ * range.
+ * @tparam T The type of the result of the function.
+ * @param first The iterator to the first element in the range to apply the
+ * function to.
+ * @param last The iterator to the element after the last element in the range
+ * to apply the function to.
+ * @param f The function to apply to the elements in the range.
+ * @param init The initial value of the result.
+ * @return T The result of the function.
+ */
+template <class InputIt, class T>
+constexpr T accumulate(InputIt first, InputIt last, T init) noexcept
+{
+    while (first != last)
+    {
+        init += *first++;
+    }
+    return init;
 }
 
 } // namespace tenno

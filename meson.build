@@ -35,21 +35,21 @@ valfuzz_dep = valfuzz_proj.dependency('valfuzz_shared')
 
 if get_option('TENNO_BUILD_SHARED')
   shared_library('tennoTL',
-    dependencies: [
-      valfuzz_dep
-    ],
     include_directories: [
       'include',
+    ],
+    dependencies: [
+      valfuzz_dep
     ],
   )
 endif
 if get_option('TENNO_BUILD_STATIC')
   static_library('tennoTL',
-    dependencies: [
-      valfuzz_dep
-    ],
     include_directories: [
       'include',
+    ],
+    dependencies: [
+      valfuzz_dep
     ],
   )
 endif
@@ -61,11 +61,11 @@ if get_option('TENNO_BUILD_TESTS')
   )
   executable('tests',
     sources: test_sources,
-    dependencies: [
-      valfuzz_dep
-    ],
     include_directories: [
       'include',
+    ],
+    dependencies: [
+      valfuzz_dep
     ],
   )
 endif

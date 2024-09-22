@@ -133,7 +133,16 @@ template <typename T, tenno::size N> class array
          *
          * @param ptr The pointer to the element the iterator points to
          */
-        Iterator(T *ptr_in) : ptr(ptr_in)
+        constexpr Iterator(T *ptr_in) : ptr(ptr_in)
+        {
+        }
+
+        /**
+         * @brief Construct a new Iterator object
+         *
+         * @param ptr The pointer to the element the iterator points to
+         */
+        constexpr Iterator(const T *ptr_in) : ptr(const_cast<T *>(ptr_in))
         {
         }
 
@@ -142,7 +151,7 @@ template <typename T, tenno::size N> class array
          *
          * @param other The other iterator to copy
          */
-        Iterator &operator++()
+        constexpr Iterator &operator++() noexcept
         {
             ptr++;
             return *this;
@@ -153,7 +162,7 @@ template <typename T, tenno::size N> class array
          *
          * @param other The other iterator to copy
          */
-        Iterator operator++(int)
+        constexpr Iterator operator++(int) noexcept
         {
             Iterator iterator = *this;
             ++*this;
@@ -165,7 +174,7 @@ template <typename T, tenno::size N> class array
          *
          * @param other The other iterator to copy
          */
-        bool operator==(const Iterator &other) const
+        constexpr bool operator==(const Iterator &other) const noexcept
         {
             return ptr == other.ptr;
         }
@@ -175,7 +184,7 @@ template <typename T, tenno::size N> class array
          *
          * @param other The other iterator to copy
          */
-        bool operator!=(const Iterator &other) const
+        constexpr bool operator!=(const Iterator &other) const noexcept
         {
             return !(*this == other);
         }
@@ -185,7 +194,7 @@ template <typename T, tenno::size N> class array
          *
          * @return reference The reference to the element the iterator points to
          */
-        reference operator*() const
+        constexpr reference operator*() const noexcept
         {
             return *ptr;
         }
@@ -202,7 +211,7 @@ template <typename T, tenno::size N> class array
      * auto begin = arr.begin();
      * ```
      */
-    Iterator begin()
+    constexpr Iterator begin() const noexcept
     {
         return Iterator(data);
     }
@@ -216,7 +225,7 @@ template <typename T, tenno::size N> class array
      * tenno::for_each(arr.begin(), arr.end(), [](int& elem) { elem = 0; });
      * ```
      */
-    Iterator end()
+    constexpr Iterator end() const noexcept
     {
         return Iterator(data + N);
     }

@@ -150,3 +150,27 @@ TEST(array_constexpr, "create tenno::array constexpr")
     static_assert(arr.data[1] == 2);
     static_assert(arr.data[2] == 3);
 }
+
+TEST(array_constexpr_init,
+     "initialize tenno::array with default values constexpr")
+{
+    constexpr auto arr = tenno::array<int, 3>::init();
+    static_assert(arr.data[0] == 0);
+    static_assert(arr.data[1] == 0);
+    static_assert(arr.data[2] == 0);
+}
+
+TEST(array_constexpr_iterator, "iterate over tenno::array constexpr")
+{
+    constexpr auto arr = tenno::array<int, 3>{1, 2, 3};
+    constexpr auto sum = [&arr]()
+    {
+        auto sum_ = 0;
+        for (auto elem : arr)
+        {
+            sum_ += elem;
+        }
+        return sum_;
+    }();
+    static_assert(sum == 6);
+}

@@ -29,6 +29,7 @@
             cmake                   # build system
             meson                   # build system
             ninja                   # build system
+            bazelisk                # build system
             valgrind                # memory debugger
             clang-tools             # code formatting
             gdb                     # debugger

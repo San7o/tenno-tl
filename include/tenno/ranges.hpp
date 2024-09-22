@@ -50,7 +50,7 @@ template <typename T> class range
      * @param start The first element in the range
      * @param end The element after the last element in the range
      */
-    range(T start, T end) : start_elem(start), end_elem(end)
+    constexpr range(T start, T end) : start_elem(start), end_elem(end)
     {
     }
 
@@ -59,7 +59,7 @@ template <typename T> class range
      *
      * @return T The size of the range
      */
-    T size() const
+    constexpr T size() const noexcept
     {
         return end_elem - start_elem;
     }
@@ -76,22 +76,29 @@ template <typename T> class range
         using reference = T &;
 
         T current;
-        Iterator(T current_it) : current(current_it)
+        constexpr Iterator(T current_it) : current(current_it)
         {
         }
 
-        T operator*() const
+        constexpr T operator*() const noexcept
         {
             return current;
         }
 
-        Iterator &operator++()
+        constexpr Iterator &operator++() noexcept
         {
             ++current;
             return *this;
         }
 
-        bool operator!=(const Iterator &other) const
+        constexpr Iterator operator++(int) noexcept
+        {
+            Iterator iterator = *this;
+            ++*this;
+            return iterator;
+        }
+
+        constexpr bool operator!=(const Iterator &other) const noexcept
         {
             return current != other.current;
         }
@@ -102,7 +109,7 @@ template <typename T> class range
      *
      * @return Iterator The iterator to the first element in the range
      */
-    Iterator begin() const
+    constexpr Iterator begin() const noexcept
     {
         return Iterator(start_elem);
     }
@@ -114,7 +121,7 @@ template <typename T> class range
      * @return Iterator The iterator to the element after the last element in
      * the range
      */
-    Iterator end() const
+    constexpr Iterator end() const noexcept
     {
         return Iterator(end_elem);
     }
