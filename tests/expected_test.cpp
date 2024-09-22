@@ -24,8 +24,8 @@
  *
  */
 
-#include <valfuzz/valfuzz.hpp>
 #include <tenno/expected.hpp>
+#include <valfuzz/valfuzz.hpp>
 
 TEST(expected_create, "creating tenno::expected")
 {
@@ -40,8 +40,7 @@ TEST(expected_has_value, "reading tenno::expected.has_value()")
 
 TEST(expected_has_value_false, "reading tenno::expected.has_value() with false")
 {
-    auto e = tenno::expected<int, int>(5);
-    e.has_val = false;
+    auto e = tenno::expected<int, int>(tenno::unexpected<int>(5));
     ASSERT_EQ(e.has_value(), false);
 }
 
@@ -53,7 +52,7 @@ TEST(expected_bool, "reading tenno::expected as bool")
 
 TEST(expected_bool_false, "reading tenno::expected as bool with false")
 {
-    auto e = tenno::expected<int, int>(5);
+    auto e = tenno::expected<int, int>(tenno::unexpected<int>(5));
     e.has_val = false;
     ASSERT_EQ(static_cast<bool>(e), false);
 }
@@ -100,8 +99,23 @@ TEST(expected_move_assign, "move assigning tenno::expected")
     ASSERT_EQ(e2.value(), 5);
 }
 
-TEST(expected_error_or_default, "reading tenno::expected::error_or() with default")
+TEST(expected_error_or_default,
+     "reading tenno::expected::error_or() with default")
 {
     auto e = tenno::expected<int, int>(5);
     ASSERT_EQ(e.error_or(10), 10);
+}
+
+TEST(expected_constexpr, "create tenno::expected constexpr")
+{
+    constexpr auto e = tenno::expected<int, int>(5);
+    static_assert(e.has_value());
+    static_assert(e.value() == 5);
+}
+
+TEST(expexted_constexpr_error, "create tenno::expected constexpr with error")
+{
+    constexpr auto e = tenno::expected<int, int>(tenno::unexpected<int>(5));
+    static_assert(!e.has_value());
+    static_assert(e.error() == 5);
 }

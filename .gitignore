@@ -1,2 +1,4 @@
 build/
 generated_docs/
+builddir/
+subprojects/valfuzz

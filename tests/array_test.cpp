@@ -142,3 +142,11 @@ TEST(array_iteration, "iterating over tenno::array")
     }
     ASSERT_EQ(sum, 6);
 }
+
+TEST(array_constexpr, "create tenno::array constexpr")
+{
+    constexpr auto arr = tenno::array<int, 3>{1, 2, 3};
+    static_assert(arr.data[0] == 1);
+    static_assert(arr.data[1] == 2);
+    static_assert(arr.data[2] == 3);
+}

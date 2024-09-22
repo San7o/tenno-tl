@@ -29,8 +29,19 @@
 namespace tenno
 {
 
-template <typename T, typename E>
-class expected
+template <typename E> class unexpected
+{
+  public:
+    E unex;
+    constexpr unexpected() : unex(E())
+    {
+    }
+    constexpr unexpected(E unex_in) : unex(unex_in)
+    {
+    }
+};
+
+template <typename T, typename E> class expected
 {
   public:
     /**
@@ -44,26 +55,25 @@ class expected
     /**
      * @brief The unexpected value of the expected object
      */
-    E unex;
+    unexpected<E> unex;
 
     /**
      * @brief Construct a new expected object
      *
      * @param val The value of the expected object
      */
-    expected(T val) : has_val(true), val(val) {}
+    constexpr expected(T val_in) : has_val(true), val(val_in), unex(E())
+    {
+    }
     /**
      * @brief Construct a new expected object
      *
      * @param unex The unexpected value of the expected object
      */
-    expected unexpected(E unex_val)
+    constexpr expected(unexpected<E> unex_val)
+        : has_val(false), val(T()), unex(unex_val)
     {
-        this->has_val = false;
-        this->unex = unex_val;
-        return *this;
     }
-    ~expected() {}
 
     /**
      * @brief Converts the expected object to a boolean
@@ -92,7 +102,7 @@ class expected
      *
      * @return T The value of the expected object
      */
-    T value() const noexcept
+    constexpr T value() const noexcept
     {
         return val;
     }
@@ -102,19 +112,19 @@ class expected
      *
      * @return E The unexpected value of the expected object
      */
-    E error() const noexcept
+    constexpr E error() const noexcept
     {
-        return unex;
+        return unex.unex;
     }
 
     /**
      * @brief Returns the value of the expected object or a default value
      *
-     * @param default_val The default value to return if the expected object does
-     * not have a value
+     * @param default_val The default value to return if the expected object
+     * does not have a value
      * @return T The value of the expected object or the default value
      */
-    T value_or(T default_val) const noexcept
+    constexpr T value_or(T default_val) const noexcept
     {
         if (has_val)
         {
@@ -127,15 +137,16 @@ class expected
      * @brief Returns the unexpected value of the expected object or a default
      * value
      *
-     * @param default_err The default value to return if the expected object does
-     * not have an unexpected value
-     * @return E The unexpected value of the expected object or the default value
+     * @param default_err The default value to return if the expected object
+     * does not have an unexpected value
+     * @return E The unexpected value of the expected object or the default
+     * value
      */
-    E error_or(E default_err) const noexcept
+    constexpr E error_or(E default_err) const noexcept
     {
         if (!has_val)
         {
-            return unex;
+            return unex.unex;
         }
         return default_err;
     }
@@ -145,7 +156,6 @@ class expected
     // - transform
     // - or_else
     // - transform_error
-    // - emplace
 };
 
 } // namespace tenno

@@ -24,8 +24,8 @@
  *
  */
 
-#include <valfuzz/valfuzz.hpp>
 #include <tenno/ranges.hpp>
+#include <valfuzz/valfuzz.hpp>
 
 TEST(range_create, "creating tenno::range")
 {

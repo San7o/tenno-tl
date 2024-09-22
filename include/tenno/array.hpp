@@ -66,7 +66,7 @@ template <typename T, tenno::size N> class array
      * performance reasons. If you want to initialize the array's
      * elements, use the static `init` method.
      */
-    array() = default;
+    constexpr array() = default;
 
     /**
      * @brief Construct a new array object with a list of elements
@@ -79,7 +79,7 @@ template <typename T, tenno::size N> class array
      * tenno::array<int, 5> arr2 = {5, 4, 3, 2, 1};
      * ```
      */
-    array(std::initializer_list<T> list)
+    constexpr array(std::initializer_list<T> list)
     {
         tenno::copy(list.begin(), list.end(), this->data);
     }
@@ -95,7 +95,7 @@ template <typename T, tenno::size N> class array
      * const tenno::size size = arr.size();
      * ```
      */
-    tenno::size size() const noexcept
+    constexpr tenno::size size() const noexcept
     {
         return this->_size;
     }
@@ -108,14 +108,12 @@ template <typename T, tenno::size N> class array
      * auto arr = tenno::array<int, 10>::init();
      * ```
      */
-    static tenno::array<T, N> init() noexcept
+    constexpr static tenno::array<T, N> init() noexcept
     {
         auto arr = tenno::array<T, N>();
         tenno::for_each(arr.begin(), arr.end(), [](T &elem) { elem = T(); });
         return arr;
     }
-
-    
 
     /**
      * @brief An iterator to iterate over the array
@@ -135,7 +133,7 @@ template <typename T, tenno::size N> class array
          *
          * @param ptr The pointer to the element the iterator points to
          */
-        Iterator(T *ptr) : ptr(ptr)
+        Iterator(T *ptr_in) : ptr(ptr_in)
         {
         }
 

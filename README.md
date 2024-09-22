@@ -9,6 +9,7 @@ Design goals:
 - do not strictly follow silly standards
 - thread-safe data structures
 - modern-looking and readable c++23 code
+- **constexpr** everywhere It's possible
 
 Currently implemented:
 - [array](./include/tenno/array.hpp)
@@ -24,11 +25,22 @@ cmake --build build -j 4
 ```
 
 ## Testing
-```
+
+### Using Cmake
+```bash
 cmake -Bbuild -DTENNO_BUILD_TESTS=ON
 cmake --build build -j 4
 ./build/tests --help
 ```
+
+### Using meson
+
+```bash
+meson setup build
+ninja -C build
+./build/tests --help
+```
+
 The library uses [valFuzz](https://github.com/San7o/valFuzz) for testing
 ```c++
 ./build/tests              # run tests

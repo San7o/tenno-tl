@@ -26,14 +26,13 @@
 
 #pragma once
 
-#include <cstddef>          /* for std::ptrdiff_t */
-#include <iterator>         /* for std::forward_iterator_tag */
+#include <cstddef>  /* for std::ptrdiff_t */
+#include <iterator> /* for std::forward_iterator_tag */
 
 namespace tenno
 {
 
-template <typename T>
-class range
+template <typename T> class range
 {
   public:
     /**
@@ -77,7 +76,7 @@ class range
         using reference = T &;
 
         T current;
-        Iterator(T current) : current(current)
+        Iterator(T current_it) : current(current_it)
         {
         }
 
@@ -112,8 +111,8 @@ class range
      * @brief Returns an iterator to the element after the last element in the
      * range
      *
-     * @return Iterator The iterator to the element after the last element in the
-     * range
+     * @return Iterator The iterator to the element after the last element in
+     * the range
      */
     Iterator end() const
     {
