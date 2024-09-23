@@ -5,19 +5,19 @@ improving on security and parallelism.
 
 Design goals:
 - **exceptions are NEVER thrown**, instead values are returned as `optional` or `result`
+- **constexpr** everywhere It's possible
 - less undefined behaviour, more security
-- do not strictly follow silly standards
 - thread-safe data structures
 - modern-looking and readable c++23 code
-- **constexpr** everywhere It's possible
+- do not strictly follow silly standards
 
 Currently implemented:
 - [tenno::array<T,N>](./include/tenno/array.hpp)
-- [tenno::range\<T>](./include/tenno/ranges.hpp)
+- [tenno::expected<T,E>](./include/tenno/expected.hpp)
 - [tenno::copy<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::for_each<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)
-- [tenno::expected<T,E>](./include/tenno/expected.hpp)
+- [tenno::range\<T>](./include/tenno/ranges.hpp)
 - [tenno::error](./include/tenno/error.hpp)
 
 ## Testing
