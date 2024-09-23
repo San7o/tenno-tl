@@ -82,7 +82,7 @@ template <typename T> class range
     /**
      * @brief An iterator to iterate over the range
      */
-    struct Iterator
+    struct iterator
     {
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
@@ -91,7 +91,7 @@ template <typename T> class range
         using reference = T &;
 
         T current;
-        constexpr Iterator(T current_it) : current(current_it)
+        constexpr iterator(T current_it) : current(current_it)
         {
         }
 
@@ -100,20 +100,20 @@ template <typename T> class range
             return current;
         }
 
-        constexpr Iterator &operator++() noexcept
+        constexpr iterator &operator++() noexcept
         {
             ++current;
             return *this;
         }
 
-        constexpr Iterator operator++(int) noexcept
+        constexpr iterator operator++(int) noexcept
         {
-            Iterator iterator = *this;
+            iterator _iterator = *this;
             ++*this;
-            return iterator;
+            return _iterator;
         }
 
-        constexpr bool operator!=(const Iterator &other) const noexcept
+        constexpr bool operator!=(const iterator &other) const noexcept
         {
             return current != other.current;
         }
@@ -122,23 +122,23 @@ template <typename T> class range
     /**
      * @brief Returns an iterator to the first element in the range
      *
-     * @return Iterator The iterator to the first element in the range
+     * @return iterator The iterator to the first element in the range
      */
-    constexpr Iterator begin() const noexcept
+    constexpr iterator begin() const noexcept
     {
-        return Iterator(start_elem);
+        return iterator(start_elem);
     }
 
     /**
      * @brief Returns an iterator to the element after the last element in the
      * range
      *
-     * @return Iterator The iterator to the element after the last element in
+     * @return iterator The iterator to the element after the last element in
      * the range
      */
-    constexpr Iterator end() const noexcept
+    constexpr iterator end() const noexcept
     {
-        return Iterator(end_elem);
+        return iterator(end_elem);
     }
 
 }; // class range

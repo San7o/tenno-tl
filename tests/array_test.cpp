@@ -235,7 +235,7 @@ TEST(array_at_error_constexpr, "tenno::array::at() error constexpr")
 TEST(array_at_mutable, "tenno::array::at() mutable")
 {
     auto arr = tenno::array<int, 3>{1, 2, 3};
-    auto val = arr.at(0).value();
+    [[maybe_unused]]auto val = arr.at(0).value();
     val++;
     ASSERT_EQ(arr.at(0).value(), 1);
 }

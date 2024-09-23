@@ -2,7 +2,7 @@
  * MIT License
  *
  * Copyright (c) 2024 Giovanni Santini
- *
+
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -24,20 +24,26 @@
  *
  */
 
-#include <valfuzz/valfuzz.hpp>
+#pragma once
 
-// meet the two fighters:
-#include <array>
-#include <tenno/array.hpp>
-
-BENCHMARK(array_mv_std_benchmark, "Benchmarking tenno:array constructor")
+namespace tenno
 {
-    RUN_BENCHMARK([[maybe_unused]] auto arr = tenno::array<int, 1000>());
-    RUN_BENCHMARK([[maybe_unused]] auto arr = std::array<int, 1000>());
-}
 
-BENCHMARK(array_mv_std_benchmark_init, "Benchmarking tenno:array::init()")
+template <typename T> class atomic;
+
+/* general case */
+template <typename T> class atomic
 {
-    RUN_BENCHMARK([[maybe_unused]] auto arr = tenno::array<int, 1000>{});
-    RUN_BENCHMARK([[maybe_unused]] auto arr = std::array<int, 1000>{});
-}
+  public:
+    using value_type = T;
+    T value;
+
+    atomic() noexcept = default;
+
+    bool is_lock_free() const noexcept
+    {
+        return __atomic_is_lock_free(sizeof(T), &value);
+    }
+};
+
+} // namespace tenno

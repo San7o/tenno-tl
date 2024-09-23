@@ -32,11 +32,14 @@ valfuzz_proj = cmake.subproject(
 valfuzz_dep = valfuzz_proj.dependency('valfuzz_shared')
 
 # project
-if get_option('TENNO_OPTIMIZE')
+if get_option('TENNO_BUILD_OPTIMIZED_AGGRESSIVE')
+  add_project_arguments('-O3', '-march=native', '-ffast-math', language: 'cpp')
+elif get_option('TENNO_BUILD_OPTIMIZED')
   add_project_arguments('-O3', language: 'cpp')
 else
   add_project_arguments('-O0', language: 'cpp')
 endif
+
 
 if get_option('TENNO_BUILD_SHARED')
   shared_library('tennoTL',
@@ -64,6 +67,7 @@ if get_option('TENNO_BUILD_TESTS')
     'tests/expected_test.cpp',
     'tests/ranges_test.cpp',
     'tests/algorithm_test.cpp',
+    'tests/atomic_test.cpp',
     'benchmarks/array_benchmark.cpp',
     'fuzz/array_fuzz.cpp',
   )

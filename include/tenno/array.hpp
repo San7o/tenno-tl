@@ -32,8 +32,8 @@
 #include <tenno/algorithm.hpp>
 #include <tenno/error.hpp>
 #include <tenno/expected.hpp>
-#include <tenno/types.hpp>
 #include <tenno/ranges.hpp>
+#include <tenno/types.hpp>
 
 namespace tenno
 {
@@ -249,9 +249,8 @@ template <typename T, tenno::size N> class array
      */
     void fill(const T &value) noexcept
     {
-        tenno::for_each(this->begin(), this->end(), [&value](T &elem) {
-            elem = value;
-        });
+        tenno::for_each(this->begin(), this->end(),
+                        [&value](T &elem) { elem = value; });
     }
 
     /**

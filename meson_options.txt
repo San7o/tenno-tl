@@ -1,4 +1,5 @@
 option('TENNO_BUILD_SHARED', type: 'boolean', value: 'true', description:'Build shared library')
 option('TENNO_BUILD_STATIC', type: 'boolean', value: 'false', description: 'Build static library')
 option('TENNO_BUILD_TESTS', type: 'boolean', value: 'true', description: 'Build tests')
-option('TENNO_OPTIMIZE', type: 'boolean', value: 'false', description: 'Enable optimization')
+option('TENNO_BUILD_OPTIMIZED', type: 'boolean', value: 'false', description: 'Enable optimization')
+option('TENNO_BUILD_OPTIMIZED_AGGRESSIVE', type: 'boolean', value: 'false', description: 'Enable maximum optimization')
