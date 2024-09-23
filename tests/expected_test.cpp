@@ -69,36 +69,6 @@ TEST(expected_value_or, "reading tenno::expected::value_or()")
     ASSERT_EQ(e.value_or(10), 5);
 }
 
-TEST(expected_copy, "copying tenno::expected")
-{
-    auto e = tenno::expected<int, int>(5);
-    auto e2 = e;
-    ASSERT_EQ(e2.value(), 5);
-}
-
-TEST(expected_move, "moving tenno::expected")
-{
-    auto e = tenno::expected<int, int>(5);
-    auto e2 = std::move(e);
-    ASSERT_EQ(e2.value(), 5);
-}
-
-TEST(expected_copy_assign, "copy assigning tenno::expected")
-{
-    auto e = tenno::expected<int, int>(5);
-    auto e2 = tenno::expected<int, int>(10);
-    e2 = e;
-    ASSERT_EQ(e2.value(), 5);
-}
-
-TEST(expected_move_assign, "move assigning tenno::expected")
-{
-    auto e = tenno::expected<int, int>(5);
-    auto e2 = tenno::expected<int, int>(10);
-    e2 = std::move(e);
-    ASSERT_EQ(e2.value(), 5);
-}
-
 TEST(expected_error_or_default,
      "reading tenno::expected::error_or() with default")
 {

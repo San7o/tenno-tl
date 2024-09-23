@@ -37,11 +37,11 @@ namespace tenno
 template <typename E> class unexpected
 {
   public:
-    E unex;
+    const E unex;
     constexpr unexpected() : unex(E())
     {
     }
-    constexpr unexpected(E unex_in) : unex(unex_in)
+    constexpr unexpected(const E unex_in) : unex(unex_in)
     {
     }
 };
@@ -62,18 +62,18 @@ template <typename T, typename E> class expected
     /**
      * @brief The value of the expected object
      */
-    T val;
+    const T val;
     /**
      * @brief The unexpected value of the expected object
      */
-    unexpected<E> unex;
+    const unexpected<E> unex;
 
     /**
      * @brief Construct a new expected object
      *
      * @param val The value of the expected object
      */
-    constexpr expected(T val_in) : has_val(true), val(val_in), unex(E())
+    constexpr expected(const T val_in) : has_val(true), val(val_in), unex(E())
     {
     }
     /**
@@ -81,7 +81,7 @@ template <typename T, typename E> class expected
      *
      * @param unex The unexpected value of the expected object
      */
-    constexpr expected(unexpected<E> unex_val)
+    constexpr expected(const unexpected<E> unex_val)
         : has_val(false), val(T()), unex(unex_val)
     {
     }
@@ -95,6 +95,33 @@ template <typename T, typename E> class expected
     constexpr explicit operator bool() const noexcept
     {
         return has_val;
+    }
+
+    constexpr bool operator==(const expected<T, E> &other) const noexcept
+    {
+        if (has_val != other.has_val)
+        {
+            return false;
+        }
+        if (has_val)
+        {
+            return val == other.val;
+        }
+        return unex.unex == other.unex.unex;
+    }
+
+    constexpr bool operator!=(const expected<T, E> &other) const noexcept
+    {
+        return !(*this == other);
+    }
+
+    constexpr auto
+    operator=(const expected<T, E> &other) noexcept -> expected<T, E> &
+    {
+        has_val = other.has_val;
+        val = other.val;
+        unex = other.unex;
+        return *this;
     }
 
     /**
@@ -135,7 +162,7 @@ template <typename T, typename E> class expected
      * does not have a value
      * @return T The value of the expected object or the default value
      */
-    constexpr T value_or(T default_val) const noexcept
+    constexpr T value_or(const T default_val) const noexcept
     {
         if (has_val)
         {
@@ -153,7 +180,7 @@ template <typename T, typename E> class expected
      * @return E The unexpected value of the expected object or the default
      * value
      */
-    constexpr E error_or(E default_err) const noexcept
+    constexpr E error_or(const E default_err) const noexcept
     {
         if (!has_val)
         {

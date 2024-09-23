@@ -60,6 +60,16 @@ template <typename T> class range
     }
 
     /**
+     * @brief Short constructor
+     *
+     * @param end The element after the last element in the range
+     * @note The first element in the range will default to 0
+     */
+    constexpr range(T end) : start_elem(0), end_elem(end)
+    {
+    }
+
+    /**
      * @brief Returns the size of the range
      *
      * @return T The size of the range

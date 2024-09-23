@@ -12,17 +12,13 @@ Design goals:
 - **constexpr** everywhere It's possible
 
 Currently implemented:
-- [array](./include/tenno/array.hpp)
-- [ranges](./include/tenno/ranges.hpp)
-- [algorithm](./include/tenno/algorithm.hpp)
-- [expected](./include/tenno/expected.hpp)
-
-## Building
-
-```bash
-cmake -Bbuild
-cmake --build build -j 4
-```
+- [tenno::array<T,N>](./include/tenno/array.hpp)
+- [tenno::range<T>](./include/tenno/ranges.hpp)
+- [tenno::copy<It1,It2,F>](./include/tenno/algorithm.hpp)
+- [tenno::for_each<It1,It2,F>](./include/tenno/algorithm.hpp)
+- [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)
+- [tenno::expected<T,E>](./include/tenno/expected.hpp)
+- [tenno::error](./include/tenno/error.hpp)
 
 ## Testing
 

@@ -83,3 +83,11 @@ TEST(range_constexpr_iterate, "tenno::range::Iterator is constexpr")
     constexpr auto sum = tenno::accumulate(r.begin(), r.end(), 0);
     static_assert(sum == 10);
 }
+
+TEST(range_short_constructor, "short constructor for tenno::range")
+{
+    auto r = tenno::range<int>(5);
+    ASSERT_EQ(r.size(), 5);
+    ASSERT_EQ(*r.begin(), 0);
+    ASSERT_EQ(*r.end(), 5);
+}
