@@ -1,6 +1,6 @@
 # tenno template library
 
-This library aims to be a replacement for some functionalities of c++ STL,
+This library aims to be a replacement for some functionalities of c++23 STL,
 improving on security and parallelism.
 
 Design goals:
@@ -13,7 +13,7 @@ Design goals:
 
 Currently implemented:
 - [tenno::array<T,N>](./include/tenno/array.hpp)
-- [tenno::range<T>](./include/tenno/ranges.hpp)
+- [tenno::range\<T>](./include/tenno/ranges.hpp)
 - [tenno::copy<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::for_each<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)

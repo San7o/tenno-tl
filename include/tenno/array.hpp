@@ -527,10 +527,13 @@ template <typename T, tenno::size N> class array
      * tenno::for_each(arr.rbegin(), arr.rend(), [](int& elem) { elem = 0; });
      * ```
      */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
     constexpr reverse_iterator rend() const noexcept
     {
         return reverse_iterator(this->_data - 1);
     }
+#pragma GCC diagnostic pop
 
   private:
     T _data[N];

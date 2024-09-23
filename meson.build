@@ -32,6 +32,11 @@ valfuzz_proj = cmake.subproject(
 valfuzz_dep = valfuzz_proj.dependency('valfuzz_shared')
 
 # project
+if get_option('TENNO_OPTIMIZE')
+  add_project_arguments('-O3', language: 'cpp')
+else
+  add_project_arguments('-O0', language: 'cpp')
+endif
 
 if get_option('TENNO_BUILD_SHARED')
   shared_library('tennoTL',

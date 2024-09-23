@@ -24,10 +24,23 @@
  *
  */
 
-#include <tenno/array.hpp>
 #include <valfuzz/valfuzz.hpp>
 
-BENCHMARK(nth_fibonacci_benchmark, "Benchmarking tenno:array constructor")
+// the two contenders:
+#include <tenno/array.hpp>
+#include <array>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+BENCHMARK(array_mv_std_benchmark, "Benchmarking tenno:array constructor")
 {
     RUN_BENCHMARK([[maybe_unused]] auto arr = tenno::array<int, 1000>());
+    RUN_BENCHMARK([[maybe_unused]] auto arr = std::array<int, 1000>());
 }
+
+BENCHMARK(array_mv_std_benchmark_init, "Benchmarking tenno:array::init()")
+{
+    RUN_BENCHMARK([[maybe_unused]] auto arr = tenno::array<int, 1000>::init());
+    RUN_BENCHMARK([[maybe_unused]] auto arr = std::array<int, 1000>{});
+}
+#pragma GCC diagnostic pop
