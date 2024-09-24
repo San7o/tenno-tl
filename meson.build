@@ -39,7 +39,9 @@ elif get_option('TENNO_BUILD_OPTIMIZED')
 else
   add_project_arguments('-O0', language: 'cpp')
 endif
-
+if get_option('TENNO_BUILD_TESTS')
+  add_project_arguments('-D TENNO_DEBUG', language: 'cpp')
+endif
 
 if get_option('TENNO_BUILD_SHARED')
   shared_library('tennoTL',

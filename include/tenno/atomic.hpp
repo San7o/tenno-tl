@@ -40,9 +40,9 @@ template <typename T> class atomic
 
     atomic() noexcept = default;
     ~atomic() noexcept = default;
-    atomic(const atomic&) = delete;
-    atomic& operator=(const atomic&) = delete;
-    atomic& operator=(const atomic&) volatile = delete;
+    atomic(const atomic &) = delete;
+    atomic &operator=(const atomic &) = delete;
+    atomic &operator=(const atomic &) volatile = delete;
 
     inline bool is_lock_free() const noexcept
     {
@@ -73,7 +73,7 @@ template <typename T> class atomic
         return desired;
     }
 
-    inline bool compare_exchange_weak(T& expected, T desired) noexcept
+    inline bool compare_exchange_weak(T &expected, T desired) noexcept
     {
         // TODO
         // more efficient and used in weak memory models, may return
@@ -81,7 +81,7 @@ template <typename T> class atomic
         return true;
     }
 
-    inline bool compare_exchange_strong(T& expected, T desired) noexcept
+    inline bool compare_exchange_strong(T &expected, T desired) noexcept
     {
         // TODO
         // less efficient but returns true if the operation was successful
@@ -93,7 +93,7 @@ template <typename T> class atomic
     // - notify_one
     // - notify_all
 
-private:
+  private:
     T _value;
 };
 
@@ -104,7 +104,7 @@ template <typename U> class atomic<U *>
 };
 
 /* int specialization */
-/* 
+/*
  * Read this:
  * https://www.felixcloutier.com/x86/lock
  *

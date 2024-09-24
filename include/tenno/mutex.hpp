@@ -35,31 +35,110 @@ class mutex
     mutex() = default;
     ~mutex() = default;
 
-    inline void lock() noexcept 
+    inline void lock() noexcept
     {
-        // TODO: use atomic operation
-        is_locked = true;
+        int expected = 0;
+
+#if defined(__GNUC__) || !defined(__clang__)
+        while (!__atomic_compare_exchange_n(
+            &this->is_locked, /* Address of the mutex variable */
+            &expected,        /* address of the expected value */
+            1,                /* desired value */
+            0,                /* strong compare-and-swap (retry on failure) */
+            __ATOMIC_SEQ_CST, /* memory order */
+            __ATOMIC_SEQ_CST))
+        {
+            expected = 0;
+        }
+#elif __x86_64__
+        while (true)
+        {
+            asm volatile("movl %1, %%eax\n\t" /* move expexted value to eax */
+                         "lock cmpxchgl %2, %0\n\t" /* compare and exchange */
+                         : "+m"(this->is_locked)    /* %0: output operand */
+                         : "r"(expected),  /* %1: expected value (input) */
+                           "r"(1)          /* %2: new value to set */
+                         : "eax", "memory" /* clobbered registers */
+            );
+
+            if (this->is_locked == 1)
+            {
+                return;
+            }
+
+            asm volatile("pause");
+        }
+#else
+#error "Unsupported platform"
+#endif
     }
 
     inline bool try_lock() noexcept
     {
-        // TODO: use atomic operation
-        if (this->is_locked)
-        {
-            return false;
-        }
-        this->is_locked = true;
-        return true;
+        int expected = 0;
+
+#if defined(__GNUC__) || !defined(__clang__)
+        return __atomic_compare_exchange_n(
+            &this->is_locked, /* Address of the mutex variable */
+            &expected,        /* address of the expected value */
+            1,                /* desired value */
+            0,                /* strong compare-and-swap (retry on failure) */
+            __ATOMIC_SEQ_CST, /* memory order */
+            __ATOMIC_SEQ_CST);
+#elif __x86_64__
+        asm volatile("movl %1, %%eax\n\t"       /* move expexted value to eax */
+                     "lock cmpxchgl %2, %0\n\t" /* compare and exchange */
+                     : "+m"(this->is_locked)    /* %0: output operand */
+                     : "r"(expected),           /* %1: expected value (input) */
+                       "r"(1)                   /* %2: new value to set */
+                     : "eax", "memory"          /* clobbered registers */
+        );
+
+        return (bool) this->is_locked;
+
+#else
+#error "Unsupported platform"
+#endif
     }
 
     inline void unlock() noexcept
     {
-        //TODO: use atomic operation
-        this->is_locked = false;
+#if defined(__GNUC__) || !defined(__clang__)
+        __atomic_store_n(&this->is_locked, 0, __ATOMIC_SEQ_CST);
+#elif __x86_64__
+        asm volatile("movl $0, %0\n\t"       /* set the state to 0 */
+                     : "+m"(this->is_locked) /* %0: output operand */
+                     :                       /* no input operands */
+                     : "memory"              /* clobbered registers */
+        );
+#else
+#error "Unsupported platform"
+#endif
     }
 
+#ifndef TENNO_DEBUG
   private:
-    bool is_locked = false;
+#endif
+    volatile int is_locked = 0;
+};
+
+template <typename M> class lock_guard
+{
+  public:
+    lock_guard(M &m) : _m(m)
+    {
+        this->_m.lock();
+    }
+
+    ~lock_guard()
+    {
+        this->_m.unlock();
+    }
+
+    void operator=(const lock_guard &) = delete;
+
+  private:
+    M &_m;
 };
 
 } // namespace tenno

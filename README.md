@@ -20,7 +20,8 @@ Currently implemented:
 - [tenno::range\<T>](./include/tenno/ranges.hpp)
 - [tenno::error](./include/tenno/error.hpp)
 - [tenno::atomic\<T>](./include/tenno/atomic.hpp) (work in progress)
-- [tenno::mutex](./include/tenno/mutex.hpp) (work in progress)
+- [tenno::mutex](./include/tenno/mutex.hpp)
+- [tenno::lock_guard\<T>](./include/tenno/mutex.hpp)
 
 ## Testing
 
