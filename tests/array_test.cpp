@@ -85,7 +85,8 @@ TEST(array_iterator_dereference, "tenno::array::iterator::operator*()")
 }
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored                                                 \
+    "-Wuninitialized" // -O3 optimization does black magic
 TEST(array_iterator_end, "tenno::array.end()")
 {
     auto arr = tenno::array<int, 3>{1, 2, 3};
@@ -235,7 +236,7 @@ TEST(array_at_error_constexpr, "tenno::array::at() error constexpr")
 TEST(array_at_mutable, "tenno::array::at() mutable")
 {
     auto arr = tenno::array<int, 3>{1, 2, 3};
-    [[maybe_unused]]auto val = arr.at(0).value();
+    [[maybe_unused]] auto val = arr.at(0).value();
     val++;
     ASSERT_EQ(arr.at(0).value(), 1);
 }

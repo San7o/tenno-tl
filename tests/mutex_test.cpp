@@ -25,27 +25,33 @@
  */
 
 #include <valfuzz/valfuzz.hpp>
+#include <tenno/mutex.hpp>
 
-// meet the two fighters:
-#include <array>
-#include <tenno/array.hpp>
-
-BENCHMARK(benchmark_tenno_array_constructor, "tenno::array()")
+TEST(mutex_create, "Creating a mutex")
 {
-    RUN_BENCHMARK([[maybe_unused]] auto arr = tenno::array<int, 1000>());
+    tenno::mutex m;
 }
 
-BENCHMARK(benchmark_std_array_constructor, "std::array()")
+TEST(mutex_lock, "Locking a mutex")
 {
-    RUN_BENCHMARK([[maybe_unused]] auto arr = std::array<int, 1000>());
+    tenno::mutex m;
+    m.lock();
+    ASSERT(m.is_locked);
 }
 
-BENCHMARK(benchmark_tenno_array_init, "tenno:array{}")
+TEST(mutex_unlock, "Unlocking a mutex")
 {
-    RUN_BENCHMARK([[maybe_unused]] auto arr = tenno::array<int, 1000>{});
+    tenno::mutex m;
+    m.lock();
+    ASSERT(m.is_locked);
+    m.unlock();
+    ASSERT(!m.is_locked);
 }
 
-BENCHMARK(benchmark_std_array_init, "std::array{}")
+TEST(mutex_try_lock, "Trying to lock a mutex")
 {
-    RUN_BENCHMARK([[maybe_unused]] auto arr = std::array<int, 1000>{});
+    tenno::mutex m;
+    ASSERT(m.try_lock());
+    ASSERT(m.is_locked);
+    ASSERT(!m.try_lock());
 }

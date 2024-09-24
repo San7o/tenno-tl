@@ -2,7 +2,7 @@
  * MIT License
  *
  * Copyright (c) 2024 Giovanni Santini
- *
+
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -24,28 +24,42 @@
  *
  */
 
-#include <valfuzz/valfuzz.hpp>
+#pragma once
 
-// meet the two fighters:
-#include <array>
-#include <tenno/array.hpp>
-
-BENCHMARK(benchmark_tenno_array_constructor, "tenno::array()")
+namespace tenno
 {
-    RUN_BENCHMARK([[maybe_unused]] auto arr = tenno::array<int, 1000>());
-}
 
-BENCHMARK(benchmark_std_array_constructor, "std::array()")
+class mutex
 {
-    RUN_BENCHMARK([[maybe_unused]] auto arr = std::array<int, 1000>());
-}
+  public:
+    mutex() = default;
+    ~mutex() = default;
 
-BENCHMARK(benchmark_tenno_array_init, "tenno:array{}")
-{
-    RUN_BENCHMARK([[maybe_unused]] auto arr = tenno::array<int, 1000>{});
-}
+    inline void lock() noexcept 
+    {
+        // TODO: use atomic operation
+        is_locked = true;
+    }
 
-BENCHMARK(benchmark_std_array_init, "std::array{}")
-{
-    RUN_BENCHMARK([[maybe_unused]] auto arr = std::array<int, 1000>{});
-}
+    inline bool try_lock() noexcept
+    {
+        // TODO: use atomic operation
+        if (this->is_locked)
+        {
+            return false;
+        }
+        this->is_locked = true;
+        return true;
+    }
+
+    inline void unlock() noexcept
+    {
+        //TODO: use atomic operation
+        this->is_locked = false;
+    }
+
+  private:
+    bool is_locked = false;
+};
+
+} // namespace tenno

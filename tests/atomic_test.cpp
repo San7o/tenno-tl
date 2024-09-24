@@ -31,3 +31,24 @@ TEST(atomic_create, "creating tenno::atomic")
 {
     [[maybe_unused]] auto a = tenno::atomic<int>();
 }
+
+TEST(atomic_create_pointer, "creating tenno::atomic with pointer")
+{
+    [[maybe_unused]] auto a = tenno::atomic<int *>();
+}
+
+TEST(atomic_generic_is_lock_free, "checking tenno::atomic::is_lock_free()")
+{
+    struct A
+    {
+        int a;
+    };
+    auto a = tenno::atomic<A>();
+    ASSERT(!a.is_lock_free());
+}
+
+TEST(atomic_int_is_lock_free, "checking tenno::atomic<int>::is_lock_free()")
+{
+    auto a = tenno::atomic<int>();
+    ASSERT(a.is_lock_free());
+}
