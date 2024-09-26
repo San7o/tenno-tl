@@ -52,3 +52,77 @@ TEST(atomic_int_is_lock_free, "checking tenno::atomic<int>::is_lock_free()")
     auto a = tenno::atomic<int>();
     ASSERT(a.is_lock_free());
 }
+
+TEST(atomic_store_generic, "storing a value in tenno::atomic")
+{
+    struct A
+    {
+        int a;
+    };
+    auto a = tenno::atomic<A>();
+    a.store(A{42});
+}
+
+TEST(atomic_load_generic, "loading a value from tenno::atomic")
+{
+    struct A
+    {
+        int a;
+    };
+    auto a = tenno::atomic<A>();
+    a.store(A{42});
+    auto b = a.load();
+    ASSERT(b.a == 42);
+}
+
+TEST(atomic_exchange_generic, "exchanging a value in tenno::atomic")
+{
+    struct A
+    {
+        int a;
+    };
+    auto a = tenno::atomic<A>();
+    a.store(A{42});
+    auto b = a.exchange(A{43});
+    ASSERT(b.a == 42);
+    auto c = a.load();
+    ASSERT(c.a == 43);
+}
+
+TEST(atomic_compare_exhange_weak_generic, "comparing and exchanging a value in tenno::atomic")
+{
+    struct A
+    {
+        int a;
+        bool operator==(const A &rhs) const
+        {
+            return this->a == rhs.a;
+        }
+    };
+    auto a = tenno::atomic<A>();
+    a.store(A{42});
+    A b{42};
+    ASSERT(a.compare_exchange_weak(b, A{43}));
+    ASSERT(b.a == 42);
+    auto c = a.load();
+    ASSERT(c.a == 43);
+}
+
+TEST(atomic_compare_exhange_strong_generic, "comparing and exchanging a value in tenno::atomic")
+{
+    struct A
+    {
+        int a;
+        bool operator==(const A &rhs) const
+        {
+            return a == rhs.a;
+        }
+    };
+    auto a = tenno::atomic<A>();
+    a.store(A{42});
+    A b{42};
+    ASSERT(a.compare_exchange_strong(b, A{43}));
+    ASSERT(b.a == 42);
+    auto c = a.load();
+    ASSERT(c.a == 43);
+}

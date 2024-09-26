@@ -1,5 +1,5 @@
 {
-  description = "C++ development environment";
+  description = "C++, gcc9.5 development environment";
 
   inputs = {
     nixpkgs = { url = "github:nixos/nixpkgs/nixos-unstable"; };
@@ -22,15 +22,14 @@
           stdenv = pkgsFor.${system}.gcc14Stdenv;
         } {
 
-          name = "c++-dev-shell";
+          name = "gcc9-dev-shell";
           hardeningDisable = ["all"];
           packages = with pkgsFor.${system}; [
-            gcc14                   # compiler
+            gcc9                   # compiler
             cmake                   # build system
             meson                   # build system
             ninja                   # build system
             bazelisk                # build system
-            ccache                  # compiler cache
             valgrind                # memory debugger
             python312               # scripting
             python312Packages.pip   # python package manager

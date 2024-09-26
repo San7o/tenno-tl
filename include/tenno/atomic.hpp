@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <tenno/mutex.hpp> 
+
 namespace tenno
 {
 
@@ -51,40 +53,48 @@ template <typename T> class atomic
 
     inline void store(T desired) noexcept
     {
-        // TODO: use mutexes I guess?
+        tenno::lock_guard<tenno::mutex> lock(this->_mutex);
         this->_value = desired;
     }
 
-    inline T load() const noexcept
+    inline T load() noexcept
     {
-        // TODO: use mutexes
+        tenno::lock_guard<tenno::mutex> lock(this->_mutex);
         return this->_value;
     }
 
-    operator T() const noexcept
+    operator T() noexcept
     {
         return this->load();
     }
 
     inline T exchange(T desired) noexcept
     {
-        // read-modify-write operation (CAS)
-        // TODO
-        return desired;
+        tenno::lock_guard<tenno::mutex> lock(this->_mutex);
+        T old = this->_value;
+        this->_value = desired;
+        return old;
     }
 
     inline bool compare_exchange_weak(T &expected, T desired) noexcept
     {
-        // TODO
-        // more efficient and used in weak memory models, may return
-        // false even if the operation was successful
+        tenno::lock_guard<tenno::mutex> lock(this->_mutex);
+        if (this->_value == expected)
+        {
+            this->_value = desired;
+            return true;
+        }
         return true;
     }
 
     inline bool compare_exchange_strong(T &expected, T desired) noexcept
     {
-        // TODO
-        // less efficient but returns true if the operation was successful
+        tenno::lock_guard<tenno::mutex> lock(this->_mutex);
+        if (this->_value == expected)
+        {
+            this->_value = desired;
+            return true;
+        }
         return true;
     }
 
@@ -95,6 +105,7 @@ template <typename T> class atomic
 
   private:
     T _value;
+    tenno::mutex _mutex;
 };
 
 /* general pointer */
@@ -113,19 +124,60 @@ template <typename U> class atomic<U *>
  */
 template <> class atomic<int>
 {
+
   public:
     using value_type = int;
-    const bool is_always_lock_free = true; // ig
+    const bool is_always_lock_free = true;
 
     atomic() noexcept = default;
+    ~atomic() noexcept = default;
+    atomic(const atomic &) = delete;
+    atomic &operator=(const atomic &) = delete;
+    atomic &operator=(const atomic &) volatile = delete;
 
     inline bool is_lock_free() const noexcept
     {
         return this->is_always_lock_free;
     }
 
-    // TODO
+    inline void store(int desired) noexcept
+    {
+        // make atomic
+        this->_value = desired;
+    }
 
+    inline int load() const noexcept
+    {
+        // make atomic
+        return this->_value;
+    }
+
+    operator int() noexcept
+    {
+        return this->load();
+    }
+
+    inline int exchange(int desired) noexcept
+    {
+        // read-modify-write operation (CAS)
+        // intODO
+        return desired;
+    }
+
+    inline bool compare_exchange_weak([[maybe_unused]]int &expected, [[maybe_unused]] int desired) noexcept
+    {
+        // intODO
+        // more efficient and used in weak memory models, may return
+        // false even if the operation was successful
+        return true;
+    }
+
+    inline bool compare_exchange_strong([[maybe_unused]] int &expected, [[maybe_unused]] int desired) noexcept
+    {
+        // intODO
+        // less efficient but returns true if the operation was successful
+        return true;
+    }
   private:
     int _value;
 };
