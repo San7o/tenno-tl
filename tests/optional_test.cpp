@@ -80,6 +80,29 @@ TEST(optional_assign, "tenno::optional =")
     ASSERT_EQ(opt.value(), 42);
 }
 
+TEST(optional_reset, "tenno::optional.reset()")
+{
+    tenno::optional<int> opt(10);
+    ASSERT(opt.has_value());
+    opt.reset();
+    ASSERT(!opt.has_value());
+}
+
+template<typename... Args>
+struct optional_emplace_test_struct {
+    int a;
+    optional_emplace_test_struct() {}
+    optional_emplace_test_struct([[maybe_unused]]Args... args) : a(10) {}
+};
+
+TEST(optional_emplace, "tenno::optional.emplace()")
+{  
+    tenno::optional<optional_emplace_test_struct<int>> opt;
+    opt.emplace(123);
+    ASSERT(opt.has_value());
+    ASSERT(opt.value().a == 10);
+}
+
 TEST(optional_constexpr_constructor, "constexpr tenno::optional()")
 {
     constexpr tenno::optional<int> o = tenno::optional<int>();

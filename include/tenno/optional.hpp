@@ -85,8 +85,20 @@ template <typename T> class optional
         if (this->_has_value && other.has_value())
             tenno::swap(*this, other);
     }
-    // reset
-    // emplate
+
+    void reset() noexcept
+    {
+        if (this->_has_value)
+            this->_value.~T();
+        *this = optional();
+    }
+
+    template< class... Args >
+    T& emplace( Args&&... args )
+    {
+        *this = optional(T(args...));
+        return this->_value;
+    }
 
   private:
     bool _has_value;

@@ -20,12 +20,13 @@ Currently implemented:
 - [tenno::atomic\<T>](./include/tenno/atomic.hpp)
 - [tenno::mutex](./include/tenno/mutex.hpp)
 - [tenno::lock_guard\<T>](./include/tenno/mutex.hpp)
-- [tenno::optional\<T>](./include/tenno/optional.hpp) (work in progress)
+- [tenno::optional\<T>](./include/tenno/optional.hpp)
 - [tenno::shared_ptr\<T>](./include/tenno/shared_ptr.hpp) (work in progress)
 - [tenno::copy<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::for_each<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)
 - [tenno::swap\<T>](./include/tenno/algorithm.hpp)
+- [tenno::allocator]
 
 ## Testing
 
