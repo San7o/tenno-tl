@@ -112,7 +112,7 @@ template <typename T> class atomic
 template <typename U> class atomic<U *>
 {
   public:
-    using value_type = U*;
+    using value_type = U *;
     const bool is_always_lock_free = false;
 
     atomic() noexcept = default;
@@ -126,7 +126,7 @@ template <typename U> class atomic<U *>
         return this->is_always_lock_free;
     }
 
-    inline void store(U* desired) noexcept
+    inline void store(U *desired) noexcept
     {
         tenno::lock_guard<tenno::mutex> lock(this->_mutex);
         this->_value = desired;
@@ -143,7 +143,7 @@ template <typename U> class atomic<U *>
         return this->load();
     }
 
-    inline U exchange(U* desired) noexcept
+    inline U exchange(U *desired) noexcept
     {
         tenno::lock_guard<tenno::mutex> lock(this->_mutex);
         U old = *this->_value;
@@ -157,7 +157,7 @@ template <typename U> class atomic<U *>
      * @param desired The desired value
      * @return true if the exchange was successful, false otherwise
      */
-    inline bool compare_exchange_weak(const U* expected, U* desired) noexcept
+    inline bool compare_exchange_weak(const U *expected, U *desired) noexcept
     {
         tenno::lock_guard<tenno::mutex> lock(this->_mutex);
         if (this->_value != nullptr && *this->_value == *expected)
@@ -168,7 +168,7 @@ template <typename U> class atomic<U *>
         return false;
     }
 
-    inline bool compare_exchange_strong(const U* expected, U* desired) noexcept
+    inline bool compare_exchange_strong(const U *expected, U *desired) noexcept
     {
         tenno::lock_guard<tenno::mutex> lock(this->_mutex);
         if (this->_value != nullptr && *this->_value == *expected)
@@ -185,18 +185,11 @@ template <typename U> class atomic<U *>
     // - notify_all
 
   private:
-    U* _value;
+    U *_value;
     tenno::mutex _mutex;
 };
 
 /* int specialization */
-/*
- * Read this:
- * https://www.felixcloutier.com/x86/lock
- *
- * Maybe this class extends the general atomic class and overrides the
- * methods that need to be optimized for the int type ??
- */
 template <> class atomic<int>
 {
   public:
@@ -216,14 +209,14 @@ template <> class atomic<int>
 
     inline void store(int desired) noexcept
     {
-        // make atomic
-        this->_value = desired;
+        asm volatile("lock xchg %0, %1" : "+m"(this->_value), "+r"(desired));
     }
 
-    inline int load() const noexcept
+    inline int load() noexcept
     {
-        // make atomic
-        return this->_value;
+        int out = 0;
+        asm volatile("lock add %1, %0" : "+m"(out), "+r"(this->_value));
+        return out;
     }
 
     operator int() noexcept
@@ -233,29 +226,191 @@ template <> class atomic<int>
 
     inline int exchange(int desired) noexcept
     {
-        // read-modify-write operation (CAS)
+        asm volatile("lock xchg %0, %1" : "+m"(this->_value), "+r"(desired));
         return desired;
     }
 
-    inline bool compare_exchange_weak([[maybe_unused]] int &expected,
-                                      [[maybe_unused]] int desired) noexcept
+    inline bool compare_exchange_weak(int &expected,
+                                      int desired) noexcept
     {
-        // TODO
-        // more efficient and used in weak memory models, may return
-        // false even if the operation was successful
-        return true;
+        bool success;
+        asm volatile("lock cmpxchg %[desired], %[target]\n\t"
+                     "sete %[success]\n\t"
+                     : [success] "=r"(success), "=m"(this->_value)
+                     : [target] "m"(this->_value),
+                       "a"(expected), [desired] "r"(desired)
+                     : "memory", "cc");
+        return success;
     }
 
-    inline bool compare_exchange_strong([[maybe_unused]] int &expected,
-                                        [[maybe_unused]] int desired) noexcept
+    inline bool compare_exchange_strong(int &expected,
+                                        int desired) noexcept
     {
-        // intODO
-        // less efficient but returns true if the operation was successful
+        bool success = false;
+        while (!success)
+        {
+            asm volatile("lock cmpxchg %[desired], %[target]\n\t"
+                         "sete %[success]\n\t"
+                         : [success] "=r"(success), "=m"(this->_value)
+                         : [target] "m"(this->_value),
+                           "a"(expected), [desired] "r"(desired)
+                         : "memory", "cc");
+        }
         return true;
     }
 
   private:
     int _value;
+};
+
+/* char specialization */
+
+template <> class atomic<char>
+{
+  public:
+    using value_type = char;
+    const bool is_always_lock_free = true;
+
+    atomic() noexcept = default;
+    ~atomic() noexcept = default;
+    atomic(const atomic &) = delete;
+    atomic &operator=(const atomic &) = delete;
+    atomic &operator=(const atomic &) volatile = delete;
+
+    inline bool is_lock_free() const noexcept
+    {
+        return this->is_always_lock_free;
+    }
+
+    inline void store(char desired) noexcept
+    {
+        asm volatile("lock xchg %0, %1" : "+m"(this->_value), "+r"(desired));
+    }
+
+    inline char load() noexcept
+    {
+        char out = 0;
+        asm volatile("lock add %1, %0" : "+m"(out), "+r"(this->_value));
+        return out;
+    }
+
+    operator char() noexcept
+    {
+        return this->load();
+    }
+
+    inline char exchange(char desired) noexcept
+    {
+        asm volatile("lock xchg %0, %1" : "+m"(this->_value), "+r"(desired));
+        return desired;
+    }
+
+    inline bool compare_exchange_weak(char &expected,
+                                      char desired) noexcept
+    {
+        bool success;
+        asm volatile("lock cmpxchg %[desired], %[target]\n\t"
+                     "sete %[success]\n\t"
+                     : [success] "=r"(success), "=m"(this->_value)
+                     : [target] "m"(this->_value),
+                       "a"(expected), [desired] "r"(desired)
+                     : "memory", "cc");
+        return success;
+    }
+
+    inline bool compare_exchange_strong(char &expected,
+                                        char desired) noexcept
+    {
+        bool success = false;
+        while (!success)
+        {
+            asm volatile("lock cmpxchg %[desired], %[target]\n\t"
+                         "sete %[success]\n\t"
+                         : [success] "=r"(success), "=m"(this->_value)
+                         : [target] "m"(this->_value),
+                           "a"(expected), [desired] "r"(desired)
+                         : "memory", "cc");
+        }
+        return true;
+    }
+
+  private:
+    char _value;
+};
+
+/* long specialization */
+
+template <> class atomic<long>
+{
+  public:
+    using value_type = long;
+    const bool is_always_lock_free = true;
+
+    atomic() noexcept = default;
+    ~atomic() noexcept = default;
+    atomic(const atomic &) = delete;
+    atomic &operator=(const atomic &) = delete;
+    atomic &operator=(const atomic &) volatile = delete;
+
+    inline bool is_lock_free() const noexcept
+    {
+        return this->is_always_lock_free;
+    }
+
+    inline void store(long desired) noexcept
+    {
+        asm volatile("lock xchg %0, %1" : "+m"(this->_value), "+r"(desired));
+    }
+
+    inline long load() noexcept
+    {
+        long out = 0;
+        asm volatile("lock add %1, %0" : "+m"(out), "+r"(this->_value));
+        return out;
+    }
+
+    operator long() noexcept
+    {
+        return this->load();
+    }
+
+    inline long exchange(long desired) noexcept
+    {
+        asm volatile("lock xchg %0, %1" : "+m"(this->_value), "+r"(desired));
+        return desired;
+    }
+
+    inline bool compare_exchange_weak(long &expected,
+                                      long desired) noexcept
+    {
+        bool success;
+        asm volatile("lock cmpxchg %[desired], %[target]\n\t"
+                     "sete %[success]\n\t"
+                     : [success] "=r"(success), "=m"(this->_value)
+                     : [target] "m"(this->_value),
+                       "a"(expected), [desired] "r"(desired)
+                     : "memory", "cc");
+        return success;
+    }
+
+    inline bool compare_exchange_strong(long &expected,
+                                        long desired) noexcept
+    {
+        bool success = false;
+        while (!success)
+        {
+            asm volatile("lock cmpxchg %[desired], %[target]\n\t"
+                         "sete %[success]\n\t"
+                         : [success] "=r"(success), "=m"(this->_value)
+                         : [target] "m"(this->_value),
+                           "a"(expected), [desired] "r"(desired)
+                         : "memory", "cc");
+        }
+        return true;
+    }
+
+  private:
+    long _value;
 };
 
 } // namespace tenno

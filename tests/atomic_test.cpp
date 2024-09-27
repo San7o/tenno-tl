@@ -37,6 +37,8 @@ TEST(atomic_create_pointer, "creating tenno::atomic with pointer")
     [[maybe_unused]] auto a = tenno::atomic<int *>();
 }
 
+/* generic */
+
 TEST(atomic_generic_is_lock_free, "checking tenno::atomic::is_lock_free()")
 {
     struct A
@@ -169,7 +171,10 @@ TEST(atomic_compare_exhange_strong_generic_fail,
     ASSERT(d.a == 42);
 }
 
-TEST(atomic_pointer_is_lock_free, "checking tenno::atomic<int *>::is_lock_free()")
+/* pointer */
+
+TEST(atomic_pointer_is_lock_free,
+     "checking tenno::atomic<int *>::is_lock_free()")
 {
     auto a = tenno::atomic<int *>();
     ASSERT(!a.is_lock_free());
@@ -251,4 +256,187 @@ TEST(atomic_pointer_compare_exhange_strong_fail,
     ASSERT(!a.compare_exchange_strong(&c, &d));
     auto e = a.load();
     ASSERT(e == 42);
+}
+
+/* int specialization */
+
+TEST(atomic_int_store, "storing a value in tenno::atomic<int>")
+{
+    auto a = tenno::atomic<int>();
+    a.store(42);
+}
+
+TEST(atomic_int_load, "loading a value from tenno::atomic<int>")
+{
+    auto a = tenno::atomic<int>();
+    a.store(42);
+    auto b = a.load();
+    ASSERT(b == 42);
+}
+
+TEST(atomic_int_exchange_success, "successful tenno::atomic<int>.exchange()")
+{
+    auto a = tenno::atomic<int>();
+    a.store(42);
+    auto e = a.exchange(43);
+    ASSERT(e == 42);
+    ASSERT(a.load() == 43);
+}
+
+TEST(atomic_int_compare_exhange_weak_success,
+     "succesful tenno::atomic<int>.compare_exchange_weak()")
+{
+    auto a = tenno::atomic<int>();
+    a.store(42);
+    auto expected = 42;
+    auto b = a.compare_exchange_weak(expected, 43);
+    ASSERT(b);
+    auto value = a.load();
+    ASSERT(value == 43);
+}
+
+TEST(atomic_int_compare_exhange_weak_fail,
+     "unsuccesfull tenno::atomic<int>.compare_exchange_weak()")
+{
+    auto a = tenno::atomic<int>();
+    a.store(42);
+    auto expected = 43;
+    auto b = a.compare_exchange_weak(expected, 43);
+    ASSERT(!b);
+    auto value = a.load();
+    ASSERT(value == 42);
+}
+
+TEST(atomic_int_compare_exhange_strong_success,
+     "succesful tenno::atomic<int>.compare_exchange_strong())")
+{
+    auto a = tenno::atomic<int>();
+    a.store(42);
+    auto expected = 42;
+    auto b = a.compare_exchange_strong(expected, 43);
+    ASSERT(b);
+    auto value = a.load();
+    ASSERT(value == 43);
+}
+
+/* char specialization */
+
+TEST(atomic_char_store, "storing a value in tenno::atomic<char>")
+{
+    auto a = tenno::atomic<char>();
+    a.store('A');
+}
+
+TEST(atomic_char_load, "loading a value from tenno::atomic<char>")
+{
+    auto a = tenno::atomic<char>();
+    a.store('A');
+    auto b = a.load();
+    ASSERT(b == 'A');
+}
+
+TEST(atomic_char_exchange_success, "successful tenno::atomic<char>.exchange()")
+{
+    auto a = tenno::atomic<char>();
+    a.store('A');
+    auto e = a.exchange('B');
+    ASSERT(e == 'A');
+    ASSERT(a.load() == 'B');
+}
+
+TEST(atomic_char_compare_exhange_weak_success,
+     "succesful tenno::atomic<char>.compare_exchange_weak()")
+{
+    auto a = tenno::atomic<char>();
+    a.store('A');
+    auto expected = 'A';
+    auto b = a.compare_exchange_weak(expected, 'B');
+    ASSERT(b);
+    auto value = a.load();
+    ASSERT(value == 'B');
+}
+
+TEST(atomic_char_compare_exhange_weak_fail,
+     "unsuccesfull tenno::atomic<char>.compare_exchange_weak()")
+{
+    auto a = tenno::atomic<char>();
+    a.store('A');
+    auto expected = 'B';
+    auto b = a.compare_exchange_weak(expected, 'B');
+    ASSERT(!b);
+    auto value = a.load();
+    ASSERT(value == 'A');
+}
+
+TEST(atomic_char_compare_exhange_strong_success,
+     "succesful tenno::atomic<char>.compare_exchange_strong())")
+{
+    auto a = tenno::atomic<char>();
+    a.store('A');
+    auto expected = 'A';
+    auto b = a.compare_exchange_strong(expected, 'B');
+    ASSERT(b);
+    auto value = a.load();
+    ASSERT(value == 'B');
+}
+
+/* long specialization */
+
+TEST(atomic_long_store, "storing a value in tenno::atomic<long>")
+{
+    auto a = tenno::atomic<long>();
+    a.store(42);
+}
+
+TEST(atomic_long_load, "loading a value from tenno::atomic<long>")
+{
+    auto a = tenno::atomic<long>();
+    a.store(42);
+    auto b = a.load();
+    ASSERT(b == 42);
+}
+
+TEST(atomic_long_exchange_success, "successful tenno::atomic<long>.exchange()")
+{
+    auto a = tenno::atomic<long>();
+    a.store(42);
+    auto e = a.exchange(43);
+    ASSERT(e == 42);
+    ASSERT(a.load() == 43);
+}
+
+TEST(atomic_long_compare_exhange_weak_success,
+     "succesful tenno::atomic<long>.compare_exchange_weak()")
+{
+    auto a = tenno::atomic<long>();
+    a.store(42);
+    long expected = 42;
+    auto b = a.compare_exchange_weak(expected, 43);
+    ASSERT(b);
+    auto value = a.load();
+    ASSERT(value == 43);
+}
+
+TEST(atomic_long_compare_exhange_weak_fail,
+     "unsuccesfull tenno::atomic<long>.compare_exchange_weak()")
+{
+    auto a = tenno::atomic<long>();
+    a.store(42);
+    long expected = 43;
+    auto b = a.compare_exchange_weak(expected, 43);
+    ASSERT(!b);
+    auto value = a.load();
+    ASSERT(value == 42);
+}
+
+TEST(atomic_long_compare_exhange_strong_success,
+     "succesful tenno::atomic<long>.compare_exchange_strong())")
+{
+    auto a = tenno::atomic<long>();
+    a.store(42);
+    long expected = 42;
+    auto b = a.compare_exchange_strong(expected, 43);
+    ASSERT(b);
+    auto value = a.load();
+    ASSERT(value == 43);
 }

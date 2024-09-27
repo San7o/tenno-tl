@@ -19,7 +19,7 @@ Currently implemented:
 - [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)
 - [tenno::range\<T>](./include/tenno/ranges.hpp)
 - [tenno::error](./include/tenno/error.hpp)
-- [tenno::atomic\<T>](./include/tenno/atomic.hpp) (work in progress)
+- [tenno::atomic\<T>](./include/tenno/atomic.hpp)
 - [tenno::mutex](./include/tenno/mutex.hpp)
 - [tenno::lock_guard\<T>](./include/tenno/mutex.hpp)
 
