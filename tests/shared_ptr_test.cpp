@@ -24,60 +24,15 @@
  *
  */
 
-#pragma once
+#include <tenno/shared_ptr.hpp>
+#include <valfuzz/valfuzz.hpp>
 
-// TODO: remove this
-#include <memory> // for std::allocator and atd::default_delete
-
-namespace tenno
+TEST(shared_ptr_constructor, "tenno::shared_ptr(cb)")
 {
-
-template <typename T> class shared_ptr
-{
-  public:
-    using element_type = T;
-
-    struct control_block
+    auto cb = tenno::shared_ptr<int>::control_block{10, nullptr, nullptr, 0, 0};
     {
-        T object;
-        void (*allocator)();
-        void (*default_delete)();
-        int num_ptrs;
-        int num_weak_ptrs;
-    };
-
-    shared_ptr(control_block *cb)
-    {
-        this->_control_block = cb;
-        this->_element = &cb->object;
-        cb->num_ptrs++;
+        auto sp = tenno::shared_ptr<int>(&cb);
+        ASSERT_EQ(cb.num_ptrs, 1);
     }
-
-    ~shared_ptr()
-    {
-        this->_control_block->num_ptrs--;
-        if (this->_control_block->num_ptrs == 0)
-        {
-            if (this->_control_block->default_delete)
-                this->_control_block->default_delete();
-        }
-    }
-
-#ifndef TENNO_DEBUG
-  private:
-#endif
-    T *_element;
-    control_block* _control_block;
-};
-
-/*
-// TODO move in memory
-template <typename T, typename... Args>
-shared_ptr<T> make_shared(Args... args) noexcept
-{
-    // TODO
-    return shared_ptr();
+    ASSERT_EQ(cb.num_ptrs, 0);
 }
-*/
-
-} // namespace tenno

@@ -179,11 +179,6 @@ template <typename U> class atomic<U *>
         return false;
     }
 
-    // UODO
-    // - wait
-    // - notify_one
-    // - notify_all
-
   private:
     U *_value;
     tenno::mutex _mutex;

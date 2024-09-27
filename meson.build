@@ -72,6 +72,7 @@ if get_option('TENNO_BUILD_TESTS')
     'tests/atomic_test.cpp',
     'tests/mutex_test.cpp',
     'tests/optional_test.cpp',
+    'tests/shared_ptr_test.cpp',
     'benchmarks/array_benchmark.cpp',
     'fuzz/array_fuzz.cpp',
   )

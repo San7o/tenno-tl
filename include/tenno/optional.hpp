@@ -93,8 +93,7 @@ template <typename T> class optional
         *this = optional();
     }
 
-    template< class... Args >
-    T& emplace( Args&&... args )
+    template <class... Args> T &emplace(Args &&...args)
     {
         *this = optional(T(args...));
         return this->_value;

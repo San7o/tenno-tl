@@ -26,7 +26,8 @@ Currently implemented:
 - [tenno::for_each<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)
 - [tenno::swap\<T>](./include/tenno/algorithm.hpp)
-- [tenno::allocator]
+- tenno::allocator: TODO
+- tenno::vector: TODO
 
 ## Testing
 
