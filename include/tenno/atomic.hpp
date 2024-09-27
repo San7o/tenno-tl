@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <tenno/mutex.hpp> 
+#include <tenno/mutex.hpp>
 
 namespace tenno
 {
@@ -76,7 +76,7 @@ template <typename T> class atomic
         return old;
     }
 
-    inline bool compare_exchange_weak(T &expected, T desired) noexcept
+    inline bool compare_exchange_weak(const T &expected, T desired) noexcept
     {
         tenno::lock_guard<tenno::mutex> lock(this->_mutex);
         if (this->_value == expected)
@@ -84,10 +84,10 @@ template <typename T> class atomic
             this->_value = desired;
             return true;
         }
-        return true;
+        return false;
     }
 
-    inline bool compare_exchange_strong(T &expected, T desired) noexcept
+    inline bool compare_exchange_strong(const T &expected, T desired) noexcept
     {
         tenno::lock_guard<tenno::mutex> lock(this->_mutex);
         if (this->_value == expected)
@@ -95,7 +95,7 @@ template <typename T> class atomic
             this->_value = desired;
             return true;
         }
-        return true;
+        return false;
     }
 
     // TODO
@@ -111,7 +111,82 @@ template <typename T> class atomic
 /* general pointer */
 template <typename U> class atomic<U *>
 {
-    // TODO
+  public:
+    using value_type = U*;
+    const bool is_always_lock_free = false;
+
+    atomic() noexcept = default;
+    ~atomic() noexcept = default;
+    atomic(const atomic &) = delete;
+    atomic &operator=(const atomic &) = delete;
+    atomic &operator=(const atomic &) volatile = delete;
+
+    inline bool is_lock_free() const noexcept
+    {
+        return this->is_always_lock_free;
+    }
+
+    inline void store(U* desired) noexcept
+    {
+        tenno::lock_guard<tenno::mutex> lock(this->_mutex);
+        this->_value = desired;
+    }
+
+    inline U load() noexcept
+    {
+        tenno::lock_guard<tenno::mutex> lock(this->_mutex);
+        return *this->_value;
+    }
+
+    operator U() noexcept
+    {
+        return this->load();
+    }
+
+    inline U exchange(U* desired) noexcept
+    {
+        tenno::lock_guard<tenno::mutex> lock(this->_mutex);
+        U old = *this->_value;
+        this->_value = desired;
+        return old;
+    }
+
+    /**
+     * @brief Compare and exchange the value of the atomic object
+     * @param expected The expected value
+     * @param desired The desired value
+     * @return true if the exchange was successful, false otherwise
+     */
+    inline bool compare_exchange_weak(const U* expected, U* desired) noexcept
+    {
+        tenno::lock_guard<tenno::mutex> lock(this->_mutex);
+        if (this->_value != nullptr && *this->_value == *expected)
+        {
+            *this->_value = *desired;
+            return true;
+        }
+        return false;
+    }
+
+    inline bool compare_exchange_strong(const U* expected, U* desired) noexcept
+    {
+        tenno::lock_guard<tenno::mutex> lock(this->_mutex);
+        if (this->_value != nullptr && *this->_value == *expected)
+        {
+            *this->_value = *desired;
+            return true;
+        }
+        return false;
+    }
+
+    // UODO
+    // - wait
+    // - notify_one
+    // - notify_all
+
+  private:
+    U* _value;
+    tenno::mutex _mutex;
 };
 
 /* int specialization */
@@ -124,7 +199,6 @@ template <typename U> class atomic<U *>
  */
 template <> class atomic<int>
 {
-
   public:
     using value_type = int;
     const bool is_always_lock_free = true;
@@ -160,24 +234,26 @@ template <> class atomic<int>
     inline int exchange(int desired) noexcept
     {
         // read-modify-write operation (CAS)
-        // intODO
         return desired;
     }
 
-    inline bool compare_exchange_weak([[maybe_unused]]int &expected, [[maybe_unused]] int desired) noexcept
+    inline bool compare_exchange_weak([[maybe_unused]] int &expected,
+                                      [[maybe_unused]] int desired) noexcept
     {
-        // intODO
+        // TODO
         // more efficient and used in weak memory models, may return
         // false even if the operation was successful
         return true;
     }
 
-    inline bool compare_exchange_strong([[maybe_unused]] int &expected, [[maybe_unused]] int desired) noexcept
+    inline bool compare_exchange_strong([[maybe_unused]] int &expected,
+                                        [[maybe_unused]] int desired) noexcept
     {
         // intODO
         // less efficient but returns true if the operation was successful
         return true;
     }
+
   private:
     int _value;
 };

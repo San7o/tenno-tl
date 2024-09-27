@@ -89,7 +89,8 @@ TEST(atomic_exchange_generic, "exchanging a value in tenno::atomic")
     ASSERT(c.a == 43);
 }
 
-TEST(atomic_compare_exhange_weak_generic, "comparing and exchanging a value in tenno::atomic")
+TEST(atomic_compare_exhange_weak_generic,
+     "comparing and exchanging a value in tenno::atomic")
 {
     struct A
     {
@@ -108,7 +109,28 @@ TEST(atomic_compare_exhange_weak_generic, "comparing and exchanging a value in t
     ASSERT(c.a == 43);
 }
 
-TEST(atomic_compare_exhange_strong_generic, "comparing and exchanging a value in tenno::atomic")
+TEST(atomic_compare_exhange_weak_generic_fail,
+     "comparing and exchanging a value in tenno::atomic")
+{
+    struct A
+    {
+        int a;
+        bool operator==(const A &rhs) const
+        {
+            return this->a == rhs.a;
+        }
+    };
+    auto a = tenno::atomic<A>();
+    a.store(A{42});
+    A c{43};
+    ASSERT(!a.compare_exchange_weak(c, A{44}));
+    ASSERT(c.a == 43);
+    auto d = a.load();
+    ASSERT(d.a == 42);
+}
+
+TEST(atomic_compare_exhange_strong_generic,
+     "comparing and exchanging a value in tenno::atomic")
 {
     struct A
     {
@@ -125,4 +147,108 @@ TEST(atomic_compare_exhange_strong_generic, "comparing and exchanging a value in
     ASSERT(b.a == 42);
     auto c = a.load();
     ASSERT(c.a == 43);
+}
+
+TEST(atomic_compare_exhange_strong_generic_fail,
+     "comparing and exchanging a value in tenno::atomic")
+{
+    struct A
+    {
+        int a;
+        bool operator==(const A &rhs) const
+        {
+            return a == rhs.a;
+        }
+    };
+    auto a = tenno::atomic<A>();
+    a.store(A{42});
+    A c{43};
+    ASSERT(!a.compare_exchange_strong(c, A{44}));
+    ASSERT(c.a == 43);
+    auto d = a.load();
+    ASSERT(d.a == 42);
+}
+
+TEST(atomic_pointer_is_lock_free, "checking tenno::atomic<int *>::is_lock_free()")
+{
+    auto a = tenno::atomic<int *>();
+    ASSERT(!a.is_lock_free());
+}
+
+TEST(atomic_pointer_store, "storing a value in tenno::atomic<int *>")
+{
+    auto a = tenno::atomic<int *>();
+    int b = 42;
+    a.store(&b);
+}
+
+TEST(atomic_pointer_load, "loading a value from tenno::atomic<int *>")
+{
+    auto a = tenno::atomic<int *>();
+    int b = 42;
+    a.store(&b);
+    int c = a.load();
+    ASSERT(c == 42);
+}
+
+TEST(atomic_pointer_exchange, "exchanging a value in tenno::atomic<int *>")
+{
+    auto a = tenno::atomic<int *>();
+    int b = 42;
+    a.store(&b);
+    int c = 43;
+    auto d = a.exchange(&c);
+    ASSERT(d == 42);
+    auto e = a.load();
+    ASSERT(e == 43);
+}
+
+TEST(atomic_pointer_compare_exhange_weak,
+     "comparing and exchanging a value in tenno::atomic<int *>")
+{
+    auto a = tenno::atomic<int *>();
+    int b = 42;
+    a.store(&b);
+    int c = 43;
+    ASSERT(a.compare_exchange_weak(&b, &c));
+    auto d = a.load();
+    ASSERT(d == 43);
+}
+
+TEST(atomic_pointer_compare_exhange_weak_fail,
+     "comparing and exchanging a value in tenno::atomic<int *>")
+{
+    auto a = tenno::atomic<int *>();
+    int b = 42;
+    a.store(&b);
+    int c = 43;
+    int d = 44;
+    ASSERT(!a.compare_exchange_weak(&c, &d));
+    auto e = a.load();
+    ASSERT(e == 42);
+}
+
+TEST(atomic_pointer_compare_exhange_strong,
+     "comparing and exchanging a value in tenno::atomic<int *>")
+{
+    auto a = tenno::atomic<int *>();
+    int b = 42;
+    a.store(&b);
+    int c = 43;
+    ASSERT(a.compare_exchange_strong(&b, &c));
+    auto d = a.load();
+    ASSERT(d == 43);
+}
+
+TEST(atomic_pointer_compare_exhange_strong_fail,
+     "comparing and exchanging a value in tenno::atomic<int *>")
+{
+    auto a = tenno::atomic<int *>();
+    int b = 42;
+    a.store(&b);
+    int c = 43;
+    int d = 44;
+    ASSERT(!a.compare_exchange_strong(&c, &d));
+    auto e = a.load();
+    ASSERT(e == 42);
 }
