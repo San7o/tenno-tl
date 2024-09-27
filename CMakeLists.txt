@@ -24,6 +24,7 @@ set(TENNO_TEST_SOURCES
         tests/algorithm_test.cpp
         tests/atomic_test.cpp
         tests/mutex_test.cpp
+        tests/optional_test.cpp
         fuzz/array_fuzz.cpp
         benchmarks/array_benchmark.cpp
 )

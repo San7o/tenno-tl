@@ -230,8 +230,7 @@ template <> class atomic<int>
         return desired;
     }
 
-    inline bool compare_exchange_weak(int &expected,
-                                      int desired) noexcept
+    inline bool compare_exchange_weak(int &expected, int desired) noexcept
     {
         bool success;
         asm volatile("lock cmpxchg %[desired], %[target]\n\t"
@@ -243,8 +242,7 @@ template <> class atomic<int>
         return success;
     }
 
-    inline bool compare_exchange_strong(int &expected,
-                                        int desired) noexcept
+    inline bool compare_exchange_strong(int &expected, int desired) noexcept
     {
         bool success = false;
         while (!success)
@@ -305,8 +303,7 @@ template <> class atomic<char>
         return desired;
     }
 
-    inline bool compare_exchange_weak(char &expected,
-                                      char desired) noexcept
+    inline bool compare_exchange_weak(char &expected, char desired) noexcept
     {
         bool success;
         asm volatile("lock cmpxchg %[desired], %[target]\n\t"
@@ -318,8 +315,7 @@ template <> class atomic<char>
         return success;
     }
 
-    inline bool compare_exchange_strong(char &expected,
-                                        char desired) noexcept
+    inline bool compare_exchange_strong(char &expected, char desired) noexcept
     {
         bool success = false;
         while (!success)
@@ -380,8 +376,7 @@ template <> class atomic<long>
         return desired;
     }
 
-    inline bool compare_exchange_weak(long &expected,
-                                      long desired) noexcept
+    inline bool compare_exchange_weak(long &expected, long desired) noexcept
     {
         bool success;
         asm volatile("lock cmpxchg %[desired], %[target]\n\t"
@@ -393,8 +388,7 @@ template <> class atomic<long>
         return success;
     }
 
-    inline bool compare_exchange_strong(long &expected,
-                                        long desired) noexcept
+    inline bool compare_exchange_strong(long &expected, long desired) noexcept
     {
         bool success = false;
         while (!success)

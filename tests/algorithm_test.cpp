@@ -74,3 +74,12 @@ TEST(algorithm_accumulate_constexpr, "accumulating tenno::array constexpr")
     constexpr auto sum = tenno::accumulate(arr.begin(), arr.end(), 0);
     static_assert(sum == 15);
 }
+
+TEST(algorithm_swap, "tenno::swap")
+{
+    int a = 1;
+    int b = 2;
+    tenno::swap(a, b);
+    ASSERT(a == 2);
+    ASSERT(b == 1);
+}

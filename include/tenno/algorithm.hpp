@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <utility>
+
 namespace tenno
 {
 
@@ -103,6 +105,13 @@ constexpr T accumulate(InputIt first, InputIt last, T init) noexcept
         init += *first++;
     }
     return init;
+}
+
+template <class T> void swap(T &a, T &b) noexcept
+{
+    T tmp = std::move(a);
+    a = std::move(b);
+    b = std::move(tmp);
 }
 
 } // namespace tenno
