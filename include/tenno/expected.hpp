@@ -97,6 +97,13 @@ template <typename T, typename E> class expected
         return has_val;
     }
 
+    /**
+     * @brief Compares two expected objects
+     *
+     * @param other The other expected object to compare to
+     * @return true If the two expected objects are equal
+     * @return false If the two expected objects are not equal
+     */
     constexpr bool operator==(const expected<T, E> &other) const noexcept
     {
         if (has_val != other.has_val)
@@ -110,11 +117,24 @@ template <typename T, typename E> class expected
         return unex.unex == other.unex.unex;
     }
 
+    /**
+     * @brief Compares two expected objects
+     *
+     * @param other The other expected object to compare to
+     * @return false If the two expected objects are equal
+     * @return true If the two expected objects are not equal
+     */
     constexpr bool operator!=(const expected<T, E> &other) const noexcept
     {
         return !(*this == other);
     }
 
+    /**
+     * @brief Assigns an expected object to another expected object
+     *
+     * @param other The other expected object to assign to
+     * @return expected<T, E>& The assigned expected object
+     */
     constexpr auto
     operator=(const expected<T, E> &other) noexcept -> expected<T, E> &
     {

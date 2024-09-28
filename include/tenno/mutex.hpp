@@ -29,12 +29,18 @@
 namespace tenno
 {
 
+/**
+ * @brief A simple mutex implementation
+ */
 class mutex
 {
   public:
     mutex() = default;
     ~mutex() = default;
 
+    /**
+     * @brief Lock the mutex
+     */
     inline void lock() noexcept
     {
         int expected = 0;
@@ -73,6 +79,11 @@ class mutex
 #endif
     }
 
+    /**
+     * @brief Try to lock the mutex
+     * 
+     * @return true if the mutex was locked, false otherwise
+     */
     inline bool try_lock() noexcept
     {
         int expected = 0;
@@ -101,6 +112,9 @@ class mutex
 #endif
     }
 
+    /**
+     * @brief Unlock the mutex
+     */
     inline void unlock() noexcept
     {
 #if defined(__GNUC__) || !defined(__clang__)
@@ -122,6 +136,13 @@ class mutex
     volatile int is_locked = 0;
 };
 
+/**
+ * @brief A simple lock guard implementation
+ * 
+ * @tparam M The type of the mutex to guard
+ *
+ * Locks the mutex in the constructor and unlocks it in the destructor.
+ */
 template <typename M> class lock_guard
 {
   public:

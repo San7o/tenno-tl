@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <utility>
+#include <tenno/utility.hpp>
 
 namespace tenno
 {
@@ -107,11 +107,18 @@ constexpr T accumulate(InputIt first, InputIt last, T init) noexcept
     return init;
 }
 
+/**
+ * @brief Exchanges the values of a and b.
+ *
+ * @tparam T The type of the values to swap.
+ * @param a The first value to swap.
+ * @param b The second value to swap.
+ */
 template <class T> void swap(T &a, T &b) noexcept
 {
-    T tmp = std::move(a);
-    a = std::move(b);
-    b = std::move(tmp);
+    T tmp = tenno::move(a);
+    a = tenno::move(b);
+    b = tenno::move(tmp);
 }
 
 } // namespace tenno

@@ -1,7 +1,7 @@
 # tenno template library
 
-This library aims to be a replacement for some functionalities of c++23 STL,
-improving on security and parallelism.
+This library aims to be a replacement for some functionalities of the STL for c++23,
+improving on security and parallelism. You can expect all the functionalities to behave like STL.
 
 Design goals:
 - **exceptions are NEVER thrown**, instead values are returned as `optional` or `expected`
@@ -21,11 +21,12 @@ Currently implemented:
 - [tenno::mutex](./include/tenno/mutex.hpp)
 - [tenno::lock_guard\<T>](./include/tenno/mutex.hpp)
 - [tenno::optional\<T>](./include/tenno/optional.hpp)
-- [tenno::shared_ptr\<T>](./include/tenno/shared_ptr.hpp) (work in progress)
+- [tenno::shared_ptr\<T>](./include/tenno/shared_ptr.hpp)
 - [tenno::copy<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::for_each<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)
 - [tenno::swap\<T>](./include/tenno/algorithm.hpp)
+- [tenno::move\<T>](./include/tenno/utility.hpp)
 - tenno::allocator: TODO
 - tenno::vector: TODO
 
