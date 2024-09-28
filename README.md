@@ -34,7 +34,7 @@ improving on security and parallelism. You can expect all the functionalities to
 - tenno::weak_ptr: TODO
 - tenno::allocator: TODO
 - tenno::vector: TODO
-- theads and thread pool: TODO
+- theads, jthreads and thread pool: TODO
 
 ## Testing
 
