@@ -3,7 +3,7 @@
 This library aims to be a replacement for some functionalities of the STL for c++23,
 improving on security and parallelism. You can expect all the functionalities to behave like STL.
 
-Design goals:
+## Design goals
 - **exceptions are NEVER thrown**, instead values are returned as `optional` or `expected`
 - **constexpr** everywhere It's possible
 - less undefined behaviour, more security
@@ -12,7 +12,7 @@ Design goals:
 - do not strictly follow silly standards
 - optimize for performance
 
-Currently implemented:
+## Currently implemented
 - [tenno::array<T,N>](./include/tenno/array.hpp)
 - [tenno::expected<T,E>](./include/tenno/expected.hpp)
 - [tenno::range\<T>](./include/tenno/ranges.hpp)
@@ -27,8 +27,14 @@ Currently implemented:
 - [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)
 - [tenno::swap\<T>](./include/tenno/algorithm.hpp)
 - [tenno::move\<T>](./include/tenno/utility.hpp)
+- [tenno::make_shared\<T>](./include/tenno/memory.hpp)
+- tenno::allocate_shared: TODO
+- tenno::unique_ptr: TODO
+- tenno::make_unique: TODO
+- tenno::weak_ptr: TODO
 - tenno::allocator: TODO
 - tenno::vector: TODO
+- theads and thread pool: TODO
 
 ## Testing
 

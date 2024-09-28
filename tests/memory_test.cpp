@@ -12,7 +12,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  all
- * copies or substantial portions of the Software.
+ * copies or substantial portions of the Snooftware.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -24,24 +24,27 @@
  *
  */
 
-#pragma once
+#include <tenno/memory.hpp>
+#include <valfuzz/valfuzz.hpp>
 
-#include <type_traits> // std::remove_reference_t
-
-namespace tenno
+TEST(make_shared, "tenno::make_shared")
 {
-
-/**
- * @brief Move a value from one location to another.
- *
- * @tparam T The type of the value to move.
- * @param t The value to move.
- * @return T&& The moved value.
- */
-template <typename T>
-constexpr std::remove_reference_t<T> &&move(T &&t) noexcept
-{
-    return static_cast<typename std::remove_reference<T>::type &&>(t);
+    auto sp = tenno::make_shared<int>(5);
+    ASSERT_EQ(sp.use_count(), 1);
+    ASSERT_EQ(*sp, 5);
 }
 
-} // namespace tenno
+/*
+TEST(make_shared_array_size, "tenno::make_shared [] size")
+{
+    auto sp = tenno::make_shared<int[5]>(5);
+    ASSERT_EQ(sp.use_count(), 1);
+}
+*/
+
+TEST(make_shared_no_args, "tenno::make_shared no args")
+{
+    auto sp = tenno::make_shared<int>();
+    ASSERT_EQ(sp.use_count(), 1);
+    ASSERT_EQ(*sp, 0);
+}

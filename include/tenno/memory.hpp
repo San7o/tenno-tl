@@ -26,22 +26,34 @@
 
 #pragma once
 
-#include <type_traits> // std::remove_reference_t
+#include <tenno/shared_ptr.hpp>
+#include <memory> // std::allocator and std::default_delete
 
 namespace tenno
 {
 
-/**
- * @brief Move a value from one location to another.
- *
- * @tparam T The type of the value to move.
- * @param t The value to move.
- * @return T&& The moved value.
- */
-template <typename T>
-constexpr std::remove_reference_t<T> &&move(T &&t) noexcept
+template <typename T, typename... Args>
+shared_ptr<T> make_shared(Args... args) noexcept
 {
-    return static_cast<typename std::remove_reference<T>::type &&>(t);
+    T t = T(args...);
+    return tenno::shared_ptr<T>(&t);
+}
+
+/*
+// TODO: array initialization
+template< class T >
+shared_ptr<T> make_shared(tenno::size N) noexcept
+{
+    auto t = T[N]();
+    return tenno::shared_ptr<T>(&t);
+}
+*/
+
+template< class T >
+shared_ptr<T> make_shared() noexcept
+{
+    T t = T();
+    return tenno::shared_ptr<T>(&t);
 }
 
 } // namespace tenno

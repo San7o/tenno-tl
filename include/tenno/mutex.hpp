@@ -81,7 +81,7 @@ class mutex
 
     /**
      * @brief Try to lock the mutex
-     * 
+     *
      * @return true if the mutex was locked, false otherwise
      */
     inline bool try_lock() noexcept
@@ -138,7 +138,7 @@ class mutex
 
 /**
  * @brief A simple lock guard implementation
- * 
+ *
  * @tparam M The type of the mutex to guard
  *
  * Locks the mutex in the constructor and unlocks it in the destructor.

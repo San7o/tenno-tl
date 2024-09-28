@@ -83,6 +83,11 @@ template <typename T, tenno::size N> class array
         tenno::copy(list.begin(), list.end(), this->_data);
     }
 
+    constexpr array(const array &other)
+    {
+        tenno::copy(other.begin(), other.end(), this->_data);
+    }
+
     /**
      * @brief Get the size of the array
      *
@@ -298,6 +303,12 @@ template <typename T, tenno::size N> class array
     constexpr T operator[](const tenno::size index) const noexcept
     {
         return this->_data[index];
+    }
+
+    constexpr array &operator=(const array &other) noexcept
+    {
+        tenno::copy(other.begin(), other.end(), this->_data);
+        return *this;
     }
 
     /**

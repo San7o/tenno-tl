@@ -33,7 +33,7 @@ namespace tenno
 
 /**
  * @brief The atomic class template provides operations on atomic types.
- * 
+ *
  * @tparam T The type of the atomic object.
  */
 template <typename T> class atomic;
@@ -59,7 +59,7 @@ template <typename T> class atomic
 
     /**
      * @brief Check if the atomic object is lock free.
-     * 
+     *
      * @return true if the atomic object is lock free, false otherwise.
      */
     inline bool is_lock_free() const noexcept
@@ -69,7 +69,7 @@ template <typename T> class atomic
 
     /**
      * @brief Store a value in the atomic object.
-     * 
+     *
      * @param desired The value to store.
      */
     inline void store(T desired) noexcept
@@ -80,7 +80,7 @@ template <typename T> class atomic
 
     /**
      * @brief Load the value from the atomic object.
-     * 
+     *
      * @return T The value stored in the atomic object.
      */
     inline T load() noexcept
@@ -91,7 +91,7 @@ template <typename T> class atomic
 
     /**
      * @brief Implicit conversion to the value stored in the atomic object.
-     * 
+     *
      * @return T The value stored in the atomic object.
      */
     operator T() noexcept
@@ -101,7 +101,7 @@ template <typename T> class atomic
 
     /**
      * @brief Exchange the value stored in the atomic object with a new value.
-     * 
+     *
      * @param desired The new value to store in the atomic object.
      * @return T The old value stored in the atomic object.
      */
