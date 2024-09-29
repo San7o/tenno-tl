@@ -45,13 +45,16 @@ template <class T, class Deleter = std::default_delete<T>> class unique_ptr
     using element_type = T;
     using deleter_type = Deleter;
 
-    constexpr unique_ptr() : _value(nullptr) {}
-
-    constexpr unique_ptr(T *ptr, Deleter deleter = std::default_delete<T>()) : _value(ptr), _deleter(deleter)
+    constexpr unique_ptr() : _value(nullptr)
     {
     }
 
-    constexpr unique_ptr(const unique_ptr& other) = delete;
+    constexpr unique_ptr(T *ptr, Deleter deleter = std::default_delete<T>())
+        : _value(ptr), _deleter(deleter)
+    {
+    }
+
+    constexpr unique_ptr(const unique_ptr &other) = delete;
     constexpr unique_ptr(unique_ptr &&other) noexcept
     {
         this->reset(other.release());

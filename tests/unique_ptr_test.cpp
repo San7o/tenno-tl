@@ -37,24 +37,24 @@ TEST(unique_ptr_constructor, "tenno::unique_ptr() constructor")
 
 TEST(unique_ptr_get, "tenno::unique_ptr.get()")
 {
-    int* p = new int(10);
+    int *p = new int(10);
     auto ptr = tenno::unique_ptr<int>(p);
     ASSERT(*(ptr.get()) == 10);
 }
 
 TEST(unique_ptr_release, "tenno::unique_ptr.release()")
 {
-    int* p = new int(10);
+    int *p = new int(10);
     auto ptr = tenno::unique_ptr<int>(p);
     ASSERT(*(ptr.get()) == 10);
-    int* r = ptr.release();
+    int *r = ptr.release();
     ASSERT(ptr.get() == nullptr);
     delete r;
 }
 
 TEST(unique_ptr_reset, "tenno::unique_ptr.reset()")
 {
-    int* p = new int(10);
+    int *p = new int(10);
     auto ptr = tenno::unique_ptr<int>(p);
     ASSERT(*(ptr.get()) == 10);
     ptr.reset();
@@ -77,7 +77,8 @@ TEST(unique_ptr_swap, "tenno::unique_ptr.swap()")
 TEST(uniqie_ptr_get_deleter, "tenno::unique_ptr.get_deleter()")
 {
     int *p = new int(10);
-    auto ptr = tenno::unique_ptr<int, void(*)(int*)>(p, [](int * _p) {delete _p;});
+    auto ptr =
+        tenno::unique_ptr<int, void (*)(int *)>(p, [](int *_p) { delete _p; });
     ASSERT(*ptr == 10);
 }
 

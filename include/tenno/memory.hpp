@@ -28,6 +28,7 @@
 
 #include <memory> // std::allocator and std::default_delete
 #include <tenno/shared_ptr.hpp>
+#include <tenno/unique_ptr.hpp>
 
 namespace tenno
 {
@@ -80,6 +81,14 @@ shared_ptr<T> allocate_shared(Alloc &alloc) noexcept
     T *t = alloc.allocate(1);
     *t = T();
     return tenno::shared_ptr<T>(t);
+}
+
+template <class T, class... Args>
+constexpr unique_ptr<T> make_unique(Args &&...args)
+{
+    T *t = new T(args...);
+    auto ptr = tenno::unique_ptr<T>(args...);
+    ASSERT(ptr.get() != nullptr);
 }
 
 } // namespace tenno
