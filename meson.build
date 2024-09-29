@@ -75,6 +75,7 @@ if get_option('TENNO_BUILD_TESTS')
     'tests/shared_ptr_test.cpp',
     'tests/utility_test.cpp',
     'tests/memory_test.cpp',
+    'tests/unique_ptr_test.cpp',
     'benchmarks/array_benchmark.cpp',
     'fuzz/array_fuzz.cpp',
   )

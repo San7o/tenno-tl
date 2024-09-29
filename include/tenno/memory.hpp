@@ -32,27 +32,54 @@
 namespace tenno
 {
 
-template <typename T, typename... Args>
-shared_ptr<T> make_shared(Args... args) noexcept
+/**
+ * @brief Create a shared pointer with the given arguments
+ *
+ * @tparam T The type of the object to create
+ * @tparam Args The type of the arguments to pass to the constructor
+ * @param args The arguments to pass to the constructor
+ * @return shared_ptr<T> The shared pointer to the object
+ *
+ * @note Make shared takes care of the allocation of the object, while the
+ * shared pointer takes care of the allocation and deallocation of the
+ * internal control block, as well as the deallocation of the object.
+ * @note The object must accept variadic arguments in the constructor
+ */
+template <class T, class... Args>
+std::enable_if<!std::is_array<T>::value, shared_ptr<T>>::type
+make_shared(Args &&...args) noexcept
 {
-    return tenno::shared_ptr<T>(T(args...));
+    return tenno::shared_ptr<T>(new T(args...));
 }
 
 /*
-// TODO: array initialization
-template< class T >
-shared_ptr<T> make_shared(tenno::size N) noexcept
+template <class T>
+std::enable_if<std::is_array<T>::value, shared_ptr<T>>::type
+make_shared(tenno::size n) noexcept
 {
-    auto t = T[N]();
-    return tenno::shared_ptr<T>(&t);
+    return tenno::shared_ptr<T>(new T[n]);
 }
 */
 
 template <class T> shared_ptr<T> make_shared() noexcept
 {
-    return tenno::shared_ptr<T>(T());
+    return tenno::shared_ptr<T>(new T());
+}
+
+template <class T, class Alloc, class... Args>
+shared_ptr<T> allocate_shared(Alloc &alloc, Args &&...args) noexcept
+{
+    T *t = alloc.allocate(1);
+    *t = T(args...);
+    return tenno::shared_ptr<T>(t);
+}
+
+template <class T, class Alloc>
+shared_ptr<T> allocate_shared(Alloc &alloc) noexcept
+{
+    T *t = alloc.allocate(1);
+    *t = T();
+    return tenno::shared_ptr<T>(t);
 }
 
 } // namespace tenno
-
-// TODO: allocate shared

@@ -32,5 +32,6 @@ namespace tenno
 {
 
 typedef size_t size;
+using nullptr_t = decltype(nullptr);
 
 } // namespace tenno

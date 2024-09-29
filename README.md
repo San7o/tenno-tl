@@ -28,8 +28,8 @@ improving on security and parallelism. You can expect all the functionalities to
 - [tenno::swap\<T>](./include/tenno/algorithm.hpp)
 - [tenno::move\<T>](./include/tenno/utility.hpp)
 - [tenno::make_shared\<T>](./include/tenno/memory.hpp)
-- tenno::allocate_shared: TODO
-- tenno::unique_ptr: TODO
+- [tenno::allocate_shared](./include/tenno/memory) (TODO: array specialization)
+- [tenno::unique_ptr](./include/tenno/unique_ptr.hpp) (TODO: array specialization)
 - tenno::make_unique: TODO
 - tenno::weak_ptr: TODO
 - tenno::allocator: TODO
@@ -69,28 +69,8 @@ make docs
 
 # Differences with STL
 
-## shared_ptr
-
-`tenno::shared_ptr<T>` allocated both the `T` object and the control block
-in single allocation, using a provided allocator if specified. The
-standard library required two allocations, using the default allocator
-for the control block and a custom one for the value if provided.
-Construction of  `tenno::shared_ptr<T>` is done by moving (`tenno::move()`)
-a T value inside the shared pointer, the following example shows
-the api difference between tenno-tl and stl:
-```c++
-// stl
-int* val = new int(1337);
-auto ptr = std::make_shared(val);
-// tenno
-int val = 1337;
-auto ptr = std::make_shared(tenno::move(val));
-// or simply
-auto ptr = std::make_shared(1337);
-```
-
 ## array
 
-`tenno::array<T,N>-at(n)` returns `expected<T,E>` with either the value
+`tenno::array<T,N>.at(n)` returns `expected<T,E>` with either the value
 or a `tenno::error` with the error `out_of_range` if the range specified
 is bigger than the size of the array.
