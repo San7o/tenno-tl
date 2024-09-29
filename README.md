@@ -66,3 +66,31 @@ The library uses doxygen for documentation, to build the html documentation run:
 ```
 make docs
 ```
+
+# Differences with STL
+
+## shared_ptr
+
+`tenno::shared_ptr<T>` allocated both the `T` object and the control block
+in single allocation, using a provided allocator if specified. The
+standard library required two allocations, using the default allocator
+for the control block and a custom one for the value if provided.
+Construction of  `tenno::shared_ptr<T>` is done by moving (`tenno::move()`)
+a T value inside the shared pointer, the following example shows
+the api difference between tenno-tl and stl:
+```c++
+// stl
+int* val = new int(1337);
+auto ptr = std::make_shared(val);
+// tenno
+int val = 1337;
+auto ptr = std::make_shared(tenno::move(val));
+// or simply
+auto ptr = std::make_shared(1337);
+```
+
+## array
+
+`tenno::array<T,N>-at(n)` returns `expected<T,E>` with either the value
+or a `tenno::error` with the error `out_of_range` if the range specified
+is bigger than the size of the array.

@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include <tenno/shared_ptr.hpp>
 #include <memory> // std::allocator and std::default_delete
+#include <tenno/shared_ptr.hpp>
 
 namespace tenno
 {
@@ -35,8 +35,7 @@ namespace tenno
 template <typename T, typename... Args>
 shared_ptr<T> make_shared(Args... args) noexcept
 {
-    T t = T(args...);
-    return tenno::shared_ptr<T>(&t);
+    return tenno::shared_ptr<T>(T(args...));
 }
 
 /*
@@ -49,11 +48,11 @@ shared_ptr<T> make_shared(tenno::size N) noexcept
 }
 */
 
-template< class T >
-shared_ptr<T> make_shared() noexcept
+template <class T> shared_ptr<T> make_shared() noexcept
 {
-    T t = T();
-    return tenno::shared_ptr<T>(&t);
+    return tenno::shared_ptr<T>(T());
 }
 
 } // namespace tenno
+
+// TODO: allocate shared

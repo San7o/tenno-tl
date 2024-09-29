@@ -31,11 +31,10 @@
 
 TEST(shared_ptr_constructor, "constructor tenno::shared_ptr")
 {
-    int a = 10;
     tenno::shared_ptr<int> sp;
     ASSERT_EQ(sp.use_count(), 0);
     {
-        auto sp2 = tenno::shared_ptr<int>(&a);
+        auto sp2 = tenno::shared_ptr<int>(10);
         sp = sp2;
         ASSERT_EQ(sp.use_count(), 2);
     }
@@ -44,8 +43,7 @@ TEST(shared_ptr_constructor, "constructor tenno::shared_ptr")
 
 TEST(shared_ptr_assignment, "tenno::shared_ptr = tenno::shared_ptr")
 {
-    int a = 10;
-    auto sp1 = tenno::shared_ptr<int>(&a);
+    auto sp1 = tenno::shared_ptr<int>(10);
     ASSERT_EQ(sp1.use_count(), 1);
     auto sp2 = sp1;
     ASSERT_EQ(sp1.use_count(), 2);
@@ -55,8 +53,7 @@ TEST(shared_ptr_assignment, "tenno::shared_ptr = tenno::shared_ptr")
 
 TEST(shared_ptr_reset0, "tenno::shared_ptr::reset 1")
 {
-    int a = 10;
-    auto sp1 = tenno::shared_ptr<int>(&a);
+    auto sp1 = tenno::shared_ptr<int>(10);
     auto sp2 = sp1;
     ASSERT_EQ(sp1.use_count(), 2);
     sp1.reset();
@@ -66,40 +63,33 @@ TEST(shared_ptr_reset0, "tenno::shared_ptr::reset 1")
 
 TEST(shared_ptr_reset1, "tenno::shared_ptr::reset 1")
 {
-    int a = 10;
-    auto sp1 = tenno::shared_ptr<int>(&a);
+    auto sp1 = tenno::shared_ptr<int>(10);
     ASSERT_EQ(sp1.use_count(), 1);
-    int i = 42;
-    sp1.reset(&i);
+    sp1.reset(42);
     ASSERT_EQ(sp1.use_count(), 1);
 }
 
 TEST(shared_ptr_reset2, "tenno::shared_ptr::reset 2")
 {
-    int a = 10;
-    auto sp = tenno::shared_ptr<int>(&a);
+    auto sp = tenno::shared_ptr<int>(10);
     ASSERT_EQ(*sp.get(), 10);
-    int i = 42;
-    sp.reset(&i, std::default_delete<tenno::shared_ptr<int>::control_block>());
+    sp.reset(42, std::default_delete<tenno::shared_ptr<int>::control_block>());
     ASSERT_EQ(*sp.get(), 42);
 }
 
 TEST(shared_ptr_reset3, "tenno::shared_ptr::reset 3")
 {
-    int a = 10;
-    auto sp = tenno::shared_ptr<int>(&a);
+    auto sp = tenno::shared_ptr<int>(10);
     ASSERT_EQ(*sp.get(), 10);
-    int i = 42;
-    sp.reset(&i, std::default_delete<tenno::shared_ptr<int>::control_block>(), std::allocator<tenno::shared_ptr<int>::control_block>());
+    sp.reset(42, std::default_delete<tenno::shared_ptr<int>::control_block>(),
+             std::allocator<tenno::shared_ptr<int>::control_block>());
     ASSERT_EQ(*sp.get(), 42);
 }
 
 TEST(shared_ptr_swap, "tenno::shared_ptr::swap")
 {
-    int a = 10;
-    int b = 11;
-    auto sp1 = tenno::shared_ptr<int>(&a);
-    auto sp2 = tenno::shared_ptr<int>(&b);
+    auto sp1 = tenno::shared_ptr<int>(10);
+    auto sp2 = tenno::shared_ptr<int>(11);
     ASSERT_EQ(sp1.use_count(), 1);
     ASSERT_EQ(sp2.use_count(), 1);
     ASSERT_EQ(*sp1.get(), 10);
@@ -111,15 +101,13 @@ TEST(shared_ptr_swap, "tenno::shared_ptr::swap")
 
 TEST(shared_ptr_get, "tenno::shared_ptr::get")
 {
-    int a = 10;
-    auto sp = tenno::shared_ptr<int>(&a);
+    auto sp = tenno::shared_ptr<int>(10);
     ASSERT_EQ(*sp.get(), 10);
 }
 
 TEST(shared_ptr_dereference_operator, "tenno::shared_ptr::operator*")
 {
-    int a = 10;
-    auto sp = tenno::shared_ptr<int>(&a);
+    auto sp = tenno::shared_ptr<int>(10);
     *sp = 42;
     ASSERT_EQ(*sp.get(), 42);
 }
@@ -130,7 +118,7 @@ TEST(shared_ptr_arrow_operator, "tenno::shared_ptr::operator->")
     {
         int bar;
     } a;
-    auto sp = tenno::shared_ptr<foo>(&a);
+    auto sp = tenno::shared_ptr<foo>(tenno::move(a));
     sp->bar = 42;
     ASSERT_EQ(sp.get()->bar, 42);
 }
@@ -138,22 +126,20 @@ TEST(shared_ptr_arrow_operator, "tenno::shared_ptr::operator->")
 TEST(shared_ptr_array_access_operator, "tenno::shared_ptr::operator[]")
 {
     auto arr = tenno::array<int, 5>{};
-    auto sp = tenno::shared_ptr<tenno::array<int, 5>>(&arr);
+    auto sp = tenno::shared_ptr<tenno::array<int, 5>>(tenno::move(arr));
     sp[0] = 42;
     ASSERT_EQ((*sp.get())[0], 42);
 }
 
 TEST(shared_ptr_use_count, "tenno::shared_ptr::use_count")
 {
-    int a = 10;
-    auto sp1 = tenno::shared_ptr<int>(&a);
+    auto sp1 = tenno::shared_ptr<int>(10);
     ASSERT_EQ(sp1.use_count(), 1);
 }
 
 TEST(shared_ptr_bool, "tenno::shared_ptr::operator bool")
 {
-    int a = 10;
-    auto sp = tenno::shared_ptr<int>(&a);
+    auto sp = tenno::shared_ptr<int>(10);
     ASSERT(sp);
     sp.reset();
     ASSERT(!sp);
@@ -161,37 +147,31 @@ TEST(shared_ptr_bool, "tenno::shared_ptr::operator bool")
 
 TEST(shared_ptr_owner_before, "tenno::shared_ptr::owner_before")
 {
-    int a = 42;
-    int b = 43;
-    auto sp1 = tenno::shared_ptr<int>(&a);
-    auto sp2 = tenno::shared_ptr<int>(&b);
+    auto sp1 = tenno::shared_ptr<int>(42);
+    auto sp2 = tenno::shared_ptr<int>(43);
     ASSERT(sp1.owner_before(sp2));
     ASSERT(!sp2.owner_before(sp1));
 }
 
 TEST(shared_ptr_owner_equal, "tenno::shared_ptr::owner_equal")
 {
-    int a = 42;
-    int b = 43;
-    auto sp1 = tenno::shared_ptr<int>(&a);
-    auto sp2 = tenno::shared_ptr<int>(&b);
-    auto sp3 = tenno::shared_ptr<int>(&a);
+    auto sp1 = tenno::shared_ptr<int>(42);
+    auto sp2 = tenno::shared_ptr<int>(43);
+    auto sp3 = tenno::shared_ptr<int>(42);
     ASSERT(sp1.owner_equal(sp3));
     ASSERT(!sp1.owner_equal(sp2));
 }
 
 TEST(shared_ptr_copy_constructor, "tenno::shared_ptr::shared_ptr copy1")
 {
-    int a = 10;
-    auto sp1 = tenno::shared_ptr<int>(&a);
+    auto sp1 = tenno::shared_ptr<int>(10);
     auto sp2 = sp1;
     ASSERT_EQ(sp1.use_count(), 2);
 }
 
 TEST(shared_ptr_copy_constructor2, "tenno::shared_ptr::shared_ptr copy2")
 {
-    int a = 10;
-    auto sp1 = tenno::shared_ptr<int>(&a);
+    auto sp1 = tenno::shared_ptr<int>(10);
     ASSERT_EQ(sp1.use_count(), 1);
     auto b = [&test_name](tenno::shared_ptr<int> sp)
     {

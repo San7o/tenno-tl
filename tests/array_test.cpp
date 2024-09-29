@@ -84,18 +84,16 @@ TEST(array_iterator_dereference, "tenno::array::iterator::operator*()")
     ASSERT_EQ(*it, 1);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored                                                 \
-    "-Wuninitialized" // -O3 optimization does black magic
 TEST(array_iterator_end, "tenno::array.end()")
 {
     auto arr = tenno::array<int, 3>{1, 2, 3};
-    auto it = arr.end();
-    ASSERT_NE(*it, 1);
-    ASSERT_NE(*it, 2);
-    ASSERT_NE(*it, 3);
+    auto begin = arr.begin();
+    auto end = arr.end();
+    ASSERT_NE(begin, end);
+    ASSERT_NE(++begin, end);
+    ASSERT_NE(++begin, end);
+    ASSERT_EQ(++begin, end);
 }
-#pragma GCC diagnostic pop
 
 TEST(array_iterator_increment, "tenno::array::iterator::operator++()")
 {

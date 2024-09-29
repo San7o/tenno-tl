@@ -41,6 +41,7 @@
             libz.dev                # compression
             llvmPackages.libcxxClang
             stdenv.cc.cc.lib
+            tracy                   # profiler
 
             # need those for numpy
             glib
