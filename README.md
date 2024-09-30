@@ -30,11 +30,12 @@ improving on security and parallelism. You can expect all the functionalities to
 - [tenno::make_shared\<T>](./include/tenno/memory.hpp)
 - [tenno::allocate_shared](./include/tenno/memory) (TODO: array specialization)
 - [tenno::unique_ptr](./include/tenno/unique_ptr.hpp) (TODO: array specialization)
-- [tenno::make_unique](./include/tenno/memory-hpp)
+- [tenno::make_unique](./include/tenno/memory.hpp)
+- [tenno::jthread](./include/tenno/thread.hpp))
 - tenno::weak_ptr: TODO
 - tenno::allocator: TODO
 - tenno::vector: TODO
-- theads, jthreads and thread pool: TODO
+- thread pool: TODO
 
 ## Testing
 
