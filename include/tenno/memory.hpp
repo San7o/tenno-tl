@@ -62,11 +62,27 @@ make_shared(tenno::size n) noexcept
 }
 */
 
+/**
+ * @brief Default initialize a shared pointer
+ *
+ * @tparam T The type of the object to create
+ * @return shared_ptr<T> The shared pointer to the object
+ */
 template <class T> shared_ptr<T> make_shared() noexcept
 {
     return tenno::shared_ptr<T>(new T());
 }
 
+/**
+ * @brief Create a shared pointer with the given arguments and allocator
+ *
+ * @tparam T The type of the object to create
+ * @tparam Alloc The type of the allocator to use
+ * @tparam Args The type of the arguments to pass to the constructor
+ * @param alloc The allocator to use
+ * @param args The arguments to pass to the constructor
+ * @return shared_ptr<T> The shared pointer to the object
+ */
 template <class T, class Alloc, class... Args>
 shared_ptr<T> allocate_shared(Alloc &alloc, Args &&...args) noexcept
 {
@@ -75,6 +91,14 @@ shared_ptr<T> allocate_shared(Alloc &alloc, Args &&...args) noexcept
     return tenno::shared_ptr<T>(t);
 }
 
+/**
+ * @brief Default initialize a shared pointer with the given allocator
+ *
+ * @tparam T The type of the object to create
+ * @tparam Alloc The type of the allocator to use
+ * @param alloc The allocator to use
+ * @return shared_ptr<T> The shared pointer to the object
+ */
 template <class T, class Alloc>
 shared_ptr<T> allocate_shared(Alloc &alloc) noexcept
 {
@@ -83,6 +107,15 @@ shared_ptr<T> allocate_shared(Alloc &alloc) noexcept
     return tenno::shared_ptr<T>(t);
 }
 
+/**
+ * @brief Create a unique pointer with the given arguments
+ *
+ * @tparam T The type of the object to create
+ * @tparam Args The type of the arguments to pass to the constructor
+ * @param args The arguments to pass to the constructor
+ * @return unique_ptr<T> The unique pointer to the object
+ * @note The object must accept variadic arguments in the constructor
+ */
 template <class T, class... Args>
 constexpr unique_ptr<T> make_unique(Args &&...args)
 {

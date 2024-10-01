@@ -90,6 +90,11 @@ template <typename T> class shared_ptr
     {
     }
 
+    /**
+     * @brief Construct a new shared pointer object
+     *
+     * @param ptr The object to point to
+     */
     shared_ptr(T *ptr)
     {
         auto *cb = new control_block();
@@ -102,6 +107,12 @@ template <typename T> class shared_ptr
         this->_control_block = cb;
     }
 
+    /**
+     * @brief Construct a new shared pointer object
+     *
+     * @param ptr The object to point to
+     * @param deleter The deleter to use to delete the object
+     */
     shared_ptr(T *ptr, std::default_delete<T> deleter)
     {
         auto *cb = new control_block();
@@ -114,6 +125,13 @@ template <typename T> class shared_ptr
         this->_control_block = cb;
     }
 
+    /**
+     * @brief Construct a new shared pointer object
+     *
+     * @param ptr The object to point to
+     * @param deleter The deleter to use to delete the object
+     * @param allocator The allocator to use to allocate the control block
+     */
     shared_ptr(T *ptr, std::default_delete<T> deleter,
                std::allocator<control_block> alloc)
     {

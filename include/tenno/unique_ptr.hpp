@@ -45,22 +45,38 @@ template <class T, class Deleter = std::default_delete<T>> class unique_ptr
     using element_type = T;
     using deleter_type = Deleter;
 
+    /**
+     * @brief Construct a new empty unique_ptr object
+     */
     constexpr unique_ptr() : _value(nullptr)
     {
     }
 
+    /**
+     * @brief Construct a new unique_ptr object with the given pointer
+     *
+     * @param ptr The pointer to the object
+     */
     constexpr unique_ptr(T *ptr, Deleter deleter = std::default_delete<T>())
         : _value(ptr), _deleter(deleter)
     {
     }
 
     constexpr unique_ptr(const unique_ptr &other) = delete;
+    /**
+     * @brief Construct a new unique_ptr object by moving the other object
+     *
+     * @param other The other unique_ptr object to move
+     */
     constexpr unique_ptr(unique_ptr &&other) noexcept
     {
         this->reset(other.release());
         this->_deleter = other.get_deleter();
     }
 
+    /**
+     * @brief Destroy the unique_ptr object
+     */
     constexpr ~unique_ptr()
     {
         if (this->_value != nullptr)
@@ -68,6 +84,12 @@ template <class T, class Deleter = std::default_delete<T>> class unique_ptr
     }
 
     constexpr unique_ptr &operator=(const unique_ptr &other) = delete;
+    /**
+     * @brief Move the other unique_ptr object into this one
+     *
+     * @param other The other unique_ptr object to move
+     * @return unique_ptr& The reference to this object
+     */
     constexpr unique_ptr &operator=(unique_ptr &&other) noexcept
     {
         this->reset(other.release());
@@ -75,6 +97,11 @@ template <class T, class Deleter = std::default_delete<T>> class unique_ptr
         return *this;
     }
 
+    /**
+     * @brief Release the pointer from the unique_ptr object
+     *
+     * @return pointer The pointer to the object
+     */
     constexpr pointer release() noexcept
     {
         if (!this->_value)
@@ -85,6 +112,11 @@ template <class T, class Deleter = std::default_delete<T>> class unique_ptr
         return ptr;
     }
 
+    /**
+     * @brief Reset the pointer to the given value
+     *
+     * @param ptr The pointer to the object
+     */
     constexpr void reset(pointer ptr = pointer()) noexcept
     {
         if (this->_value)
@@ -92,6 +124,11 @@ template <class T, class Deleter = std::default_delete<T>> class unique_ptr
         this->_value = ptr;
     }
 
+    /**
+     * @brief Swap the unique_ptr object with the other one
+     *
+     * @param other The other unique_ptr object to swap with
+     */
     void swap(unique_ptr &other) noexcept
     {
         T tmp_val = *other.get();
@@ -102,26 +139,48 @@ template <class T, class Deleter = std::default_delete<T>> class unique_ptr
         this->_deleter = del_tmp;
     }
 
+    /**
+     * @brief Get the pointer to the object
+     *
+     * @return pointer The pointer to the object
+     */
     constexpr pointer get() const noexcept
     {
         return this->_value;
     }
 
+    /**
+     * @brief Get the deleter of the object
+     *
+     * @return deleter_type The deleter of the object
+     */
     deleter_type &get_deleter()
     {
         return this->_deleter;
     }
 
+    /**
+     * @brief Boolean conversion operator
+     * @return true if the pointer is not null, false otherwise
+     */
     explicit operator bool() const noexcept
     {
         return this->_value != nullptr;
     }
 
+    /**
+     * @brief Dereference operator
+     * @return T& The reference to the object
+     */
     T &operator*() noexcept
     {
         return *this->_value;
     }
 
+    /**
+     * @brief Dereference operator
+     * @return T& The reference to the object
+     */
     T &operator->() noexcept
     {
         return this->_value;
