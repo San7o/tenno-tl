@@ -49,12 +49,14 @@ struct deleter
 };
 */
 
+template <class T> class weak_ptr;
+
 /**
  * @brief A shared pointer
  *
  * @tparam T The type of the object to point to
  */
-template <typename T> class shared_ptr
+template <class T> class shared_ptr
 {
   public:
     /**
@@ -77,11 +79,13 @@ template <typename T> class shared_ptr
         void deallocate()
         {
             this->deleter(this->object);
-            this->allocator.deallocate(this, 1);
+            if (this->num_weak_ptrs == 0)
+                this->allocator.deallocate(this, 1);
         }
     };
 
     friend control_block;
+    friend class tenno::weak_ptr<T>;
 
     /**
      * @brief Default constructor
@@ -459,6 +463,8 @@ template <typename T> class shared_ptr
      */
     bool owner_equal(const shared_ptr &other) const noexcept
     {
+        if (!this->_element && !other._element) return true;
+        if (!this->_element || !other._element) return false;
         return *this->_element == *other._element;
     }
 
@@ -470,6 +476,221 @@ template <typename T> class shared_ptr
 #endif
     T *_element;
     control_block *_control_block;
+};
+
+template <typename T>
+class weak_ptr
+{
+  public:
+    using element_type = T;
+
+    constexpr weak_ptr() noexcept
+    {
+        this->_control_block = nullptr;
+        this->_ptr = nullptr;
+    }
+
+    weak_ptr( const weak_ptr& r ) noexcept
+    {
+        if (!r._control_block)
+        {
+            this->_control_block = nullptr;
+            this->_ptr = nullptr;
+            return;
+        }
+        this->_control_block = r._control_block;
+        this->_ptr = r._ptr;
+        this->_control_block->num_weak_ptrs++;
+    }
+    
+    weak_ptr( weak_ptr&& r ) noexcept
+    {
+        if (!r._control_block)
+        {
+            this->_control_block = nullptr;
+            this->_ptr = nullptr;
+            return;
+        }
+        this->_control_block = r._control_block;
+        this->_ptr = r._ptr;
+        r._control_block = nullptr;
+        r._ptr = nullptr;
+    }
+
+    weak_ptr( const tenno::shared_ptr<T>& r ) noexcept
+    {
+        if (!r._control_block)
+        {
+            this->_control_block = nullptr;
+            this->_ptr = nullptr;
+            return;
+        }
+        tenno::lock_guard<tenno::mutex> lock(r._control_block->cb_mutex);
+        this->_ptr = r._element;
+        this->_control_block = r._control_block;
+        this->_control_block->num_weak_ptrs++;
+    }
+
+    ~weak_ptr()
+    {
+        if (this->_control_block)
+        {
+            {
+                tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
+                this->_control_block->num_weak_ptrs--;
+            }
+            if (this->_control_block->num_ptrs == 0 && this->_control_block->num_weak_ptrs == 0)
+                this->_control_block->deallocate();
+        }
+    }
+
+    weak_ptr& operator=( const weak_ptr& r ) noexcept
+    {
+        if (this->_control_block)
+        {
+            {
+                tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
+                this->_control_block->num_weak_ptrs--;
+            }
+            if (this->_control_block->num_ptrs == 0 && this->_control_block->num_weak_ptrs == 0)
+                this->_control_block->deallocate();
+        }
+        if (!r._control_block)
+        {
+            this->_control_block = nullptr;
+            this->_ptr = nullptr;
+            return *this;
+        }
+        tenno::lock_guard<tenno::mutex> lock(r._control_block->cb_mutex);
+        this->_control_block = r._control_block;
+        this->_ptr = r._ptr;
+        this->_control_block->num_weak_ptrs++;
+        return *this;
+    }
+
+    weak_ptr& operator=( const shared_ptr<T>& r ) noexcept
+    {
+        if (this->_control_block)
+        {
+            {
+                tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
+                this->_control_block->num_weak_ptrs--;
+            }
+            if (this->_control_block->num_ptrs == 0 && this->_control_block->num_weak_ptrs == 0)
+                this->_control_block->deallocate();
+        }
+        if (!r._control_block)
+        {
+            this->_control_block = nullptr;
+            this->_ptr = nullptr;
+            return *this;
+        }
+        tenno::lock_guard<tenno::mutex> lock(r._control_block->cb_mutex);
+        this->_ptr = r._element;
+        this->_control_block = r._control_block;
+        this->_control_block->num_weak_ptrs++;
+        return *this;
+    }
+
+    weak_ptr& operator=( weak_ptr&& r ) noexcept
+    {
+        if (this->_control_block)
+        {
+            {
+                tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
+                this->_control_block->num_weak_ptrs--;
+            }
+            if (this->_control_block->num_ptrs == 0 && this->_control_block->num_weak_ptrs == 0)
+                this->_control_block->deallocate();
+        }
+        if (!r._control_block)
+        {
+            this->_control_block = nullptr;
+            this->_ptr = nullptr;
+            return *this;
+        }
+        this->_control_block = r._control_block;
+        this->_ptr = r._ptr;
+        r._control_block = nullptr;
+        r._ptr = nullptr;
+        return *this;
+    }
+
+    void reset() noexcept
+    {
+        if (this->_control_block)
+            this->_control_block->num_weak_ptrs--;
+        this->_control_block = nullptr;
+        this->_ptr = nullptr;
+    }
+
+    void swap( weak_ptr& r ) noexcept
+    {
+        auto cb_tmp = this->_control_block;
+        auto ptr_tmp = this->_ptr;
+        this->_control_block = r._control_block;
+        this->_ptr = r._ptr;
+        r._control_block = cb_tmp;
+        r._ptr = ptr_tmp;
+    }
+
+    long use_count() const noexcept
+    {
+        if (this->_control_block)
+            return this->_control_block->num_ptrs;
+        return 0;
+    }
+
+    bool expired() const noexcept
+    {
+        if (!this->_control_block) return true;
+        return this->_control_block->num_ptrs == 0;
+    }
+
+    tenno::shared_ptr<T> lock() const noexcept
+    {
+        if (this->_control_block->num_ptrs == 0)
+            return tenno::shared_ptr<T>();
+        auto sp = tenno::shared_ptr<T>(this->_ptr);
+        sp._control_block = this->_control_block;
+        sp._control_block->num_ptrs++;
+        return sp;
+    }
+
+    template< class Y >
+    bool owner_before( const weak_ptr<Y>& other ) const noexcept
+    {
+        if (!this->_ptr || !other._ptr) return false;
+        if (this->_ptr && !other._ptr) return true;
+        if (!this->_ptr && other._ptr) return false;
+        return *this->_ptr < *other._ptr;
+    }
+		
+    template< class Y >
+    bool owner_before( const tenno::shared_ptr<Y>& other ) const noexcept
+    {
+        return *this->_ptr < *other._element;
+    }
+
+    template< class Y >
+    bool owner_equal( const tenno::shared_ptr<Y>& other ) const noexcept
+    {
+        if (!this->_ptr && !other._element) return true;
+        if (!this->_ptr || !other._element) return false;
+        return *this->_ptr == *other._element;
+    }
+
+    // TODO
+    /*
+    tenno::size_t owner_hash() const noexcept
+    {
+        return std::hash<element_type>()(this->_ptr);
+    }
+    */
+
+  private:
+    element_type *_ptr;
+    tenno::shared_ptr<T>::control_block *_control_block;
 };
 
 } // namespace tenno

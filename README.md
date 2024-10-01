@@ -32,7 +32,7 @@ improving on security and parallelism. You can expect all the functionalities to
 - [tenno::unique_ptr](./include/tenno/unique_ptr.hpp) (TODO: array specialization)
 - [tenno::make_unique](./include/tenno/memory.hpp)
 - [tenno::jthread](./include/tenno/thread.hpp)
-- tenno::weak_ptr: TODO
+- [tenno::weak_ptr](./include/tenno/shared_ptr.hpp)
 - tenno::allocator: TODO
 - tenno::vector: TODO
 - thread pool: TODO
