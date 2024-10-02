@@ -49,13 +49,13 @@ class jthread
     std::thread::id id;
 
     jthread() noexcept = default;
-    jthread( const jthread& ) = delete;
+    jthread(const jthread &) = delete;
     /**
      * @brief Construct a new jthread object by moving the other object
      *
      * @param other The other jthread object to move
      */
-    jthread([[maybe_unused]] jthread&& other ) noexcept
+    jthread(jthread &&other) noexcept
     {
         this->_inner_thread = std::move(other._inner_thread);
         this->id = this->_inner_thread.get_id();
@@ -69,13 +69,12 @@ class jthread
      * @param f The function to execute
      * @param args The arguments to pass to the function
      */
-    template< class F, class... Args >
-    explicit jthread( F&& f, Args&&... args )
+    template <class F, class... Args> explicit jthread(F &&f, Args &&...args)
     {
         this->_inner_thread = std::thread(f, args...);
         this->id = this->_inner_thread.get_id();
     }
-    
+
     /**
      * @brief Destroy the jthread object and join the thread
      */
@@ -150,7 +149,7 @@ class jthread
      *
      * @param other The other jthread object to swap with
      */
-    void swap([[maybe_unused]] tenno::jthread& other ) noexcept
+    void swap([[maybe_unused]] tenno::jthread &other) noexcept
     {
         this->_inner_thread.swap(other._inner_thread);
         this->id = this->_inner_thread.get_id();

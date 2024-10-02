@@ -25,7 +25,7 @@
  */
 
 #include <tenno/array.hpp>
-#include <tenno/shared_ptr.hpp>
+#include <tenno/memory.hpp>
 #include <tenno/utility.hpp>
 #include <valfuzz/valfuzz.hpp>
 
@@ -81,8 +81,7 @@ TEST(shared_ptr_reset3, "tenno::shared_ptr::reset 3")
 {
     auto sp = tenno::shared_ptr<int>(new int(10));
     ASSERT_EQ(*sp.get(), 10);
-    sp.reset(new int(42), std::default_delete<int>(),
-             std::allocator<tenno::shared_ptr<int>::control_block>());
+    sp.reset(new int(42), std::default_delete<int>(), std::allocator<int>());
     ASSERT_EQ(*sp.get(), 42);
 }
 
@@ -127,8 +126,13 @@ TEST(shared_ptr_array_access_operator, "tenno::shared_ptr::operator[]")
 {
     auto sp =
         tenno::shared_ptr<tenno::array<int, 5>>(new tenno::array<int, 5>{});
-    sp[0] = 42;
-    ASSERT_EQ((*sp.get())[0], 42);
+    for (int i = 0; i < 5; i++)
+    {
+        sp[i] = i;
+    }
+    ASSERT_EQ((*sp.get())[0], 0);
+    ASSERT_EQ((*sp.get())[1], 1);
+    ASSERT_EQ((*sp.get())[2], 2);
 }
 
 TEST(shared_ptr_use_count, "tenno::shared_ptr::use_count")

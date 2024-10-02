@@ -25,7 +25,7 @@
  */
 
 #include <tenno/array.hpp>
-#include <tenno/shared_ptr.hpp>
+#include <tenno/memory.hpp>
 #include <tenno/utility.hpp>
 #include <valfuzz/valfuzz.hpp>
 
@@ -35,7 +35,8 @@ TEST(weak_ptr_empty_constructor, "tenno::weak_ptr empty constructor")
     ASSERT(wp.use_count() == 0);
 }
 
-TEST(weak_ptr_constructor_from_weak_ptr, "tenno::weak_ptr constructor from weak_ptr")
+TEST(weak_ptr_constructor_from_weak_ptr,
+     "tenno::weak_ptr constructor from weak_ptr")
 {
     tenno::shared_ptr<int> sp(new int(42));
     tenno::weak_ptr<int> wp(sp);
@@ -77,7 +78,8 @@ TEST(weal_ptr_assignment_move, "tenno::weak_ptr assignment move")
     ASSERT(wp1.use_count() == 1);
 }
 
-TEST(weak_ptr_assignment_shared_ptr, "tenno::weak_ptr assignment from shared_ptr")
+TEST(weak_ptr_assignment_shared_ptr,
+     "tenno::weak_ptr assignment from shared_ptr")
 {
     tenno::shared_ptr<int> sp(new int(42));
     tenno::weak_ptr<int> wp;
@@ -124,7 +126,8 @@ TEST(weak_ptr_owner_before, "tenno::weak_ptr owner_before")
     ASSERT(wp1.owner_before(wp2));
 }
 
-TEST(weak_ptr_owner_before_shared_ptr, "tenno::weak_ptr owner_before shared_ptr")
+TEST(weak_ptr_owner_before_shared_ptr,
+     "tenno::weak_ptr owner_before shared_ptr")
 {
     tenno::shared_ptr<int> sp1(new int(42));
     tenno::shared_ptr<int> sp2(new int(43));

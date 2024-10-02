@@ -21,18 +21,18 @@ improving on security and parallelism. You can expect all the functionalities to
 - [tenno::mutex](./include/tenno/mutex.hpp)
 - [tenno::lock_guard\<T>](./include/tenno/mutex.hpp)
 - [tenno::optional\<T>](./include/tenno/optional.hpp)
-- [tenno::shared_ptr\<T>](./include/tenno/shared_ptr.hpp)
+- [tenno::shared_ptr\<T>](./include/tenno/memory.hpp) (TODO: array specialization)
 - [tenno::copy<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::for_each<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)
 - [tenno::swap\<T>](./include/tenno/algorithm.hpp)
 - [tenno::move\<T>](./include/tenno/utility.hpp)
 - [tenno::make_shared\<T>](./include/tenno/memory.hpp)
-- [tenno::allocate_shared](./include/tenno/memory) (TODO: array specialization)
-- [tenno::unique_ptr](./include/tenno/unique_ptr.hpp) (TODO: array specialization)
+- [tenno::allocate_shared](./include/tenno/memory)
+- [tenno::unique_ptr](./include/tenno/unique_ptr.hpp)
 - [tenno::make_unique](./include/tenno/memory.hpp)
 - [tenno::jthread](./include/tenno/thread.hpp)
-- [tenno::weak_ptr](./include/tenno/shared_ptr.hpp)
+- [tenno::weak_ptr](./include/tenno/memory.hpp)
 - tenno::allocator: TODO
 - tenno::vector: TODO
 - thread pool: TODO

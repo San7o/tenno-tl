@@ -35,14 +35,11 @@ TEST(make_shared, "tenno::make_shared")
     ASSERT_EQ(*sp, 5);
 }
 
-/*
 TEST(make_shared_array, "tenno::make_shared T[]")
 {
-    auto sp = tenno::make_shared<int[]>(10);
+    auto sp = tenno::make_shared<int[10]>(10);
     ASSERT_EQ(sp.use_count(), 1);
-    ASSERT_EQ((*sp)[0], 0);
 }
-*/
 
 TEST(make_shared_tenno_array, "tenno::make_shared tenno::array")
 {
@@ -73,3 +70,22 @@ TEST(allocate_shared_args, "tenno::allocate_shared with args")
     ASSERT_EQ(sp.use_count(), 1);
     ASSERT_EQ(*sp, 5);
 }
+
+TEST(make_unique, "tenno::make_unique")
+{
+    auto up = tenno::make_unique<int>(5);
+    ASSERT_EQ(*up, 5);
+}
+
+/*
+TEST(allocate_shared_array, "tenno::allocate_shared array")
+{
+    std::allocator<int> alloc;
+    auto sp = tenno::allocate_shared<int[10]>(alloc, 10);
+    for (int i = 0; i < 10; i++)
+    {
+        sp[i] = i;
+    }
+    ASSERT_EQ(sp.use_count(), 1);
+}
+*/
