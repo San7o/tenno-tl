@@ -24,7 +24,7 @@
  *
  */
 
-#include <tenno/unique_ptr.hpp>
+#include <tenno/memory.hpp>
 #include <tenno/utility.hpp>
 #include <valfuzz/valfuzz.hpp>
 

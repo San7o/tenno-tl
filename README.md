@@ -27,13 +27,14 @@ improving on security and parallelism. You can expect all the functionalities to
 - [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)
 - [tenno::swap\<T>](./include/tenno/algorithm.hpp)
 - [tenno::move\<T>](./include/tenno/utility.hpp)
-- [tenno::make_shared\<T>](./include/tenno/memory.hpp)
-- [tenno::allocate_shared](./include/tenno/memory)
-- [tenno::unique_ptr](./include/tenno/unique_ptr.hpp)
-- [tenno::make_unique](./include/tenno/memory.hpp)
+- [tenno::make_shared\<T, Deleter, Alloc>](./include/tenno/memory.hpp)
+- [tenno::allocate_shared\<T, Alloc>](./include/tenno/memory)
+- [tenno::unique_ptr\<T>](./include/tenno/unique_ptr.hpp)
+- [tenno::make_unique<\T>](./include/tenno/memory.hpp)
 - [tenno::jthread](./include/tenno/thread.hpp)
-- [tenno::weak_ptr](./include/tenno/memory.hpp)
-- tenno::allocator: TODO
+- [tenno::weak_ptr\<T>](./include/tenno/memory.hpp)
+- [tenno::allocator\<T>](./include/tenno/memory.hpp)
+- [tenno::default_delete\<T>](./include/tenno/memory.hpp)
 - tenno::vector: TODO
 - thread pool: TODO
 

@@ -26,9 +26,10 @@
 
 #pragma once
 
-#include <memory> // std::allocator and std::default_delete
 #include <tenno/mutex.hpp>
-#include <tenno/unique_ptr.hpp>
+#include <tenno/types.hpp>
+#include <tenno/utility.hpp>
+#include <type_traits>
 
 namespace tenno
 {
@@ -36,16 +37,61 @@ namespace tenno
 /*
 // Example of a custom allocator
 template <class T>
-struct custom_allocator {
+struct custom_allocator
+{
   using value_type = T;
   custom_allocator() noexcept;
   template <class U> custom_allocator (const custom_allocator<U>&) noexcept;
-  T* allocate (tenno::size_t n);
-  void deallocate (T* p, tenno::size_t n);
+  T* allocate (tenno::size n);
+  void deallocate (T* p, tenno::size n);
   constexpr bool operator== (const custom_allocator&) const noexcept;
   constexpr bool operator!= (const custom_allocator&) const noexcept;
 };
 */
+
+template <class T>
+struct allocator
+{
+    using value_type = T;
+    allocator() noexcept = default;
+    template <class U> allocator(const allocator<U> &) noexcept
+    {
+    }
+
+    T *allocate(tenno::size n)
+    {
+        return (T *) ::operator new(n * sizeof(T));
+    }
+
+    void deallocate(T *p, tenno::size n)
+    {
+        ::operator delete(p, n * sizeof(T));
+    }
+
+    constexpr bool operator==(const allocator &) const noexcept
+    {
+        return true;
+    }
+
+    constexpr bool operator!=(const allocator &) const noexcept
+    {
+        return false;
+    }
+};
+
+template <typename T>
+struct default_delete
+{
+    default_delete() noexcept = default;
+    void operator()(T *ptr) const noexcept
+    {
+        delete ptr;
+    }
+    template <typename U> void operator()(U *ptr) const noexcept
+    {
+        delete ptr;
+    }
+};
 
 template <class T> class weak_ptr;
 
@@ -54,8 +100,8 @@ template <class T> class weak_ptr;
  *
  * @tparam T The type of the object to point to
  */
-template <class T, class Deleter = std::default_delete<T>,
-          class Alloc = std::allocator<T>>
+template <class T, class Deleter = tenno::default_delete<T>,
+          class Alloc = tenno::allocator<T>>
 class shared_ptr
 {
   public:
@@ -108,14 +154,14 @@ class shared_ptr
      */
     shared_ptr(T *ptr)
     {
-        auto *cb = (control_block *) std::allocator<T>().allocate(
+        auto *cb = (control_block *) tenno::allocator<T>().allocate(
             sizeof(control_block) / sizeof(T)
             + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
         cb->object = ptr;
         cb->num_ptrs = 1;
         cb->num_weak_ptrs = 0;
-        cb->allocator = std::allocator<T>();
-        cb->deleter = std::default_delete<T>();
+        cb->allocator = tenno::allocator<T>();
+        cb->deleter = tenno::default_delete<T>();
         cb->cb_mutex = tenno::mutex();
         this->_element = cb->object;
         this->_control_block = cb;
@@ -129,13 +175,13 @@ class shared_ptr
      */
     shared_ptr(T *ptr, Deleter deleter)
     {
-        auto *cb = (control_block *) std::allocator<T>().allocate(
+        auto *cb = (control_block *) tenno::allocator<T>().allocate(
             sizeof(control_block) / sizeof(T)
             + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
         cb->object = ptr;
         cb->num_ptrs = 1;
         cb->num_weak_ptrs = 0;
-        cb->allocator = std::allocator<T>();
+        cb->allocator = tenno::allocator<T>();
         cb->deleter = deleter;
         cb->cb_mutex = tenno::mutex();
         this->_element = cb->object;
@@ -296,14 +342,14 @@ class shared_ptr
             this->_control_block->deallocate();
         }
 
-        auto *cb = (control_block *) std::allocator<T>().allocate(
+        auto *cb = (control_block *) tenno::allocator<T>().allocate(
             sizeof(control_block) / sizeof(T)
             + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
         cb->object = ptr;
         cb->num_ptrs = 1;
         cb->num_weak_ptrs = 0;
-        cb->allocator = std::allocator<T>();
-        cb->deleter = std::default_delete<T>();
+        cb->allocator = tenno::allocator<T>();
+        cb->deleter = tenno::default_delete<T>();
         cb->cb_mutex = tenno::mutex();
         this->_element = cb->object;
         this->_control_block = cb;
@@ -331,13 +377,13 @@ class shared_ptr
             this->_control_block->deallocate();
         }
 
-        auto *cb = (control_block *) std::allocator<T>().allocate(
+        auto *cb = (control_block *) tenno::allocator<T>().allocate(
             sizeof(control_block) / sizeof(T)
             + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
         cb->object = ptr;
         cb->num_ptrs = 1;
         cb->num_weak_ptrs = 0;
-        cb->allocator = std::allocator<T>();
+        cb->allocator = tenno::allocator<T>();
         cb->deleter = deleter;
         cb->cb_mutex = tenno::mutex();
         this->_element = cb->object;
@@ -822,6 +868,164 @@ template <typename T> class weak_ptr
 };
 
 /**
+ * @brief A shared pointer
+ *
+ * @tparam T The type of the object to point to
+ */
+template <class T, class Deleter = tenno::default_delete<T>> class unique_ptr
+{
+  public:
+    using pointer = T *;
+    using element_type = T;
+    using deleter_type = Deleter;
+
+    /**
+     * @brief Construct a new empty unique_ptr object
+     */
+    constexpr unique_ptr() : _value(nullptr)
+    {
+    }
+
+    /**
+     * @brief Construct a new unique_ptr object with the given pointer
+     *
+     * @param ptr The pointer to the object
+     */
+    constexpr unique_ptr(T *ptr, Deleter deleter = tenno::default_delete<T>())
+        : _value(ptr), _deleter(deleter)
+    {
+    }
+
+    constexpr unique_ptr(const unique_ptr &other) = delete;
+    /**
+     * @brief Construct a new unique_ptr object by moving the other object
+     *
+     * @param other The other unique_ptr object to move
+     */
+    constexpr unique_ptr(unique_ptr &&other) noexcept
+    {
+        this->reset(other.release());
+        this->_deleter = other.get_deleter();
+    }
+
+    /**
+     * @brief Destroy the unique_ptr object
+     */
+    constexpr ~unique_ptr()
+    {
+        if (this->_value != nullptr)
+            this->_deleter(this->_value);
+    }
+
+    constexpr unique_ptr &operator=(const unique_ptr &other) = delete;
+    /**
+     * @brief Move the other unique_ptr object into this one
+     *
+     * @param other The other unique_ptr object to move
+     * @return unique_ptr& The reference to this object
+     */
+    constexpr unique_ptr &operator=(unique_ptr &&other) noexcept
+    {
+        this->reset(other.release());
+        this->_deleter = other.get_deleter();
+        return *this;
+    }
+
+    /**
+     * @brief Release the pointer from the unique_ptr object
+     *
+     * @return pointer The pointer to the object
+     */
+    constexpr pointer release() noexcept
+    {
+        if (!this->_value)
+            return nullptr;
+
+        pointer ptr = _value;
+        this->_value = nullptr;
+        return ptr;
+    }
+
+    /**
+     * @brief Reset the pointer to the given value
+     *
+     * @param ptr The pointer to the object
+     */
+    constexpr void reset(pointer ptr = pointer()) noexcept
+    {
+        if (this->_value)
+            this->_deleter(this->_value);
+        this->_value = ptr;
+    }
+
+    /**
+     * @brief Swap the unique_ptr object with the other one
+     *
+     * @param other The other unique_ptr object to swap with
+     */
+    void swap(unique_ptr &other) noexcept
+    {
+        T tmp_val = *other.get();
+        Deleter del_tmp = other.get_deleter();
+        *other.get() = *this->get();
+        other.get_deleter() = this->get_deleter();
+        *this->_value = tmp_val;
+        this->_deleter = del_tmp;
+    }
+
+    /**
+     * @brief Get the pointer to the object
+     *
+     * @return pointer The pointer to the object
+     */
+    constexpr pointer get() const noexcept
+    {
+        return this->_value;
+    }
+
+    /**
+     * @brief Get the deleter of the object
+     *
+     * @return deleter_type The deleter of the object
+     */
+    deleter_type &get_deleter()
+    {
+        return this->_deleter;
+    }
+
+    /**
+     * @brief Boolean conversion operator
+     * @return true if the pointer is not null, false otherwise
+     */
+    explicit operator bool() const noexcept
+    {
+        return this->_value != nullptr;
+    }
+
+    /**
+     * @brief Dereference operator
+     * @return T& The reference to the object
+     */
+    T &operator*() noexcept
+    {
+        return *this->_value;
+    }
+
+    /**
+     * @brief Dereference operator
+     * @return T& The reference to the object
+     */
+    T &operator->() noexcept
+    {
+        return this->_value;
+    }
+
+  private:
+    pointer _value = nullptr;
+    deleter_type _deleter;
+};
+
+/**
  * @brief Create a shared pointer with the given arguments
  *
  * @tparam T The type of the object to create
@@ -841,13 +1045,13 @@ make_shared(Args &&...args) noexcept
     using cb_t = typename tenno::shared_ptr<T>::control_block;
     tenno::shared_ptr<T> sp;
     T *t = new T(args...);
-    cb_t *cb = (cb_t *) std::allocator<T>().allocate(
+    cb_t *cb = (cb_t *) tenno::allocator<T>().allocate(
         sizeof(cb_t) / sizeof(T) + (sizeof(cb_t) % sizeof(T) != 0 ? 1 : 0));
     cb->object = t;
     cb->num_ptrs = 1;
     cb->num_weak_ptrs = 0;
-    cb->allocator = std::allocator<T>();
-    cb->deleter = std::default_delete<T>();
+    cb->allocator = tenno::allocator<T>();
+    cb->deleter = tenno::default_delete<T>();
     cb->cb_mutex = tenno::mutex();
     sp._element = t;
     sp._control_block = cb;
@@ -861,13 +1065,13 @@ make_shared(tenno::size n) noexcept
     using cb_t = typename tenno::shared_ptr<T>::control_block;
     tenno::shared_ptr<T> sp;
     T *t = new T[n];
-    cb_t *cb = (cb_t *) std::allocator<T>().allocate(
+    cb_t *cb = (cb_t *) tenno::allocator<T>().allocate(
         sizeof(cb_t) / sizeof(T) + (sizeof(cb_t) % sizeof(T) != 0 ? 1 : 0));
     cb->object = t;
     cb->num_ptrs = 1;
     cb->num_weak_ptrs = 0;
-    cb->allocator = std::allocator<T>();
-    cb->deleter = std::default_delete<T>();
+    cb->allocator = tenno::allocator<T>();
+    cb->deleter = tenno::default_delete<T>();
     cb->cb_mutex = tenno::mutex();
     sp._element = t;
     sp._control_block = cb;
@@ -885,13 +1089,13 @@ template <class T> shared_ptr<T> make_shared() noexcept
     using cb_t = typename tenno::shared_ptr<T>::control_block;
     tenno::shared_ptr<T> sp;
     T *t = new T();
-    cb_t *cb = (cb_t *) std::allocator<T>().allocate(
+    cb_t *cb = (cb_t *) tenno::allocator<T>().allocate(
         sizeof(cb_t) / sizeof(T) + (sizeof(cb_t) % sizeof(T) != 0 ? 1 : 0));
     cb->object = t;
     cb->num_ptrs = 1;
     cb->num_weak_ptrs = 0;
-    cb->allocator = std::allocator<T>();
-    cb->deleter = std::default_delete<T>();
+    cb->allocator = tenno::allocator<T>();
+    cb->deleter = tenno::default_delete<T>();
     cb->cb_mutex = tenno::mutex();
     sp._element = t;
     sp._control_block = cb;
@@ -942,15 +1146,15 @@ allocate_shared(Alloc &alloc, tenno::size n) noexcept
 
     T *t = (T*) alloc.allocate(n);
     auto *cb =
-        new tenno::shared_ptr<T, std::default_delete<elem>>::control_block();
+        new tenno::shared_ptr<T, tenno::default_delete<elem>>::control_block();
     cb->object = t;
     cb->num_ptrs = 1;
     cb->num_weak_ptrs = 0;
     cb->allocator = alloc;
-    cb->deleter = std::default_delete<elem>();
+    cb->deleter = tenno::default_delete<elem>();
     cb->cb_mutex = tenno::mutex();
 
-    auto sp = tenno::shared_ptr<T, std::default_delete<elem>>();
+    auto sp = tenno::shared_ptr<T, tenno::default_delete<elem>>();
     sp._element = t;
     sp._control_block = cb;
     return tenno::move(sp);
