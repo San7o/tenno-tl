@@ -35,7 +35,7 @@ improving on security and parallelism. You can expect all the functionalities to
 - [tenno::weak_ptr\<T>](./include/tenno/memory.hpp)
 - [tenno::allocator\<T>](./include/tenno/memory.hpp)
 - [tenno::default_delete\<T>](./include/tenno/memory.hpp)
-- tenno::vector: TODO
+- [tenno::vector\<T>](./include/tenno/vector.hpp)
 - thread pool: TODO
 
 ## Testing

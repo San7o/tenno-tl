@@ -53,6 +53,12 @@ template <class T>
 struct allocator
 {
     using value_type = T;
+    using pointer = T*;
+    using const_pointer = const T*;
+    using reference = T&;
+    using const_referemce = const T&;
+    using size_type = tenno::size;
+
     allocator() noexcept = default;
     template <class U> allocator(const allocator<U> &) noexcept
     {
