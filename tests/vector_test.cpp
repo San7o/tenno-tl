@@ -24,9 +24,10 @@
  *
  */
 
-#include <vector>
 #include <tenno/vector.hpp>
+#include <tenno/ranges.hpp>
 #include <valfuzz/valfuzz.hpp>
+#include <vector>
 
 TEST(vector_empty_constructor, "vector empty constructor")
 {
@@ -46,7 +47,8 @@ TEST(vector_constructor_count_value, "vector constructor with count and value")
     }
 }
 
-TEST(vector_constructor_count_value_allocator, "vector constructor with count, value and allocator")
+TEST(vector_constructor_count_value_allocator,
+     "vector constructor with count, value and allocator")
 {
     tenno::allocator<int> alloc;
     tenno::vector<int> v(5, 10, alloc);
@@ -65,7 +67,8 @@ TEST(vector_constructor_count, "vector constructor with count")
     ASSERT_EQ(v.capacity(), 5);
 }
 
-TEST(vector_constructor_count_allocator, "vector constructor with count and allocator")
+TEST(vector_constructor_count_allocator,
+     "vector constructor with count and allocator")
 {
     tenno::allocator<int> alloc;
     tenno::vector<int> v(5, alloc);
@@ -85,7 +88,8 @@ TEST(vector_constructor_copy, "vector constructor with copy")
     }
 }
 
-TEST(vector_constructor_copy_allocator, "vector constructor with copy and allocator")
+TEST(vector_constructor_copy_allocator,
+     "vector constructor with copy and allocator")
 {
     tenno::allocator<int> alloc;
     tenno::vector<int> v1(5, 10);
@@ -112,7 +116,8 @@ TEST(vector_constructor_move, "vector constructor with move")
     ASSERT_EQ(v1.capacity(), 5);
 }
 
-TEST(vector_constructor_move_allocator, "vector constructor with move and allocator")
+TEST(vector_constructor_move_allocator,
+     "vector constructor with move and allocator")
 {
     tenno::allocator<int> alloc;
     tenno::vector<int> v1(5, 10);
@@ -127,7 +132,8 @@ TEST(vector_constructor_move_allocator, "vector constructor with move and alloca
     ASSERT_EQ(v1.capacity(), 5);
 }
 
-TEST(vector_constructor_initializer_list, "vector constructor with initializer list")
+TEST(vector_constructor_initializer_list,
+     "vector constructor with initializer list")
 {
     tenno::vector<int> v = {1, 2, 3, 4, 5};
     ASSERT_EQ(v.size(), 5);
@@ -138,7 +144,8 @@ TEST(vector_constructor_initializer_list, "vector constructor with initializer l
     }
 }
 
-TEST(vector_constructor_initializer_list_allocator, "vector constructor with initializer list and allocator")
+TEST(vector_constructor_initializer_list_allocator,
+     "vector constructor with initializer list and allocator")
 {
     tenno::allocator<int> alloc;
     tenno::vector<int> v = {{1, 2, 3, 4, 5}, alloc};
@@ -148,6 +155,116 @@ TEST(vector_constructor_initializer_list_allocator, "vector constructor with ini
     {
         ASSERT_EQ(v[i], i + 1);
     }
+}
+
+TEST(vector_copy_assignment, "vector copy assignment")
+{
+    tenno::vector<int> v1(5, 10);
+    tenno::vector<int> v2;
+    v2 = v1;
+    ASSERT_EQ(v2.size(), 5);
+    ASSERT_EQ(v2.capacity(), 5);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v2[i], 10);
+    }
+}
+
+TEST(vector_move_assignment, "vector move assignment")
+{
+    tenno::vector<int> v1(5, 10);
+    tenno::vector<int> v2;
+    v2 = std::move(v1);
+    ASSERT_EQ(v2.size(), 5);
+    ASSERT_EQ(v2.capacity(), 5);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v2[i], 10);
+    }
+    ASSERT_EQ(v1.size(), 0);
+    ASSERT_EQ(v1.capacity(), 0);
+}
+
+TEST(vector_initializer_list_assignment, "vector initializer list assignment")
+{
+    tenno::vector<int> v;
+    v = {1, 2, 3, 4, 5};
+    ASSERT_EQ(v.size(), 5);
+    ASSERT_EQ(v.capacity(), 5);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v[i], i + 1);
+    }
+}
+
+TEST(vector_assign, "vector assign")
+{
+    tenno::vector<int> v(5, 10);
+    v.assign(3, 20);
+    ASSERT_EQ(v.size(), 5);
+    ASSERT_EQ(v.capacity(), 5);
+    for (int i = 0; i < 3; i++)
+    {
+        ASSERT_EQ(v[i], 20);
+    }
+}
+
+/*
+TEST(vector_assign_iterator, "vector assign iterator")
+{
+    tenno::vector<int> v(5, 10);
+    std::vector<int> v2 = {1, 2, 3, 4, 5};
+    v.assign(v2.begin(), v2.end());
+    ASSERT_EQ(v.size(), 5);
+    ASSERT_EQ(v.capacity(), 5);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v[i], i + 1);
+    }
+}
+*/
+
+TEST(vector_assign_initializer_list, "vector assign initializer list")
+{
+    tenno::vector<int> v(5, 10);
+    v.assign({1, 2, 3, 4, 5});
+    ASSERT_EQ(v.size(), 5);
+    ASSERT_EQ(v.capacity(), 5);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v[i], i + 1);
+    }
+}
+
+TEST(vector_assign_range, "vector assign range")
+{
+    tenno::vector<int> v(2, 10);
+    tenno::range<int> r(1, 6);
+    v.assign_range(r);
+    ASSERT_EQ(v.size(), 5);
+    ASSERT_EQ(v.capacity(), 5);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v[i], i + 1);
+    }
+}
+
+TEST(vector_get_allocator, "vector get allocator")
+{
+    tenno::vector<int> v;
+    tenno::allocator<int> alloc = v.get_allocator();
+    ASSERT_EQ(alloc, tenno::allocator<int>());
+}
+
+TEST(vector_at, "vector at")
+{
+    tenno::vector<int> v(5, 10);
+    ASSERT_EQ(*v.at(0).value(), 10);
+    ASSERT_EQ(*v.at(1).value(), 10);
+    ASSERT_EQ(*v.at(2).value(), 10);
+    ASSERT_EQ(*v.at(3).value(), 10);
+    ASSERT_EQ(*v.at(4).value(), 10);
+    ASSERT_EQ(v.at(5).has_value(), false);
 }
 
 TEST(vector_size, "vector size")

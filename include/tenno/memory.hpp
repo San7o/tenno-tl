@@ -49,14 +49,13 @@ struct custom_allocator
 };
 */
 
-template <class T>
-struct allocator
+template <class T> struct allocator
 {
     using value_type = T;
-    using pointer = T*;
-    using const_pointer = const T*;
-    using reference = T&;
-    using const_referemce = const T&;
+    using pointer = T *;
+    using const_pointer = const T *;
+    using reference = T &;
+    using const_referemce = const T &;
     using size_type = tenno::size;
 
     allocator() noexcept = default;
@@ -85,8 +84,7 @@ struct allocator
     }
 };
 
-template <typename T>
-struct default_delete
+template <typename T> struct default_delete
 {
     default_delete() noexcept = default;
     void operator()(T *ptr) const noexcept

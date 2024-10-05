@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include <tenno/types.hpp>
 #include <cstddef>  /* for std::ptrdiff_t */
 #include <iterator> /* for std::forward_iterator_tag */
 
@@ -74,9 +75,9 @@ template <typename T> class range
      *
      * @return T The size of the range
      */
-    constexpr T size() const noexcept
+    constexpr tenno::size size() const noexcept
     {
-        return end_elem - start_elem;
+        return (tenno::size) end_elem - start_elem;
     }
 
     /**

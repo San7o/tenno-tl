@@ -81,7 +81,8 @@ TEST(shared_ptr_reset3, "tenno::shared_ptr::reset 3")
 {
     auto sp = tenno::shared_ptr<int>(new int(10));
     ASSERT_EQ(*sp.get(), 10);
-    sp.reset(new int(42), tenno::default_delete<int>(), tenno::allocator<int>());
+    sp.reset(new int(42), tenno::default_delete<int>(),
+             tenno::allocator<int>());
     ASSERT_EQ(*sp.get(), 42);
 }
 
