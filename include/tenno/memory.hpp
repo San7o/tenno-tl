@@ -137,11 +137,11 @@ class shared_ptr
     friend control_block;
     friend class tenno::weak_ptr<T>;
     template <class Y, class... Args>
-    friend std::enable_if<!std::is_array<Y>::value, shared_ptr<Y>>::type
+    friend typename std::enable_if<!std::is_array<Y>::value, shared_ptr<Y>>::type
     make_shared(Args &&...args) noexcept;
     template <class Y> friend shared_ptr<Y> make_shared() noexcept;
     template <class Y>
-    friend std::enable_if<std::is_array<Y>::value, shared_ptr<Y>>::type
+    friend typename std::enable_if<std::is_array<Y>::value, shared_ptr<Y>>::type
     make_shared(tenno::size n) noexcept;
 
     /**
@@ -819,11 +819,11 @@ template <typename T> class weak_ptr
     template <class Y>
     bool owner_before(const weak_ptr<Y> &other) const noexcept
     {
-        if (!this->_ptr || !other._ptr)
-            return false;
         if (this->_ptr && !other._ptr)
             return true;
         if (!this->_ptr && other._ptr)
+            return false;
+        if (!this->_ptr || !other._ptr)
             return false;
         return *this->_ptr < *other._ptr;
     }
@@ -868,7 +868,7 @@ template <typename T> class weak_ptr
 
   private:
     element_type *_ptr;
-    tenno::shared_ptr<T>::control_block *_control_block;
+    typename tenno::shared_ptr<T>::control_block *_control_block;
 };
 
 /**
@@ -915,7 +915,10 @@ template <class T, class Deleter = tenno::default_delete<T>> class unique_ptr
     /**
      * @brief Destroy the unique_ptr object
      */
-    constexpr ~unique_ptr()
+#if __cplusplus >= 202002L // C++20
+    constexpr
+#endif
+    ~unique_ptr()
     {
         if (this->_value != nullptr)
             this->_deleter(this->_value);
@@ -1043,7 +1046,7 @@ template <class T, class Deleter = tenno::default_delete<T>> class unique_ptr
  * @note The object must accept variadic arguments in the constructor
  */
 template <class T, class... Args>
-std::enable_if<!std::is_array<T>::value, shared_ptr<T>>::type
+typename std::enable_if<!std::is_array<T>::value, shared_ptr<T>>::type
 make_shared(Args &&...args) noexcept
 {
     using cb_t = typename tenno::shared_ptr<T>::control_block;
@@ -1063,7 +1066,7 @@ make_shared(Args &&...args) noexcept
 }
 
 template <class T>
-std::enable_if<std::is_array<T>::value, shared_ptr<T>>::type
+typename std::enable_if<std::is_array<T>::value, shared_ptr<T>>::type
 make_shared(tenno::size n) noexcept
 {
     using cb_t = typename tenno::shared_ptr<T>::control_block;
@@ -1117,8 +1120,8 @@ template <class T> shared_ptr<T> make_shared() noexcept
  * @return shared_ptr<T> The shared pointer to the object
  */
 template <class T, class Alloc, class... Args>
-// std::enable_if<!std::is_array<T>::value, shared_ptr<T>>::type
-tenno::shared_ptr<T> allocate_shared(Alloc &alloc, Args &&...args) noexcept
+// typename std::enable_if<!std::is_array<T>::value, shared_ptr<T>>::type
+typename tenno::shared_ptr<T> allocate_shared(Alloc &alloc, Args &&...args) noexcept
 {
     T *t = alloc.allocate(1);
     *t = T(args...);
@@ -1143,7 +1146,7 @@ shared_ptr<T> allocate_shared(Alloc &alloc) noexcept
 
 /*
 template <class T, class Alloc>
-std::enable_if<std::is_array<T>::value, shared_ptr<T>>::type
+typename std::enable_if<std::is_array<T>::value, shared_ptr<T>>::type
 allocate_shared(Alloc &alloc, tenno::size n) noexcept
 {
     using elem = std::remove_all_extents<T>::type;

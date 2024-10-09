@@ -146,7 +146,7 @@ class mutex
 template <typename M> class lock_guard
 {
   public:
-    lock_guard(M &m) : _m(m)
+    explicit lock_guard(M &m) : _m(m)
     {
         this->_m.lock();
     }

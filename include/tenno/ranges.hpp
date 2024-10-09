@@ -26,9 +26,9 @@
 
 #pragma once
 
-#include <tenno/types.hpp>
 #include <cstddef>  /* for std::ptrdiff_t */
 #include <iterator> /* for std::forward_iterator_tag */
+#include <tenno/types.hpp>
 
 namespace tenno
 {
@@ -66,7 +66,7 @@ template <typename T> class range
      * @param end The element after the last element in the range
      * @note The first element in the range will default to 0
      */
-    constexpr range(T end) : start_elem(0), end_elem(end)
+    constexpr explicit range(T end) : start_elem(0), end_elem(end)
     {
     }
 
@@ -92,7 +92,7 @@ template <typename T> class range
         using reference = T &;
 
         T current;
-        constexpr iterator(T current_it) : current(current_it)
+        constexpr explicit iterator(T current_it) : current(current_it)
         {
         }
 

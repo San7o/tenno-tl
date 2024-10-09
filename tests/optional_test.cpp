@@ -94,7 +94,7 @@ template <typename... Args> struct optional_emplace_test_struct
     optional_emplace_test_struct()
     {
     }
-    optional_emplace_test_struct([[maybe_unused]] Args... args) : a(10)
+    optional_emplace_test_struct(Args... args) : a(args...)
     {
     }
 };
@@ -102,11 +102,12 @@ template <typename... Args> struct optional_emplace_test_struct
 TEST(optional_emplace, "tenno::optional.emplace()")
 {
     tenno::optional<optional_emplace_test_struct<int>> opt;
-    opt.emplace(123);
+    opt.emplace(10);
     ASSERT(opt.has_value());
     ASSERT(opt.value().a == 10);
 }
 
+#if __cplusplus >= 202002L // C++20
 TEST(optional_constexpr_constructor, "constexpr tenno::optional()")
 {
     constexpr tenno::optional<int> o = tenno::optional<int>();
@@ -125,3 +126,4 @@ TEST(optional_constexpr_value_or, "constexpr tenno::optional.value_or()")
     constexpr tenno::optional<int> o(10);
     static_assert(o.value_or(20) == 10);
 }
+#endif

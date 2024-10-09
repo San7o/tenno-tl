@@ -348,7 +348,7 @@ template <> class atomic<char>
         return desired;
     }
 
-    inline bool compare_exchange_weak(char &expected, char desired) noexcept
+    inline bool compare_exchange_weak(char & expected, char desired) noexcept
     {
         bool success;
         asm volatile("lock cmpxchg %[desired], %[target]\n\t"

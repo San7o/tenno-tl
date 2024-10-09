@@ -56,7 +56,7 @@ CPMAddPackage(
 CPMAddPackage(
     NAME valfuzz
     GITHUB_REPOSITORY San7o/valFuzz
-    GIT_TAG v1.0.2
+    GIT_TAG v1.0.4
     DOWNLOAD_ONLY True
 )
 if (valfuzz_ADDED)

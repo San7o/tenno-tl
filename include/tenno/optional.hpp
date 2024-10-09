@@ -54,10 +54,15 @@ template <typename T> class optional
      */
     constexpr optional() noexcept : _has_value(false)
     {
+
+#if __cplusplus >= 202002L // C++20
         if (std::is_constant_evaluated())
         {
+#endif
             _value = T();
+#if __cplusplus >= 202002L // C++20
         }
+#endif
     }
 
     /**

@@ -163,6 +163,7 @@ TEST(array_reverse_iteration, "reverse iterating over tenno::array")
     ASSERT_EQ(*rit, 1);
 }
 
+#if __cplusplus >= 202002L // C++20
 TEST(array_constexpr, "create tenno::array constexpr")
 {
     constexpr auto arr = tenno::array<int, 3>{1, 2, 3};
@@ -194,6 +195,7 @@ TEST(array_constexpr_iterator, "iterate over tenno::array constexpr")
     }();
     static_assert(sum == 6);
 }
+#endif
 
 TEST(array_at, "tenno::array::at()")
 {
@@ -213,6 +215,8 @@ TEST(array_at_error, "tenno::array::at() error")
     ASSERT_EQ(arr.at(3).error(), tenno::error::out_of_range);
 }
 
+
+#if __cplusplus >= 202002L // C++20
 TEST(array_at_constexpr, "tenno::array::at() constexpr")
 {
     constexpr auto arr = tenno::array<int, 3>{1, 2, 3};
@@ -230,6 +234,7 @@ TEST(array_at_error_constexpr, "tenno::array::at() error constexpr")
     static_assert(!arr.at(3).has_value());
     static_assert(arr.at(3).error() == tenno::error::out_of_range);
 }
+#endif
 
 TEST(array_at_mutable, "tenno::array::at() mutable")
 {
@@ -245,11 +250,13 @@ TEST(array_front, "tenno::array::front()")
     ASSERT_EQ(arr.front(), 1);
 }
 
+#if __cplusplus >= 202002L // C++20
 TEST(array_front_constexpr, "tenno::array::front() constexpr")
 {
     constexpr auto arr = tenno::array<int, 3>{1, 2, 3};
     static_assert(arr.front() == 1);
 }
+#endif
 
 TEST(array_back, "tenno::array::back()")
 {
@@ -257,11 +264,13 @@ TEST(array_back, "tenno::array::back()")
     ASSERT_EQ(arr.back(), 3);
 }
 
+#if __cplusplus >= 202002L // C++20
 TEST(array_back_constexpr, "tenno::array::back() constexpr")
 {
     constexpr auto arr = tenno::array<int, 3>{1, 2, 3};
     static_assert(arr.back() == 3);
 }
+#endif
 
 TEST(array_data, "tenno::array::data()")
 {
@@ -278,11 +287,13 @@ TEST(array_empty, "tenno::array::empty()")
     ASSERT(!arr.empty());
 }
 
+#if __cplusplus >= 202002L // C++20
 TEST(array_empty_constexpr, "tenno::array::empty() constexpr")
 {
     constexpr auto arr = tenno::array<int, 3>{1, 2, 3};
     static_assert(!arr.empty());
 }
+#endif
 
 TEST(array_max_size, "tenno::array::max_size()")
 {
@@ -290,11 +301,13 @@ TEST(array_max_size, "tenno::array::max_size()")
     ASSERT_EQ(arr.max_size(), 3);
 }
 
+#if __cplusplus >= 202002L // C++20
 TEST(arrya_max_size_constexpr, "tenno::array::max_size() constexpr")
 {
     constexpr auto arr = tenno::array<int, 3>{1, 2, 3};
     static_assert(arr.max_size() == 3);
 }
+#endif
 
 TEST(array_fill, "tenno::array::fill()")
 {
@@ -337,6 +350,7 @@ TEST(array_operator_brackets_mutable, "tenno::array::operator[] mutable")
     ASSERT_EQ(arr[2], 0);
 }
 
+#if __cplusplus >= 202002L // C++20
 TEST(array_operator_brackets_constexpr, "tenno::array::operator[] constexpr")
 {
     constexpr auto arr = tenno::array<int, 3>{1, 2, 3};
@@ -344,3 +358,4 @@ TEST(array_operator_brackets_constexpr, "tenno::array::operator[] constexpr")
     static_assert(arr[1] == 2);
     static_assert(arr[2] == 3);
 }
+#endif

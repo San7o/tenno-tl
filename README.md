@@ -1,6 +1,6 @@
 # tenno template library
 
-This library aims to be a replacement for some functionalities of the STL for c++23,
+This library aims to be a replacement for some functionalities of the STL for c++17/20/23,
 improving on security and parallelism. You can expect all the functionalities to behave like STL.
 
 ## Design goals
@@ -11,6 +11,8 @@ improving on security and parallelism. You can expect all the functionalities to
 - modern-looking and readable c++23 code
 - do not strictly follow silly standards
 - optimize for performance
+
+The library officially supports all GCC compilers starting from gcc-8.5.0.
 
 ## Currently implemented
 - [tenno::array<T,N>](./include/tenno/array.hpp)

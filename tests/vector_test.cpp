@@ -24,8 +24,8 @@
  *
  */
 
-#include <tenno/vector.hpp>
 #include <tenno/ranges.hpp>
+#include <tenno/vector.hpp>
 #include <valfuzz/valfuzz.hpp>
 #include <vector>
 

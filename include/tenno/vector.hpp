@@ -27,11 +27,11 @@
 #pragma once
 
 #include <initializer_list>
+#include <tenno/error.hpp>
+#include <tenno/expected.hpp>
 #include <tenno/memory.hpp>
 #include <tenno/ranges.hpp>
 #include <tenno/types.hpp>
-#include <tenno/expected.hpp>
-#include <tenno/error.hpp>
 
 namespace tenno
 {
@@ -45,8 +45,8 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
     // using difference_type = tenno::difference;
     using reference = value_type &;
     using const_reference = const value_type &;
-    using pointer = Allocator::pointer;
-    using const_pointer = Allocator::const_pointer;
+    using pointer = typename Allocator::pointer;
+    using const_pointer = typename Allocator::const_pointer;
 
     vector()
         : _size(0), _capacity(0), _data(nullptr),
@@ -58,7 +58,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         : _size(count), _capacity(count), _data(_allocator.allocate(count)),
           _allocator(alloc)
     {
-        for (size_type i = 0; i < count; i++)
+        for (size_type i = 0; i < count; ++i)
         {
             _data[i] = value;
         }
@@ -72,7 +72,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         : _size(other._size), _capacity(other._capacity),
           _data(_allocator.allocate(other._size)), _allocator(other._allocator)
     {
-        for (size_type i = 0; i < other._size; i++)
+        for (size_type i = 0; i < other._size; ++i)
         {
             _data[i] = other._data[i];
         }
@@ -81,7 +81,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         : _size(other._size), _capacity(other._capacity),
           _data(_allocator.allocate(other._size)), _allocator(alloc)
     {
-        for (size_type i = 0; i < other._size; i++)
+        for (size_type i = 0; i < other._size; ++i)
         {
             _data[i] = other._data[i];
         }
@@ -105,10 +105,10 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
           _data(_allocator.allocate(init.size())), _allocator(alloc)
     {
         size_type i = 0;
-        for (auto it = init.begin(); it != init.end(); it++)
+        for (auto it = init.begin(); it != init.end(); ++it)
         {
             _data[i] = *it;
-            i++;
+            ++i;
         }
     }
 
@@ -128,7 +128,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
             _capacity = other._size;
             _allocator = other._allocator;
             _data = _allocator.allocate(_size);
-            for (size_type i = 0; i < _size; i++)
+            for (size_type i = 0; i < _size; ++i)
             {
                 _data[i] = other._data[i];
             }
@@ -158,15 +158,15 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         _capacity = ilist.size();
         _data = _allocator.allocate(_size);
         size_type i = 0;
-        for (auto it = ilist.begin(); it != ilist.end(); it++)
+        for (auto it = ilist.begin(); it != ilist.end(); ++it)
         {
             _data[i] = *it;
-            i++;
+            ++i;
         }
         return *this;
     }
 
-    constexpr void assign( size_type count, const T& value )
+    constexpr void assign(size_type count, const T &value)
     {
         if (count > _capacity)
         {
@@ -175,14 +175,14 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
             _capacity = count;
             _data = _allocator.allocate(_size);
         }
-        for (size_type i = 0; i < count; i++)
+        for (size_type i = 0; i < count; ++i)
         {
             _data[i] = value;
         }
     }
-    
+
     /*
-    // this overwrite the previous assign method
+    // this overwrites the previous assign method
     template< class InputIt >
     constexpr void assign( InputIt first, InputIt last )
     {
@@ -202,29 +202,29 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
             _data = _allocator.allocate(_size);
         }
         size_type i = 0;
-        for (auto it = first; it != last; it++)
+        for (auto it = first; it != last; ++it)
         {
             _data[i] = *it;
-            i++;
+            ++i;
         }
     }
     */
 
-    void assign( std::initializer_list<T> ilist )
+    void assign(std::initializer_list<T> ilist)
     {
         _allocator.deallocate(_data, _capacity);
         _size = ilist.size();
         _capacity = ilist.size();
         _data = _allocator.allocate(_size);
         size_type i = 0;
-        for (auto it = ilist.begin(); it != ilist.end(); it++)
+        for (auto it = ilist.begin(); it != ilist.end(); ++it)
         {
             _data[i] = *it;
-            i++;
+            ++i;
         }
     }
 
-    constexpr void assign_range( const tenno::range<T>& r )
+    constexpr void assign_range(const tenno::range<T> &r)
     {
         if (r.size() > _capacity)
         {
@@ -234,10 +234,10 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
             _data = _allocator.allocate(_size);
         }
         size_type i = 0;
-        for (auto it = r.begin(); it != r.end(); it++)
+        for (auto it = r.begin(); it != r.end(); ++it)
         {
             _data[i] = *it;
-            i++;
+            ++i;
         }
     }
 

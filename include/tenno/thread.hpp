@@ -101,7 +101,7 @@ class jthread
      *
      * @return std::thread::id The id of the thread
      */
-    std::jthread::id get_id() const noexcept
+    std::thread::id get_id() const noexcept
     {
         return this->_inner_thread.get_id();
     }
@@ -156,6 +156,7 @@ class jthread
         other.id = other._inner_thread.get_id();
     }
 
+#if __cplusplus >= 202002L // C++20
     /**
      * @brief Get the stop source of the thread
      *
@@ -185,10 +186,13 @@ class jthread
     {
         return this->_stop_source.request_stop();
     }
+#endif
 
   private:
     std::thread _inner_thread;
+#if __cplusplus >= 202002L // C++20
     std::stop_source _stop_source;
+#endif
 };
 
 } // namespace tenno

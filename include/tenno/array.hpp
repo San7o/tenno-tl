@@ -329,7 +329,7 @@ template <typename T, tenno::size N> class array
          *
          * @param ptr The pointer to the element the iterator points to
          */
-        constexpr iterator(T *ptr_in) : ptr(ptr_in)
+        constexpr explicit iterator(T *ptr_in) : ptr(ptr_in)
         {
         }
 
@@ -338,7 +338,7 @@ template <typename T, tenno::size N> class array
          *
          * @param ptr The pointer to the element the iterator points to
          */
-        constexpr iterator(const T *ptr_in) : ptr(const_cast<T *>(ptr_in))
+        constexpr explicit iterator(const T *ptr_in) : ptr(const_cast<T *>(ptr_in))
         {
         }
 
@@ -441,7 +441,7 @@ template <typename T, tenno::size N> class array
          *
          * @param ptr The pointer to the element the iterator points to
          */
-        constexpr reverse_iterator(T *ptr_in) : ptr(ptr_in)
+        constexpr explicit reverse_iterator(T *ptr_in) : ptr(ptr_in)
         {
         }
 
@@ -450,7 +450,7 @@ template <typename T, tenno::size N> class array
          *
          * @param ptr The pointer to the element the iterator points to
          */
-        constexpr reverse_iterator(const T *ptr_in)
+        constexpr explicit reverse_iterator(const T *ptr_in)
             : ptr(const_cast<T *>(ptr_in))
         {
         }

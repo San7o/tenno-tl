@@ -48,6 +48,7 @@ TEST(algorithm_for_each, "iterating over tenno::array with for_each")
     ASSERT_EQ(sum, 15);
 }
 
+#if __cplusplus >= 202002L // C++20
 TEST(algorithm_for_each_constexpr,
      "iterating over tenno::array with for_each constexpr")
 {
@@ -60,6 +61,7 @@ TEST(algorithm_for_each_constexpr,
     }();
     static_assert(sum == 15);
 }
+#endif
 
 TEST(algorithm_accumulate, "accumulating tenno::array")
 {
@@ -68,12 +70,14 @@ TEST(algorithm_accumulate, "accumulating tenno::array")
     ASSERT_EQ(sum, 15);
 }
 
+#if __cplusplus >= 202002L // C++20
 TEST(algorithm_accumulate_constexpr, "accumulating tenno::array constexpr")
 {
     constexpr tenno::array<int, 5> arr{1, 2, 3, 4, 5};
     constexpr auto sum = tenno::accumulate(arr.begin(), arr.end(), 0);
     static_assert(sum == 15);
 }
+#endif
 
 TEST(algorithm_swap, "tenno::swap")
 {
