@@ -13,6 +13,7 @@ improving on security and parallelism. You can expect all the functionalities to
 - optimize for performance
 
 The library officially supports all GCC compilers starting from gcc-8.5.0.
+Constexpr functions are guaranteed to work from c++20 onward.
 
 ## Currently implemented
 - [tenno::array<T,N>](./include/tenno/array.hpp)
@@ -38,11 +39,12 @@ The library officially supports all GCC compilers starting from gcc-8.5.0.
 - [tenno::allocator\<T>](./include/tenno/memory.hpp)
 - [tenno::default_delete\<T>](./include/tenno/memory.hpp)
 - [tenno::vector\<T>](./include/tenno/vector.hpp) (work in progress)
-- tenno::reference_wrapper: TODO
+- [tenno::reference_wrapper](./include/tenno/functional.hpp)
 - tenno::deque: TODO
 - tenno::map: TODO
 - tenno::unordered_map: TODO
 - tenno::thread pool: TODO
+- goroutines?
 
 ## Testing
 
@@ -79,6 +81,13 @@ make docs
 
 ## array
 
-`tenno::array<T,N>.at(n)` returns `expected<T,E>` with either the value
+`tenno::array\<T,N>.at(n)` returns `expected\<T,E>` with either the value
 or a `tenno::error` with the error `out_of_range` if the range specified
 is bigger than the size of the array.
+
+## vector
+
+- `tenno::vector\<T>.at(n)` returns `expected\<T,E>`
+- `tenno::vector\<T>.front()` return `expected\<const T&,E>`
+- `tenno::vector\<T>.back()` returns `expected\<const T&,E>`
+- `tenno::vector\<T>.operator[]` returns `expected\<T,E>`

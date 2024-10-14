@@ -43,7 +43,7 @@ TEST(vector_constructor_count_value, "vector constructor with count and value")
     ASSERT_EQ(v.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v[i], 10);
+        ASSERT_EQ(v[i].value(), 10);
     }
 }
 
@@ -56,7 +56,7 @@ TEST(vector_constructor_count_value_allocator,
     ASSERT_EQ(v.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v[i], 10);
+        ASSERT_EQ(v[i].value(), 10);
     }
 }
 
@@ -84,7 +84,7 @@ TEST(vector_constructor_copy, "vector constructor with copy")
     ASSERT_EQ(v2.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v2[i], 10);
+        ASSERT_EQ(v2[i].value(), 10);
     }
 }
 
@@ -98,7 +98,7 @@ TEST(vector_constructor_copy_allocator,
     ASSERT_EQ(v2.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v2[i], 10);
+        ASSERT_EQ(v2[i].value(), 10);
     }
 }
 
@@ -110,7 +110,7 @@ TEST(vector_constructor_move, "vector constructor with move")
     ASSERT_EQ(v2.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v2[i], 10);
+        ASSERT_EQ(v2[i].value(), 10);
     }
     ASSERT_EQ(v1.size(), 0);
     ASSERT_EQ(v1.capacity(), 5);
@@ -126,7 +126,7 @@ TEST(vector_constructor_move_allocator,
     ASSERT_EQ(v2.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v2[i], 10);
+        ASSERT_EQ(v2[i].value(), 10);
     }
     ASSERT_EQ(v1.size(), 0);
     ASSERT_EQ(v1.capacity(), 5);
@@ -140,7 +140,7 @@ TEST(vector_constructor_initializer_list,
     ASSERT_EQ(v.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v[i], i + 1);
+        ASSERT_EQ(v[i].value(), i + 1);
     }
 }
 
@@ -153,7 +153,7 @@ TEST(vector_constructor_initializer_list_allocator,
     ASSERT_EQ(v.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v[i], i + 1);
+        ASSERT_EQ(v[i].value(), i + 1);
     }
 }
 
@@ -166,7 +166,7 @@ TEST(vector_copy_assignment, "vector copy assignment")
     ASSERT_EQ(v2.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v2[i], 10);
+        ASSERT_EQ(v2[i].value(), 10);
     }
 }
 
@@ -179,7 +179,7 @@ TEST(vector_move_assignment, "vector move assignment")
     ASSERT_EQ(v2.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v2[i], 10);
+        ASSERT_EQ(v2[i].value(), 10);
     }
     ASSERT_EQ(v1.size(), 0);
     ASSERT_EQ(v1.capacity(), 0);
@@ -193,7 +193,7 @@ TEST(vector_initializer_list_assignment, "vector initializer list assignment")
     ASSERT_EQ(v.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v[i], i + 1);
+        ASSERT_EQ(v[i].value(), i + 1);
     }
 }
 
@@ -205,7 +205,7 @@ TEST(vector_assign, "vector assign")
     ASSERT_EQ(v.capacity(), 5);
     for (int i = 0; i < 3; i++)
     {
-        ASSERT_EQ(v[i], 20);
+        ASSERT_EQ(v[i].value(), 20);
     }
 }
 
@@ -219,7 +219,7 @@ TEST(vector_assign_iterator, "vector assign iterator")
     ASSERT_EQ(v.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v[i], i + 1);
+        ASSERT_EQ(v[i].value(), i + 1);
     }
 }
 */
@@ -232,7 +232,7 @@ TEST(vector_assign_initializer_list, "vector assign initializer list")
     ASSERT_EQ(v.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v[i], i + 1);
+        ASSERT_EQ(v[i].value(), i + 1);
     }
 }
 
@@ -245,7 +245,7 @@ TEST(vector_assign_range, "vector assign range")
     ASSERT_EQ(v.capacity(), 5);
     for (int i = 0; i < 5; i++)
     {
-        ASSERT_EQ(v[i], i + 1);
+        ASSERT_EQ(v[i].value(), i + 1);
     }
 }
 
@@ -259,16 +259,69 @@ TEST(vector_get_allocator, "vector get allocator")
 TEST(vector_at, "vector at")
 {
     tenno::vector<int> v(5, 10);
-    ASSERT_EQ(*v.at(0).value(), 10);
-    ASSERT_EQ(*v.at(1).value(), 10);
-    ASSERT_EQ(*v.at(2).value(), 10);
-    ASSERT_EQ(*v.at(3).value(), 10);
-    ASSERT_EQ(*v.at(4).value(), 10);
+    ASSERT_EQ(v.at(0).value(), 10);
+    ASSERT_EQ(v.at(1).value(), 10);
+    ASSERT_EQ(v.at(2).value(), 10);
+    ASSERT_EQ(v.at(3).value(), 10);
+    ASSERT_EQ(v.at(4).value(), 10);
     ASSERT_EQ(v.at(5).has_value(), false);
+}
+
+TEST(vector_operator_brackets, "vector operator brackets")
+{
+    tenno::vector<int> v(5, 10);
+    ASSERT_EQ(v[0].value(), 10);
+    ASSERT_EQ(v[1].value(), 10);
+    ASSERT_EQ(v[2].value(), 10);
+    ASSERT_EQ(v[3].value(), 10);
+    ASSERT_EQ(v[4].value(), 10);
+    ASSERT_EQ(v[5].has_value(), false);
+}
+
+TEST(vector_front, "vector front")
+{
+    tenno::vector<int> v(5, 10);
+    ASSERT_EQ(v.front().value(), 10);
+    tenno::vector<int> v2 = {1, 2, 3, 4, 5};
+    ASSERT_EQ(v2.front().value(), 1);
+}
+
+TEST(vector_back, "vector back")
+{
+    tenno::vector<int> v(5, 10);
+    ASSERT_EQ(v.back().value(), 10);
+    tenno::vector<int> v2 = {1, 2, 3, 4, 5};
+    ASSERT_EQ(v2.back().value(), 5);
+}
+
+TEST(vector_data, "vector data")
+{
+    tenno::vector<int> v(5, 10);
+    auto exp = v.data();
+    ASSERT_EQ(exp.has_value(), true);
+    int *data = exp.value();
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(data[i], 10);
+    }
 }
 
 TEST(vector_size, "vector size")
 {
     tenno::vector<int> v(5, 10);
     ASSERT_EQ(v.size(), 5);
+    tenno::vector<int> v2;
+    ASSERT_EQ(v2.size(), 0);
+    tenno::vector<int> v3(10);
+    ASSERT_EQ(v3.size(), 10);
+}
+
+TEST(vector_capacity, "vector capacity")
+{
+    tenno::vector<int> v(5, 10);
+    ASSERT_EQ(v.capacity(), 5);
+    tenno::vector<int> v2;
+    ASSERT_EQ(v2.capacity(), 0);
+    tenno::vector<int> v3(10);
+    ASSERT_EQ(v3.capacity(), 10);
 }

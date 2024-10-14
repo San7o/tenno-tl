@@ -32,6 +32,7 @@
 #include <tenno/memory.hpp>
 #include <tenno/ranges.hpp>
 #include <tenno/types.hpp>
+#include <tenno/functional.hpp>
 
 namespace tenno
 {
@@ -246,23 +247,101 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         return this->_allocator;
     }
 
-    expected<pointer, tenno::error> at(size_type pos)
+    expected<tenno::reference_wrapper<T>, tenno::error> at(size_type pos)
     {
         if (pos >= _size)
         {
             return tenno::unexpected(tenno::error::out_of_range);
         }
-        return &_data[pos];
+        return tenno::reference_wrapper<T>(tenno::move(_data[pos]));
     }
 
-    reference operator[](size_type pos)
+    expected<tenno::reference_wrapper<T>, tenno::error> operator[](size_type pos)
     {
-        return _data[pos];
+        if (pos >= _size)
+        {
+            return tenno::unexpected(tenno::error::out_of_range);
+        }
+        if (_data == nullptr)
+        {
+            return tenno::unexpected(tenno::error::not_initialized);
+        }
+        return tenno::reference_wrapper<T>(tenno::move(_data[pos]));
     }
-    const_reference operator[](size_type pos) const
+
+    expected<tenno::reference_wrapper<const T>, tenno::error> operator[](size_type pos) const
     {
-        return _data[pos];
+        if (pos >= _size)
+        {
+            return tenno::unexpected(tenno::error::out_of_range);
+        }
+        if (_data == nullptr)
+        {
+            return tenno::unexpected(tenno::error::not_initialized);
+        }
+        return tenno::reference_wrapper<const T>(tenno::move(_data[pos]));
     }
+
+    expected<tenno::reference_wrapper<const T>, tenno::error> front() const
+    {
+        if (_size == 0)
+        {
+            return tenno::unexpected(tenno::error::empty);
+        }
+        if (_data == nullptr)
+        {
+            return tenno::unexpected(tenno::error::not_initialized);
+        }
+        return tenno::reference_wrapper<const T>(tenno::move(_data[0]));
+    }
+
+    expected<tenno::reference_wrapper<const T>, tenno::error> back() const
+    {
+        if (_size == 0)
+        {
+            return tenno::unexpected(tenno::error::empty);
+        }
+        if (_data == nullptr)
+        {
+            return tenno::unexpected(tenno::error::not_initialized);
+        }
+        return tenno::reference_wrapper<const T>(tenno::move(_data[_size - 1]));
+    }
+
+    /**
+     * @brief Get the data object
+     * @note Use this at your own risk
+     *
+     * @return pointer
+     */
+    constexpr tenno::expected<pointer, tenno::error> data() noexcept
+    {
+        if (_data == nullptr)
+        {
+            return tenno::unexpected(tenno::error::not_initialized);
+        }
+        return _data;
+    }
+
+    /**
+     * @brief Get the data object
+     * @note Use this at your own risk
+     *
+     * @return const_pointer
+     */
+    constexpr tenno::expected<const_pointer, tenno::error> data() const noexcept
+    {
+        if (_data == nullptr)
+        {
+            return tenno::unexpected(tenno::error::not_initialized);
+        }
+        return _data;
+    }
+
+
+    // TODO: Iterators
+
+    // TODO: Capacity
 
     constexpr size_type size() const noexcept
     {
@@ -272,6 +351,8 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
     {
         return _capacity;
     }
+
+    // TODO: Modifiers
 
   private:
     size_type _size;

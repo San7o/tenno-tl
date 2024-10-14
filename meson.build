@@ -79,6 +79,7 @@ if get_option('TENNO_BUILD_TESTS')
     'tests/thread_test.cpp',
     'tests/weak_ptr_test.cpp',
     'tests/vector_test.cpp',
+    'tests/functional_test.cpp',
     'benchmarks/array_benchmark.cpp',
     'fuzz/array_fuzz.cpp',
   )

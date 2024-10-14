@@ -32,6 +32,7 @@ set(TENNO_TEST_SOURCES
         tests/thread_test.cpp
         tests/weak_ptr_test.cpp
         tests/vector_test.cpp
+        tests/functional_test.cpp
         fuzz/array_fuzz.cpp
         benchmarks/array_benchmark.cpp
 )
