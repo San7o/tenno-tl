@@ -16,7 +16,7 @@ The library officially supports all GCC compilers starting from gcc-8.5.0.
 Constexpr functions are guaranteed to work from c++20 onward.
 
 ## Currently implemented
-- [tenno::array<T,N>](./include/tenno/array.hpp)
+- [tenno::array<T,N>](./include/tenno/array.hpp) (TODO: rework iterator)
 - [tenno::expected<T,E>](./include/tenno/expected.hpp)
 - [tenno::range\<T>](./include/tenno/ranges.hpp)
 - [tenno::error](./include/tenno/error.hpp)
@@ -91,3 +91,8 @@ is bigger than the size of the array.
 - `tenno::vector\<T>.front()` return `expected\<const T&,E>`
 - `tenno::vector\<T>.back()` returns `expected\<const T&,E>`
 - `tenno::vector\<T>.operator[]` returns `expected\<T,E>`
+- all iterator access methods return `expected\<T,E>`
+
+## functional
+
+- `std::reference_wrapper\<T>.get()` has beed renamed to `std::reference_wrapper\<T>.ref()`

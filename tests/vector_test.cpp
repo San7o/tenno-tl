@@ -267,6 +267,21 @@ TEST(vector_at, "vector at")
     ASSERT_EQ(v.at(5).has_value(), false);
 }
 
+TEST(vector_at_mutate, "vector at mutate")
+{
+    tenno::vector<int> v(5, 10);
+    v.at(0).value().ref() = 20;
+    v.at(1).value().ref() = 30;
+    v.at(2).value().ref() = 40;
+    v.at(3).value().ref() = 50;
+    v.at(4).value().ref() = 60;
+    ASSERT_EQ(v.at(0).value(), 20);
+    ASSERT_EQ(v.at(1).value(), 30);
+    ASSERT_EQ(v.at(2).value(), 40);
+    ASSERT_EQ(v.at(3).value(), 50);
+    ASSERT_EQ(v.at(4).value(), 60);
+}
+
 TEST(vector_operator_brackets, "vector operator brackets")
 {
     tenno::vector<int> v(5, 10);
@@ -276,6 +291,21 @@ TEST(vector_operator_brackets, "vector operator brackets")
     ASSERT_EQ(v[3].value(), 10);
     ASSERT_EQ(v[4].value(), 10);
     ASSERT_EQ(v[5].has_value(), false);
+}
+
+TEST(vector_operator_brackets_mutate, "vector operator brackets mutate")
+{
+    tenno::vector<int> v(5, 10);
+    v[0].value().ref() = 20;
+    v[1].value().ref() = 30;
+    v[2].value().ref() = 40;
+    v[3].value().ref() = 50;
+    v[4].value().ref() = 60;
+    ASSERT_EQ(v[0].value(), 20);
+    ASSERT_EQ(v[1].value(), 30);
+    ASSERT_EQ(v[2].value(), 40);
+    ASSERT_EQ(v[3].value(), 50);
+    ASSERT_EQ(v[4].value(), 60);
 }
 
 TEST(vector_front, "vector front")
@@ -303,6 +333,42 @@ TEST(vector_data, "vector data")
     for (int i = 0; i < 5; i++)
     {
         ASSERT_EQ(data[i], 10);
+    }
+}
+
+TEST(vector_iterator, "vector iterator")
+{
+    tenno::vector<int> v(5, 10);
+    int i = 0;
+    for (auto it = v.begin(); it != v.end(); it++)
+    {
+        ASSERT_EQ((*it).value(), 10);
+        i++;
+    }
+    ASSERT_EQ(i, 5);
+}
+
+TEST(vector_iterator_get, "vector iterator get")
+{
+    tenno::vector<int> v = {1, 2, 3, 4, 5};
+    int i = 0;
+    for (auto it = v.begin(); it != v.end(); it++)
+    {
+        ASSERT_EQ(it.get().value(), ++i);
+    }
+    ASSERT_EQ(i, 5);
+}
+
+TEST(vector_iterator_mutate, "vector iterator mutate")
+{
+    tenno::vector<int> v = {1, 2, 3, 4, 5};
+    for (auto it = v.begin(); it != v.end(); it++)
+    {
+        it.get().value().ref() = 5;
+    }
+    for (auto it = v.begin(); it != v.end(); it++)
+    {
+        ASSERT_EQ(it.get().value(), 5);
     }
 }
 

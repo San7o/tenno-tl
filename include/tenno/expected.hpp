@@ -26,6 +26,9 @@
 
 #pragma once
 
+#include <tenno/utility.hpp> // tenno::move
+#include <tenno/functional.hpp> 
+
 namespace tenno
 {
 

@@ -94,7 +94,7 @@ class reference_wrapper
      * 
      * @return T& 
      */
-    constexpr T& get() const noexcept
+    constexpr T& ref() const noexcept
     {
         return *_ptr;
     }

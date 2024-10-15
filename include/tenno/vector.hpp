@@ -33,6 +33,7 @@
 #include <tenno/ranges.hpp>
 #include <tenno/types.hpp>
 #include <tenno/functional.hpp>
+#include <tenno/types.hpp>
 
 namespace tenno
 {
@@ -338,8 +339,125 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         return _data;
     }
 
+    /**
+     * @brief An iterator to iterate over the data
+     */
+    // TODO: constexpr iterator
+    struct iterator_mut
+    {
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = T;
+        using pointer = T *;
+        using reference = T &;
 
-    // TODO: Iterators
+        tenno::size index;
+        tenno::vector<T, Allocator> &vec;
+
+        /**
+         * @brief Construct a new iterator object
+         *
+         * @param ptr The pointer to the element the iterator points to
+         */
+        explicit iterator(tenno::vector<T, Allocator> &_vec, const tenno::size _index) : index(_index), vec(_vec)
+        {
+        }
+
+        /**
+         * @brief Construct a new iterator object
+         *
+         * @param other The other iterator to copy
+         */
+        iterator &operator++() noexcept
+        {
+            index++;
+            return *this;
+        }
+
+        /**
+         * @brief Construct a new iterator object
+         *
+         * @param other The other iterator to copy
+         */
+        iterator operator++(T) noexcept
+        {
+            iterator _iterator = *this;
+            ++index;
+            return _iterator;
+        }
+
+        /**
+         * @brief Construct a new iterator object
+         *
+         * @param other The other iterator to copy
+         */
+        bool operator==(const iterator &other) const noexcept
+        {
+            return index == other.index;
+        }
+
+        /**
+         * @brief Construct a new iterator object
+         *
+         * @param other The other iterator to copy
+         */
+        bool operator!=(const iterator &other) const noexcept
+        {
+            return !(index == other.index);
+        }
+
+        /**
+         * @brief dereference operator
+         *
+         * @return reference The reference to the element the iterator points to
+         */
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error> operator*() noexcept
+        {
+            return vec[index];
+        }
+
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error> operator->() noexcept
+        {
+            return vec[index];
+        }
+
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error> get() noexcept
+        {
+            return vec[index];
+        }
+    };
+
+    /**
+     * @brief Get an iterator to the beginning of the data
+     *
+     * @return iterator The iterator to the beginning of the data
+     *
+     * # Example
+     * ```cpp
+     * tenno::vector<int> vec = {1, 2, 3};
+     * auto begin = vec.begin();
+     * ```
+     */
+    iterator begin() noexcept
+    {
+        return iterator(*this, tenno::size(0));
+    }
+    /**
+     * @brief Get an iterator to the end of the data
+     *
+     * @return iterator The iterator to the end of the data
+     *
+     * # Example
+     * ```cpp
+     * tenno::for_each(vec.begin(), vec.end(), [](int& elem) { elem = 0; });
+     * ```
+     */
+    iterator end() noexcept
+    {
+        return iterator(*this, this->_size);
+    }
+
+    // TODO: reverse iterator
 
     // TODO: Capacity
 
