@@ -92,6 +92,7 @@ is bigger than the size of the array.
 - `tenno::vector\<T>.back()` returns `expected\<const T&,E>`
 - `tenno::vector\<T>.operator[]` returns `expected\<T,E>`
 - all iterator access methods return `expected\<T,E>`
+- iterator is divided into `iterator` and `iterator_mut`
 
 ## functional
 

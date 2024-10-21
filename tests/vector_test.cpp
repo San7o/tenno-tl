@@ -372,6 +372,25 @@ TEST(vector_iterator_mutate, "vector iterator mutate")
     }
 }
 
+TEST(vector_reverse_iterator, "vector reverse iterator")
+{
+    tenno::vector<int> v = {1, 2, 3, 4, 5};
+    int i = 5;
+    for (auto it = v.rbegin(); it != v.rend(); it++)
+    {
+        ASSERT_EQ((*it).value(), i--);
+    }
+    ASSERT_EQ(i, 0);
+}
+
+TEST(vector_empty, "vector empty")
+{
+    tenno::vector<int> v;
+    ASSERT_EQ(v.empty(), true);
+    tenno::vector<int> v2(5, 10);
+    ASSERT_EQ(v2.empty(), false);
+}
+
 TEST(vector_size, "vector size")
 {
     tenno::vector<int> v(5, 10);
@@ -380,6 +399,43 @@ TEST(vector_size, "vector size")
     ASSERT_EQ(v2.size(), 0);
     tenno::vector<int> v3(10);
     ASSERT_EQ(v3.size(), 10);
+}
+
+TEST(vector_max_size, "vector max size")
+{
+    tenno::vector<int> v;
+    ASSERT_EQ(v.max_size(), (tenno::size)-1);
+}
+
+TEST(vector_reserve, "vector reserve")
+{
+    tenno::vector<int> v(5, 10);
+    v.reserve(10);
+    ASSERT_EQ(v.capacity(), 10);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v[i].value(), 10);
+    }
+    v.reserve(3);
+    ASSERT_EQ(v.capacity(), 10);
+    v.reserve(20);
+    ASSERT_EQ(v.capacity(), 20);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v[i].value(), 10);
+    }
+}
+
+TEST(vector_shrink_to_fit, "vector shrink to fit")
+{
+    tenno::vector<int> v(5, 10);
+    v.reserve(10);
+    v.shrink_to_fit();
+    ASSERT_EQ(v.capacity(), 5);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v[i].value(), 10);
+    }
 }
 
 TEST(vector_capacity, "vector capacity")

@@ -121,7 +121,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         _allocator.deallocate(_data, _size);
     }
 
-    constexpr vector &operator=(const vector &other)
+    vector &operator=(const vector &other)
     {
         if (this != &other)
         {
@@ -168,7 +168,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         return *this;
     }
 
-    constexpr void assign(size_type count, const T &value)
+    void assign(size_type count, const T &value)
     {
         if (count > _capacity)
         {
@@ -186,7 +186,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
     /*
     // this overwrites the previous assign method
     template< class InputIt >
-    constexpr void assign( InputIt first, InputIt last )
+    void assign( InputIt first, InputIt last )
     {
         size_type count = 0;
         InputIt tmp = first;
@@ -226,7 +226,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         }
     }
 
-    constexpr void assign_range(const tenno::range<T> &r)
+    void assign_range(const tenno::range<T> &r)
     {
         if (r.size() > _capacity)
         {
@@ -315,7 +315,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
      *
      * @return pointer
      */
-    constexpr tenno::expected<pointer, tenno::error> data() noexcept
+    tenno::expected<pointer, tenno::error> data() noexcept
     {
         if (_data == nullptr)
         {
@@ -330,7 +330,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
      *
      * @return const_pointer
      */
-    constexpr tenno::expected<const_pointer, tenno::error> data() const noexcept
+    tenno::expected<const_pointer, tenno::error> data() const noexcept
     {
         if (_data == nullptr)
         {
@@ -342,8 +342,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
     /**
      * @brief An iterator to iterate over the data
      */
-    // TODO: constexpr iterator
-    struct iterator_mut
+    struct iterator
     {
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
@@ -457,20 +456,191 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         return iterator(*this, this->_size);
     }
 
-    // TODO: reverse iterator
+    /**
+     * @brief An reverse_iterator to iterate over the data
+     */
+    struct reverse_iterator
+    {
+        using reverse_iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = T;
+        using pointer = T *;
+        using reference = T &;
 
-    // TODO: Capacity
+        long long int index;
+        tenno::vector<T, Allocator> &vec;
 
-    constexpr size_type size() const noexcept
+        /**
+         * @brief Construct a new reverse_iterator object
+         *
+         * @param ptr The pointer to the element the reverse_iterator points to
+         */
+        explicit reverse_iterator(tenno::vector<T, Allocator> &_vec, const long long int _index) : index(_index), vec(_vec)
+        {
+        }
+
+        /**
+         * @brief Construct a new reverse_iterator object
+         *
+         * @param other The other reverse_iterator to copy
+         */
+        reverse_iterator &operator++() noexcept
+        {
+            index--;
+            return *this;
+        }
+
+        /**
+         * @brief Construct a new reverse_iterator object
+         *
+         * @param other The other reverse_iterator to copy
+         */
+        reverse_iterator operator++(T) noexcept
+        {
+            reverse_iterator _iterator = *this;
+            --index;
+            return _iterator;
+        }
+
+        /**
+         * @brief Construct a new reverse_iterator object
+         *
+         * @param other The other reverse_iterator to copy
+         */
+        bool operator==(const reverse_iterator &other) const noexcept
+        {
+            return index == other.index;
+        }
+
+        /**
+         * @brief Construct a new reverse_iterator object
+         *
+         * @param other The other reverse_iterator to copy
+         */
+        bool operator!=(const reverse_iterator &other) const noexcept
+        {
+            return !(index == other.index);
+        }
+
+        /**
+         * @brief dereference operator
+         *
+         * @return reference The reference to the element the reverse_iterator points to
+         */
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error> operator*() noexcept
+        {
+            return vec[index];
+        }
+
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error> operator->() noexcept
+        {
+            return vec[index];
+        }
+
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error> get() noexcept
+        {
+            return vec[index];
+        }
+    };
+
+    /**
+     * @brief Get an reverse_iterator to the beginning of the data
+     *
+     * @return reverse_iterator The iterator to the beginning of the data
+     *
+     * # Example
+     * ```cpp
+     * tenno::vector<int> vec = {1, 2, 3};
+     * auto begin = vec.rbegin();
+     * ```
+     */
+    reverse_iterator rbegin() noexcept
+    {
+        return reverse_iterator(*this, _size - 1);
+    }
+    /**
+     * @brief Get an reverse_iterator to the end of the data
+     *
+     * @return reverse_iterator The iterator to the end of the data
+     *
+     * # Example
+     * ```cpp
+     * tenno::for_each(vec.rbegin(), vec.rend(), [](int& elem) { elem = 0; });
+     * ```
+     */
+    reverse_iterator rend() noexcept
+    {
+        return reverse_iterator(*this, -1);
+    }
+
+    bool empty() const noexcept
+    {
+        return _size == 0;
+    }
+
+    size_type size() const noexcept
     {
         return _size;
     }
-    constexpr size_type capacity() const noexcept
+
+    size_type max_size() const noexcept
+    {
+        return (tenno::size)-1;
+    }
+
+    void reserve(size_type new_cap)
+    {
+        if (new_cap <= _capacity)
+        {
+            return;
+        }
+        pointer new_data = _allocator.allocate(new_cap);
+        for (size_type i = 0; i < _size; ++i)
+        {
+            new_data[i] = _data[i];
+        }
+        _allocator.deallocate(_data, _capacity);
+        _data = new_data;
+        _capacity = new_cap;
+    }
+
+    size_type capacity() const noexcept
     {
         return _capacity;
     }
 
-    // TODO: Modifiers
+    void shrink_to_fit() noexcept
+    {
+        if (_size == _capacity)
+        {
+            return;
+        }
+        pointer new_data = _allocator.allocate(_size);
+        for (size_type i = 0; i < _size; ++i)
+        {
+            new_data[i] = _data[i];
+        }
+        _allocator.deallocate(_data, _capacity);
+        _data = new_data;
+        _capacity = _size;
+    }
+
+    void clear() noexcept {}
+    void push_back( const T& value ) noexcept {}
+    void push_back( T&& value ) noexcept {}
+    
+    template< class... Args >
+    void emplace_back( Args&&... args );
+    
+    template< class... Args >
+    reference emplace_back( Args&&... args );
+
+    void pop_back();
+    void resize( size_type count );
+    void resize( size_type count, const value_type& value );
+
+    void swap( vector& other );
+    void swap( vector& other ) noexcept;
 
   private:
     size_type _size;
