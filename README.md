@@ -5,12 +5,10 @@ improving on security and parallelism. You can expect all the functionalities to
 
 ## Design goals
 - **exceptions are NEVER thrown**, instead values are returned as `optional` or `expected`
-- **constexpr** everywhere It's possible
-- less undefined behaviour, more security
+- **constexpr** functions and data structures
 - thread-safe data structures
 - modern-looking and readable c++23 code
-- do not strictly follow silly standards
-- optimize for performance
+- performance
 
 The library officially supports all GCC compilers starting from gcc-8.5.0.
 Constexpr functions are guaranteed to work from c++20 onward.
@@ -40,11 +38,11 @@ Constexpr functions are guaranteed to work from c++20 onward.
 - [tenno::default_delete\<T>](./include/tenno/memory.hpp)
 - [tenno::vector\<T>](./include/tenno/vector.hpp) (work in progress)
 - [tenno::reference_wrapper](./include/tenno/functional.hpp)
+- tenno::mdspan
 - tenno::deque: TODO
 - tenno::map: TODO
 - tenno::unordered_map: TODO
 - tenno::thread pool: TODO
-- goroutines?
 
 ## Testing
 
