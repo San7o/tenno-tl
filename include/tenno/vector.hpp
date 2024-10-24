@@ -27,13 +27,13 @@
 #pragma once
 
 #include <initializer_list>
+#include <tenno/algorithm.hpp>
 #include <tenno/error.hpp>
 #include <tenno/expected.hpp>
 #include <tenno/functional.hpp>
 #include <tenno/memory.hpp>
 #include <tenno/ranges.hpp>
 #include <tenno/types.hpp>
-#include <tenno/algorithm.hpp>
 #include <utility> // std::forward
 
 namespace tenno

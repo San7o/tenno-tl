@@ -85,7 +85,7 @@ template <typename T, tenno::size N> class array
 
     constexpr array(const array &other)
     {
-        tenno::copy(other.begin(), other.end(), this->_data);
+        tenno::copy(other.cbegin(), other.cend(), this->_data);
     }
 
     /**
@@ -112,10 +112,13 @@ template <typename T, tenno::size N> class array
      * auto arr = tenno::array<int, 10>::init();
      * ```
      */
-    constexpr static tenno::array<T, N> init() noexcept
+    static constexpr tenno::array<T, N> init() noexcept
     {
         auto arr = tenno::array<T, N>();
-        tenno::for_each(arr.begin(), arr.end(), [](T &elem) { elem = T(); });
+        for (auto i : tenno::range<tenno::size>(N))
+        {
+            arr._data[i] = T();
+        }
         return arr;
     }
 
@@ -322,78 +325,41 @@ template <typename T, tenno::size N> class array
         using pointer = T *;
         using reference = T &;
 
-        T *ptr;
+        tenno::array<T, N> &array;
+        tenno::size index;
 
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param ptr The pointer to the element the iterator points to
-         */
-        constexpr explicit iterator(T *ptr_in) : ptr(ptr_in)
+        explicit iterator(tenno::array<T, N> &array_in,
+                          tenno::size end) noexcept
+            : array(array_in), index(end)
         {
         }
 
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param ptr The pointer to the element the iterator points to
-         */
-        constexpr explicit iterator(const T *ptr_in)
-            : ptr(const_cast<T *>(ptr_in))
+        iterator &operator++() noexcept
         {
-        }
-
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param other The other iterator to copy
-         */
-        constexpr iterator &operator++() noexcept
-        {
-            ptr++;
+            ++index;
             return *this;
         }
 
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param other The other iterator to copy
-         */
-        constexpr iterator operator++(T) noexcept
+        iterator operator++(T) noexcept
         {
             iterator _iterator = *this;
-            ++*this;
+            ++index;
             return _iterator;
         }
 
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param other The other iterator to copy
-         */
-        constexpr bool operator==(const iterator &other) const noexcept
+        bool operator==(const iterator &other) const noexcept
         {
-            return ptr == other.ptr;
+            return index == other.index;
         }
 
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param other The other iterator to copy
-         */
-        constexpr bool operator!=(const iterator &other) const noexcept
+        bool operator!=(const iterator &other) const noexcept
         {
             return !(*this == other);
         }
 
-        /**
-         * @brief dereference operator
-         *
-         * @return reference The reference to the element the iterator points to
-         */
-        constexpr reference operator*() const noexcept
+        reference operator*() const noexcept
         {
-            return *ptr;
+            return array[index];
         }
     };
 
@@ -408,9 +374,9 @@ template <typename T, tenno::size N> class array
      * auto begin = arr.begin();
      * ```
      */
-    constexpr iterator begin() const noexcept
+    iterator begin() noexcept
     {
-        return iterator(this->_data);
+        return iterator(*this, 0);
     }
     /**
      * @brief Get an iterator to the end of the array
@@ -422,12 +388,15 @@ template <typename T, tenno::size N> class array
      * tenno::for_each(arr.begin(), arr.end(), [](int& elem) { elem = 0; });
      * ```
      */
-    constexpr iterator end() const noexcept
+    iterator end() noexcept
     {
-        return iterator(this->_data + this->_size);
+        return iterator(*this, this->_size);
     }
 
-    struct reverse_iterator
+    /**
+     * @brief A const iterator to iterate over the array
+     */
+    struct const_iterator
     {
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
@@ -435,80 +404,231 @@ template <typename T, tenno::size N> class array
         using pointer = T *;
         using reference = T &;
 
-        T *ptr;
+        const tenno::array<T, N> &array;
+        tenno::size index;
 
-        constexpr explicit reverse_iterator(T *ptr_in) : ptr(ptr_in)
+        constexpr explicit const_iterator(const tenno::array<T, N> &array_in,
+                                          const tenno::size end) noexcept
+            : array(array_in), index(end)
         {
         }
 
-        constexpr explicit reverse_iterator(const T *ptr_in)
-            : ptr(const_cast<T *>(ptr_in))
+        constexpr const_iterator &operator++() noexcept
         {
-        }
-
-        constexpr reverse_iterator &operator++() noexcept
-        {
-            ptr--;
+            ++index;
             return *this;
         }
 
-        constexpr reverse_iterator operator++(T) noexcept
+        constexpr const_iterator operator++(T) noexcept
         {
-            reverse_iterator _reverse_reverse_iterator = *this;
-            ++*this;
-            return _reverse_reverse_iterator;
+            const_iterator _const_iterator = *this;
+            ++index;
+            return _const_iterator;
         }
 
-        constexpr bool operator==(const reverse_iterator &other) const noexcept
+        constexpr bool operator==(const const_iterator &other) const noexcept
         {
-            return ptr == other.ptr;
+            return index == other.index;
         }
 
-        constexpr bool operator!=(const reverse_iterator &other) const noexcept
+        constexpr bool operator!=(const const_iterator &other) const noexcept
         {
             return !(*this == other);
         }
 
-        constexpr reference operator*() const noexcept
+        constexpr T operator*() const noexcept
         {
-            return *ptr;
+            return array[index];
         }
     };
 
     /**
-     * @brief Get a reverse_iterator to the beginning of the array
+     * @brief Get an const_iterator to the beginning of the array
      *
-     * @return reverse_iterator The reverse_iterator to the beginning of the
-     * array
+     * @return const_iterator The iterator to the beginning of the array
      *
      * # Example
      * ```cpp
      * auto arr = tenno::array<int, 5>();
-     * auto rbegin = arr.rbegin();
+     * auto begin = arr.begin();
      * ```
      */
-    constexpr reverse_iterator rbegin() const noexcept
+    constexpr const_iterator cbegin() const noexcept
     {
-        return reverse_iterator(this->_data + this->_size - 1);
+        return const_iterator(*this, 0);
+    }
+    /**
+     * @brief Get an const_iterator to the end of the array
+     *
+     * @return const_iterator The iterator to the end of the array
+     *
+     * # Example
+     * ```cpp
+     * tenno::for_each(arr.begin(), arr.end(), [](int& elem) { elem = 0; });
+     * ```
+     */
+    constexpr const_iterator cend() const noexcept
+    {
+        return const_iterator(*this, this->_size);
     }
 
     /**
-     * @brief Get a reverse_iterator to the end of the array
+     * @brief A reverse iterator over the array
+     */
+    struct reverse_iterator
+    {
+        using iterator_category = std::contiguous_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = T;
+        using pointer = T *;
+        using reference = T &;
+
+        tenno::array<T, N> &array;
+        tenno::size index;
+
+        explicit reverse_iterator(tenno::array<T, N> &array_in,
+                          tenno::size end) noexcept
+            : array(array_in), index(end)
+        {
+        }
+
+        reverse_iterator &operator++() noexcept
+        {
+            --index;
+            return *this;
+        }
+
+        reverse_iterator operator++(T) noexcept
+        {
+            reverse_iterator _reverse_iterator = *this;
+            --index;
+            return _reverse_iterator;
+        }
+
+        bool operator==(const reverse_iterator &other) const noexcept
+        {
+            return index == other.index;
+        }
+
+        bool operator!=(const reverse_iterator &other) const noexcept
+        {
+            return !(*this == other);
+        }
+
+        reference operator*() const noexcept
+        {
+            return array[index];
+        }
+    };
+
+    /**
+     * @brief Get an reverse_iterator to the beginning of the array
+     *
+     * @return reverse_iterator The reverse_iterator to the beginning of the array
+     *
+     * # Example
+     * ```cpp
+     * auto arr = tenno::array<int, 5>();
+     * auto begin = arr.begin();
+     * ```
+     */
+    reverse_iterator rbegin() noexcept
+    {
+        return reverse_iterator(*this, this->_size - 1);
+    }
+    /**
+     * @brief Get an reverse_iterator to the end of the array
      *
      * @return reverse_iterator The reverse_iterator to the end of the array
      *
      * # Example
      * ```cpp
-     * tenno::for_each(arr.rbegin(), arr.rend(), [](int& elem) { elem = 0; });
+     * tenno::for_each(arr.begin(), arr.end(), [](int& elem) { elem = 0; });
      * ```
      */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warray-bounds"
-    constexpr reverse_iterator rend() const noexcept
+    reverse_iterator rend() noexcept
     {
-        return reverse_iterator(this->_data - 1);
+        return reverse_iterator(*this, -1);
     }
-#pragma GCC diagnostic pop
+
+    /**
+     * @brief A const iterator to iterate over the array
+     */
+    struct const_reverse_iterator
+    {
+        using iterator_category = std::contiguous_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = T;
+        using pointer = T *;
+        using reference = T &;
+
+        const tenno::array<T, N> &array;
+        tenno::size index;
+
+        constexpr explicit const_reverse_iterator(const tenno::array<T, N> &array_in,
+                                          const tenno::size end) noexcept
+            : array(array_in), index(end)
+        {
+        }
+
+        constexpr const_reverse_iterator &operator++() noexcept
+        {
+            --index;
+            return *this;
+        }
+
+        constexpr const_reverse_iterator operator++(T) noexcept
+        {
+            const_reverse_iterator _const_reverse_iterator = *this;
+            --index;
+            return _const_reverse_iterator;
+        }
+
+        constexpr bool operator==(const const_reverse_iterator &other) const noexcept
+        {
+            return index == other.index;
+        }
+
+        constexpr bool operator!=(const const_reverse_iterator &other) const noexcept
+        {
+            return !(*this == other);
+        }
+
+        constexpr T operator*() const noexcept
+        {
+            return array[index];
+        }
+    };
+
+    /**
+     * @brief Get an const_reverse_iterator to the beginning of the array
+     *
+     * @return const_reverse_iterator The iterator to the beginning of the array
+     *
+     * # Example
+     * ```cpp
+     * auto arr = tenno::array<int, 5>();
+     * auto begin = arr.begin();
+     * ```
+     */
+    constexpr const_reverse_iterator crbegin() const noexcept
+    {
+        return const_reverse_iterator(*this, this->_size - 1);
+    }
+    /**
+     * @brief Get an const_reverse_iterator to the end of the array
+     *
+     * @return const_reverse_iterator The iterator to the end of the array
+     *
+     * # Example
+     * ```cpp
+     * tenno::for_each(arr.begin(), arr.end(), [](int& elem) { elem = 0; });
+     * ```
+     */
+    constexpr const_reverse_iterator crend() const noexcept
+    {
+        return const_reverse_iterator(*this, -1);
+    }
 
   private:
     T _data[N];

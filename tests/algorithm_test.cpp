@@ -56,7 +56,7 @@ TEST(algorithm_for_each_constexpr,
     constexpr const auto sum = [arr]() constexpr
     {
         auto tmp = 0;
-        tenno::for_each(arr.begin(), arr.end(), [&tmp](int i) { tmp += i; });
+        tenno::for_each(arr.cbegin(), arr.cend(), [&tmp](int i) { tmp += i; });
         return tmp;
     }();
     static_assert(sum == 15);
@@ -66,7 +66,7 @@ TEST(algorithm_for_each_constexpr,
 TEST(algorithm_accumulate, "accumulating tenno::array")
 {
     tenno::array<int, 5> arr{1, 2, 3, 4, 5};
-    auto sum = tenno::accumulate(arr.begin(), arr.end(), 0);
+    auto sum = tenno::accumulate(arr.cbegin(), arr.cend(), 0);
     ASSERT_EQ(sum, 15);
 }
 
@@ -74,7 +74,7 @@ TEST(algorithm_accumulate, "accumulating tenno::array")
 TEST(algorithm_accumulate_constexpr, "accumulating tenno::array constexpr")
 {
     constexpr tenno::array<int, 5> arr{1, 2, 3, 4, 5};
-    constexpr auto sum = tenno::accumulate(arr.begin(), arr.end(), 0);
+    constexpr auto sum = tenno::accumulate(arr.cbegin(), arr.cend(), 0);
     static_assert(sum == 15);
 }
 #endif

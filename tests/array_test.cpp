@@ -187,9 +187,24 @@ TEST(array_constexpr_iterator, "iterate over tenno::array constexpr")
     constexpr auto sum = [&arr]()
     {
         auto sum_ = 0;
-        for (auto elem : arr)
+        for (tenno::array<int, 3>::const_iterator it = arr.cbegin(); it != arr.cend(); ++it)
         {
-            sum_ += elem;
+            sum_ += *it;
+        }
+        return sum_;
+    }();
+    static_assert(sum == 6);
+}
+
+TEST(array_constexpr_reverse_iterator, "reverse iterate over tenno::array constexpr")
+{
+    constexpr auto arr = tenno::array<int, 3>{1, 2, 3};
+    constexpr auto sum = [&arr]()
+    {
+        auto sum_ = 0;
+        for (tenno::array<int, 3>::const_reverse_iterator it = arr.crbegin(); it != arr.crend(); ++it)
+        {
+            sum_ += *it;
         }
         return sum_;
     }();

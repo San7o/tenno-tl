@@ -15,7 +15,7 @@ The library officially supports all GCC compilers starting from gcc-8.5.0.
 Constexpr functions are guaranteed to work from c++20 onward.
 
 ## Currently implemented
-- [tenno::array<T,N>](./include/tenno/array.hpp) (TODO: rework iterator)
+- [tenno::array<T,N>](./include/tenno/array.hpp)
 - [tenno::expected<T,E>](./include/tenno/expected.hpp)
 - [tenno::range\<T>](./include/tenno/ranges.hpp)
 - [tenno::error](./include/tenno/error.hpp)
@@ -85,17 +85,17 @@ make docs
 
 ## array
 
-`tenno::array\<T,N>.at(n)` returns `expected\<T,E>` with either the value
+`tenno::array<T,N>.at(n)` returns `expected<T,E>` with either the value
 or a `tenno::error` with the error `out_of_range` if the range specified
 is bigger than the size of the array.
 
 ## vector
 
-- `tenno::vector\<T>.at(n)` returns `expected\<T,E>`
-- `tenno::vector\<T>.front()` return `expected\<const T&,E>`
-- `tenno::vector\<T>.back()` returns `expected\<const T&,E>`
-- `tenno::vector\<T>.operator[]` returns `expected\<T,E>`
-- all iterator access methods return `expected\<T,E>`
+- `tenno::vector<T>.at(n)` returns `expected<T,E>`
+- `tenno::vector<T>.front()` return `expected<const T&,E>`
+- `tenno::vector<T>.back()` returns `expected<const T&,E>`
+- `tenno::vector<T>.operator[]` returns `expected<T,E>`
+- all iterator access methods return `expected<T,E>`
 - iterator is divided into `iterator` and `iterator_mut`
 
 ## functional
