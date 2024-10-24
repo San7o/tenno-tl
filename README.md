@@ -1,6 +1,6 @@
 # tenno template library
 
-Tenno is a standard library implementation inspired by the C++23 standard, compatible
+Tenno is a library inspired by the C++23 standard library, compatible
 with C++17 language onwards. It aims to provide constexpr and thread-safe containers with security in mind. You can expect
 most of the apis to be similar to the standard library.
 

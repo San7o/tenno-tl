@@ -477,7 +477,7 @@ template <typename T, tenno::size N> class array
      */
     struct reverse_iterator
     {
-        using iterator_category = std::contiguous_iterator_tag;
+        using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = T;
         using pointer = T *;
@@ -556,7 +556,7 @@ template <typename T, tenno::size N> class array
      */
     struct const_reverse_iterator
     {
-        using iterator_category = std::contiguous_iterator_tag;
+        using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = T;
         using pointer = T *;
