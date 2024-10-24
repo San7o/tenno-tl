@@ -2,19 +2,22 @@
 
 Tenno is a standard library implementations following the C++23 standard, compatible
 with C++17 language onwards, improving on security and parallelism. You can expect
-most of the functionalities to behave like STL.
+most of the apis to be similar to the standard library.
 
 ## Design goals
 - **exceptions are NEVER thrown**, instead values are returned as `optional` or `expected`
 - **constexpr** functions and data structures
 - thread-safe data structures
-- modern-looking and readable c++23 code
+- modern-looking and readable c++ code
 - performance
 
 The library officially supports all GCC compilers starting from gcc-8.5.0.
 Constexpr functions are guaranteed to work from c++20 onward.
 
 ## Currently implemented
+The library aims to provide thread safe / constexpr containers and
+algorithms that are not provided by the standard library, currently
+the library provides the following features:
 - [tenno::array<T,N>](./include/tenno/array.hpp)
 - [tenno::expected<T,E>](./include/tenno/expected.hpp)
 - [tenno::range\<T>](./include/tenno/ranges.hpp)
@@ -23,7 +26,7 @@ Constexpr functions are guaranteed to work from c++20 onward.
 - [tenno::mutex](./include/tenno/mutex.hpp)
 - [tenno::lock_guard\<T>](./include/tenno/mutex.hpp)
 - [tenno::optional\<T>](./include/tenno/optional.hpp)
-- [tenno::shared_ptr\<T>](./include/tenno/memory.hpp) (TODO: array specialization)
+- [tenno::shared_ptr\<T>](./include/tenno/memory.hpp)
 - [tenno::copy<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::for_each<It1,It2,F>](./include/tenno/algorithm.hpp)
 - [tenno::accumulate<It1,It2,T>](./include/tenno/algorithm.hpp)
@@ -40,6 +43,7 @@ Constexpr functions are guaranteed to work from c++20 onward.
 - [tenno::vector\<T>](./include/tenno/vector.hpp)
 - [tenno::reference_wrapper](./include/tenno/functional.hpp)
 - tenno::deque: TODO
+- tenno::stack: TODO
 - tenno::map: TODO
 - tenno::unordered_map: TODO
 - tenno::mdspan: TODO

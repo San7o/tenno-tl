@@ -26,5 +26,54 @@
 
 // vim: set filetype=cpp :
 /// 
-/// \mainpage mylib documentation
+/// \mainpage tenno-tl documentation
 ///
+/// Welcome to the tenno-tl documentation. This is a C++ library that provides
+/// utilities for memory management, algorithms, and threading. The library is
+/// header-only and requires a C++17 compliant compiler, and C++20 for advanced
+/// constexpr features.
+///
+/// > Note: The library is currently in developement and is not ready for production.
+///
+/// ## Design goals
+///
+/// The library is designed with the following goals in mind:
+///
+/// - exceptions are NEVER thrown, instead values are returned as optional or expected
+/// - constexpr functions and data structures
+/// - thread-safe data structures
+/// - modern-looking and readable c++ code
+/// - performance
+///
+/// ## Features
+///
+/// The library aims to provide thread safe / constexpr containers
+/// and algorithms that are not provided by the standard library,
+/// currently the library provides the following features:
+/// - `tenno::array` a fixed-size array with constexpr support
+/// - `tenno::shared_ptr` shared pointer implementation
+/// - `tenno::unique_ptr` unique pointer implementation
+/// - `tenno::make_shared` make shared pointer with variadic arguments
+/// - `tenno::make_unique` make unique pointer with variadic arguments
+/// - `tenno::vector` a vector implementation
+/// - `tenno::optional` an optional type
+/// - `tenno::expected` an expected type
+/// - `tenno::atomic` atomic operations
+/// - `tenno::mutex` a mutex implementation
+/// - `tenno::lock_guard` a lock guard implementation
+/// - `tenno::jthread` a joinable thread implementation
+///
+/// And lots of other utilities and algorithms like:
+/// - tenno::range
+/// - tenno::error
+/// - tenno::copy
+/// - tenno::for_each
+/// - tenno::accumulate
+/// - tenno::swap
+/// - tenno::move
+/// - tenno::allocate_shared
+/// - tenno::allocator
+/// - tenno::default_delete
+/// - tenno::reference_wrapper
+///
+/// You can browse the API documentation for more details.

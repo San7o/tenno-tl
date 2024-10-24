@@ -25,6 +25,7 @@
  */
 
 #include <tenno/array.hpp>
+#include <tenno/vector.hpp>
 #include <tenno/memory.hpp>
 #include <valfuzz/valfuzz.hpp>
 
@@ -53,6 +54,13 @@ TEST(make_shared_no_args, "tenno::make_shared no args")
     auto sp = tenno::make_shared<int>();
     ASSERT_EQ(sp.use_count(), 1);
     ASSERT_EQ(*sp, 0);
+}
+
+TEST(make_shared_vector, "tenno::make_shared tenno::vector")
+{
+    tenno::vector<int> vec = {1, 2, 3, 4};
+    auto sp = tenno::make_shared<tenno::vector<int>>(std::move(vec));
+    ASSERT_EQ(sp.use_count(), 1);
 }
 
 TEST(allocate_shared, "tenno::allocate_shared")
