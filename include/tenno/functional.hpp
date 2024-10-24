@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <memory>  // std::addressof
+#include <memory> // std::addressof
 
 namespace tenno
 {
@@ -35,75 +35,61 @@ namespace tenno
  * @brief A reference wrapper class
  * @details This class is a wrapper around a reference to an object. It is
  * useful when you need to store a reference in a container, for example.
- * 
- * @tparam T 
+ *
+ * @tparam T
  */
-template <class T>
-class reference_wrapper
+template <class T> class reference_wrapper
 {
   public:
     using type = T;
     /**
      * @brief Construct a new reference wrapper object
-     * 
-     * @param x 
+     *
+     * @param x
      */
-    constexpr reference_wrapper(T &&x) noexcept
-        : _ptr(std::addressof(x)) {}
+    constexpr reference_wrapper(T &&x) noexcept : _ptr(std::addressof(x))
+    {
+    }
 
-    /**
-     * @brief Default constructor
-     * 
-     * @param other 
-     */
-    constexpr reference_wrapper() noexcept
-        : _ptr(nullptr) {}
+    constexpr reference_wrapper() noexcept : _ptr(nullptr)
+    {
+    }
 
-    /**
-     * @brief Copy constructor
-     * 
-     * @param other 
-     */
-    constexpr reference_wrapper(const reference_wrapper& other) noexcept
-        : _ptr(other._ptr) {}
+    constexpr reference_wrapper(const reference_wrapper &other) noexcept
+        : _ptr(other._ptr)
+    {
+    }
 
-    /**
-     * @brief Copy assignment operator
-     * 
-     * @param other 
-     * @return reference_wrapper& 
-     */
-    reference_wrapper& operator=(const reference_wrapper& other) noexcept
+    reference_wrapper &operator=(const reference_wrapper &other) noexcept
     {
         _ptr = other._ptr;
         return *this;
     }
 
-    /**
-     * @brief Operator to get the reference
-     * 
-     * @return T& 
-     */
-    constexpr operator T&() const noexcept
+    constexpr operator T &() const noexcept
     {
         return *_ptr;
     }
 
-    /**
-     * @brief Get the reference
-     * 
-     * @return T& 
-     */
-    constexpr T& ref() const noexcept
+    constexpr T &ref() const noexcept
     {
         return *_ptr;
+    }
+
+    constexpr bool operator==(const T &&other) const noexcept
+    {
+        return *_ptr == other;
+    }
+
+    constexpr bool operator!=(const T &&other) const noexcept
+    {
+        return *_ptr != other;
     }
 
     // TODO: operator()
 
   private:
-    T* _ptr;
-
+    T *_ptr;
 };
 
 } // namespace tenno

@@ -54,7 +54,6 @@ template <typename T> class optional
      */
     constexpr optional() noexcept : _has_value(false)
     {
-
 #if __cplusplus >= 202002L // C++20
         if (std::is_constant_evaluated())
         {
@@ -65,61 +64,30 @@ template <typename T> class optional
 #endif
     }
 
-    /**
-     * @brief Constructs an optional that contains a value
-     *
-     * @param value The value to contain
-     */
     constexpr optional(T value) noexcept : _has_value(true), _value(value)
     {
     }
 
-    /**
-     * @brief Constructs an optional that contains a value
-     *
-     * @param value The value to contain
-     */
     optional operator=(T &value) noexcept
     {
         this = optional(value);
     }
 
-    /**
-     * @brief Gets the value of the optional
-     *
-     * @return T The value of the optional
-     */
     constexpr T operator->() const noexcept
     {
         return this->_value;
     }
 
-    /**
-     * @brief Gets the value of the optional
-     *
-     * @return T The value of the optional
-     */
     constexpr T operator*() const noexcept
     {
         return this->_value;
     }
 
-    /**
-     * @brief Checks if the optional has a value
-     *
-     * @return true If the optional has a value
-     * @return false If the optional does not have a value
-     */
     constexpr bool has_value() const noexcept
     {
         return this->_has_value;
     }
 
-    /**
-     * @brief Returns the value of the optional
-     *
-     * @return T The value of the optional
-     */
     constexpr T value() const noexcept
     {
         return this->_value;
@@ -150,9 +118,6 @@ template <typename T> class optional
             tenno::swap(*this, other);
     }
 
-    /**
-     * @brief Resets the optional
-     */
     void reset() noexcept
     {
         if (this->_has_value)

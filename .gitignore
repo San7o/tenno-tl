@@ -3,3 +3,4 @@ generated_docs/
 builddir/
 subprojects/valfuzz
 deps/
+bazel-*

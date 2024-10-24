@@ -29,14 +29,14 @@
 
 TEST(jthread_create, "tenno::jthread creation")
 {
-    tenno::jthread t1([]() { [[maybe_unused]] volatile int i = 0; });
+    tenno::jthread t1([]() { volatile int i = 0; i++;});
     ASSERT(t1.joinable());
 }
 
 TEST(jthread_swap, "tenno::jthread swap")
 {
-    tenno::jthread t1([]() { [[maybe_unused]] volatile int i = 0; });
-    tenno::jthread t2([]() { [[maybe_unused]] volatile int i = 0; });
+    tenno::jthread t1([]() { volatile int i = 0; i++; });
+    tenno::jthread t2([]() { volatile int i = 0; i++; });
     std::thread::id id1 = t1.id;
     std::thread::id id2 = t2.id;
     t1.swap(t2);

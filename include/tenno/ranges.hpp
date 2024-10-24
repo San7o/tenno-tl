@@ -41,48 +41,22 @@ namespace tenno
 template <typename T> class range
 {
   public:
-    /**
-     * @brief The first element in the range
-     */
     T start_elem;
-    /**
-     * @brief The element after the last element in the range
-     */
     T end_elem;
 
-    /**
-     * @brief Construct a new range object
-     *
-     * @param start The first element in the range
-     * @param end The element after the last element in the range
-     */
     constexpr range(T start, T end) : start_elem(start), end_elem(end)
     {
     }
 
-    /**
-     * @brief Short constructor
-     *
-     * @param end The element after the last element in the range
-     * @note The first element in the range will default to 0
-     */
     constexpr explicit range(T end) : start_elem(0), end_elem(end)
     {
     }
 
-    /**
-     * @brief Returns the size of the range
-     *
-     * @return T The size of the range
-     */
     constexpr tenno::size size() const noexcept
     {
         return (tenno::size) end_elem - start_elem;
     }
 
-    /**
-     * @brief An iterator to iterate over the range
-     */
     struct iterator
     {
         using iterator_category = std::forward_iterator_tag;
@@ -120,23 +94,11 @@ template <typename T> class range
         }
     };
 
-    /**
-     * @brief Returns an iterator to the first element in the range
-     *
-     * @return iterator The iterator to the first element in the range
-     */
     constexpr iterator begin() const noexcept
     {
         return iterator(start_elem);
     }
 
-    /**
-     * @brief Returns an iterator to the element after the last element in the
-     * range
-     *
-     * @return iterator The iterator to the element after the last element in
-     * the range
-     */
     constexpr iterator end() const noexcept
     {
         return iterator(end_elem);

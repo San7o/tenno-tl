@@ -29,11 +29,12 @@
 #include <initializer_list>
 #include <tenno/error.hpp>
 #include <tenno/expected.hpp>
+#include <tenno/functional.hpp>
 #include <tenno/memory.hpp>
 #include <tenno/ranges.hpp>
 #include <tenno/types.hpp>
-#include <tenno/functional.hpp>
-#include <tenno/types.hpp>
+#include <tenno/algorithm.hpp>
+#include <utility> // std::forward
 
 namespace tenno
 {
@@ -44,11 +45,11 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
     using value_type = T;
     using allocator_type = Allocator;
     using size_type = tenno::size;
-    // using difference_type = tenno::difference;
     using reference = value_type &;
     using const_reference = const value_type &;
     using pointer = typename Allocator::pointer;
     using const_pointer = typename Allocator::const_pointer;
+    using difference_type = T;
 
     vector()
         : _size(0), _capacity(0), _data(nullptr),
@@ -70,6 +71,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
           _allocator(alloc)
     {
     }
+
     vector(const vector &other)
         : _size(other._size), _capacity(other._capacity),
           _data(_allocator.allocate(other._size)), _allocator(other._allocator)
@@ -79,6 +81,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
             _data[i] = other._data[i];
         }
     }
+
     vector(const vector &other, const Allocator &alloc)
         : _size(other._size), _capacity(other._capacity),
           _data(_allocator.allocate(other._size)), _allocator(alloc)
@@ -88,6 +91,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
             _data[i] = other._data[i];
         }
     }
+
     vector(vector &&other)
         : _size(other._size), _capacity(other._capacity), _data(other._data),
           _allocator(other._allocator)
@@ -95,6 +99,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         other._size = 0;
         other._data = nullptr;
     }
+
     vector(vector &&other, const Allocator &alloc)
         : _size(other._size), _capacity(other._capacity), _data(other._data),
           _allocator(alloc)
@@ -137,6 +142,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         }
         return *this;
     }
+
     vector &operator=(vector &&other) noexcept
     {
         if (this != &other)
@@ -153,6 +159,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         }
         return *this;
     }
+
     vector &operator=(std::initializer_list<value_type> ilist)
     {
         _allocator.deallocate(_data, _capacity);
@@ -257,7 +264,8 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         return tenno::reference_wrapper<T>(tenno::move(_data[pos]));
     }
 
-    expected<tenno::reference_wrapper<T>, tenno::error> operator[](size_type pos)
+    expected<tenno::reference_wrapper<T>, tenno::error>
+    operator[](size_type pos)
     {
         if (pos >= _size)
         {
@@ -270,7 +278,8 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         return tenno::reference_wrapper<T>(tenno::move(_data[pos]));
     }
 
-    expected<tenno::reference_wrapper<const T>, tenno::error> operator[](size_type pos) const
+    expected<tenno::reference_wrapper<const T>, tenno::error>
+    operator[](size_type pos) const
     {
         if (pos >= _size)
         {
@@ -309,12 +318,6 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         return tenno::reference_wrapper<const T>(tenno::move(_data[_size - 1]));
     }
 
-    /**
-     * @brief Get the data object
-     * @note Use this at your own risk
-     *
-     * @return pointer
-     */
     tenno::expected<pointer, tenno::error> data() noexcept
     {
         if (_data == nullptr)
@@ -324,12 +327,6 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         return _data;
     }
 
-    /**
-     * @brief Get the data object
-     * @note Use this at your own risk
-     *
-     * @return const_pointer
-     */
     tenno::expected<const_pointer, tenno::error> data() const noexcept
     {
         if (_data == nullptr)
@@ -353,31 +350,18 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         tenno::size index;
         tenno::vector<T, Allocator> &vec;
 
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param ptr The pointer to the element the iterator points to
-         */
-        explicit iterator(tenno::vector<T, Allocator> &_vec, const tenno::size _index) : index(_index), vec(_vec)
+        explicit iterator(tenno::vector<T, Allocator> &_vec,
+                          const tenno::size _index)
+            : index(_index), vec(_vec)
         {
         }
 
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param other The other iterator to copy
-         */
         iterator &operator++() noexcept
         {
             index++;
             return *this;
         }
 
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param other The other iterator to copy
-         */
         iterator operator++(T) noexcept
         {
             iterator _iterator = *this;
@@ -385,42 +369,30 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
             return _iterator;
         }
 
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param other The other iterator to copy
-         */
         bool operator==(const iterator &other) const noexcept
         {
             return index == other.index;
         }
 
-        /**
-         * @brief Construct a new iterator object
-         *
-         * @param other The other iterator to copy
-         */
         bool operator!=(const iterator &other) const noexcept
         {
             return !(index == other.index);
         }
 
-        /**
-         * @brief dereference operator
-         *
-         * @return reference The reference to the element the iterator points to
-         */
-        tenno::expected<tenno::reference_wrapper<T>, tenno::error> operator*() noexcept
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error>
+        operator*() noexcept
         {
             return vec[index];
         }
 
-        tenno::expected<tenno::reference_wrapper<T>, tenno::error> operator->() noexcept
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error>
+        operator->() noexcept
         {
             return vec[index];
         }
 
-        tenno::expected<tenno::reference_wrapper<T>, tenno::error> get() noexcept
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error>
+        get() noexcept
         {
             return vec[index];
         }
@@ -441,6 +413,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
     {
         return iterator(*this, tenno::size(0));
     }
+
     /**
      * @brief Get an iterator to the end of the data
      *
@@ -470,31 +443,18 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         long long int index;
         tenno::vector<T, Allocator> &vec;
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param ptr The pointer to the element the reverse_iterator points to
-         */
-        explicit reverse_iterator(tenno::vector<T, Allocator> &_vec, const long long int _index) : index(_index), vec(_vec)
+        explicit reverse_iterator(tenno::vector<T, Allocator> &_vec,
+                                  const long long int _index)
+            : index(_index), vec(_vec)
         {
         }
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param other The other reverse_iterator to copy
-         */
         reverse_iterator &operator++() noexcept
         {
             index--;
             return *this;
         }
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param other The other reverse_iterator to copy
-         */
         reverse_iterator operator++(T) noexcept
         {
             reverse_iterator _iterator = *this;
@@ -502,42 +462,30 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
             return _iterator;
         }
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param other The other reverse_iterator to copy
-         */
         bool operator==(const reverse_iterator &other) const noexcept
         {
             return index == other.index;
         }
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param other The other reverse_iterator to copy
-         */
         bool operator!=(const reverse_iterator &other) const noexcept
         {
             return !(index == other.index);
         }
 
-        /**
-         * @brief dereference operator
-         *
-         * @return reference The reference to the element the reverse_iterator points to
-         */
-        tenno::expected<tenno::reference_wrapper<T>, tenno::error> operator*() noexcept
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error>
+        operator*() noexcept
         {
             return vec[index];
         }
 
-        tenno::expected<tenno::reference_wrapper<T>, tenno::error> operator->() noexcept
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error>
+        operator->() noexcept
         {
             return vec[index];
         }
 
-        tenno::expected<tenno::reference_wrapper<T>, tenno::error> get() noexcept
+        tenno::expected<tenno::reference_wrapper<T>, tenno::error>
+        get() noexcept
         {
             return vec[index];
         }
@@ -558,6 +506,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
     {
         return reverse_iterator(*this, _size - 1);
     }
+
     /**
      * @brief Get an reverse_iterator to the end of the data
      *
@@ -585,7 +534,7 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
 
     size_type max_size() const noexcept
     {
-        return (tenno::size)-1;
+        return (tenno::size) -1;
     }
 
     void reserve(size_type new_cap)
@@ -625,22 +574,70 @@ template <class T, class Allocator = tenno::allocator<T>> class vector
         _capacity = _size;
     }
 
-    void clear() noexcept {}
-    void push_back( const T& value ) noexcept {}
-    void push_back( T&& value ) noexcept {}
-    
-    template< class... Args >
-    void emplace_back( Args&&... args );
-    
-    template< class... Args >
-    reference emplace_back( Args&&... args );
+    void clear() noexcept
+    {
+        this->_size = 0;
+    }
 
-    void pop_back();
-    void resize( size_type count );
-    void resize( size_type count, const value_type& value );
+    void push_back(const T &value) noexcept
+    {
+        if (_size == _capacity)
+        {
+            reserve(_capacity == 0 ? 1 : _capacity * 2);
+        }
+        _data[_size] = value;
+        _size++;
+    }
 
-    void swap( vector& other );
-    void swap( vector& other ) noexcept;
+    void push_back(const T &&value) noexcept
+    {
+        push_back(value);
+    }
+
+    template <class... Args> reference emplace_back(Args &&...args) noexcept
+    {
+        push_back(T(std::forward<Args>(args)...));
+        return _data[_size - 1];
+    }
+
+    void pop_back() noexcept
+    {
+        if (_size == 0)
+        {
+            return;
+        }
+        _size--;
+    }
+
+    void resize(size_type count) noexcept
+    {
+        reserve(count);
+        while (_size < count)
+        {
+            _data[_size] = T();
+            ++_size;
+        }
+        _size = count;
+    }
+
+    void resize(size_type count, const value_type &value) noexcept
+    {
+        reserve(count);
+        while (_size < count)
+        {
+            _data[_size] = value;
+            ++_size;
+        }
+        _size = count;
+    }
+
+    void swap(vector &other) noexcept
+    {
+        tenno::swap(_size, other._size);
+        tenno::swap(_capacity, other._capacity);
+        tenno::swap(_data, other._data);
+        tenno::swap(_allocator, other._allocator);
+    }
 
   private:
     size_type _size;

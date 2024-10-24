@@ -338,7 +338,8 @@ template <typename T, tenno::size N> class array
          *
          * @param ptr The pointer to the element the iterator points to
          */
-        constexpr explicit iterator(const T *ptr_in) : ptr(const_cast<T *>(ptr_in))
+        constexpr explicit iterator(const T *ptr_in)
+            : ptr(const_cast<T *>(ptr_in))
         {
         }
 
@@ -436,41 +437,21 @@ template <typename T, tenno::size N> class array
 
         T *ptr;
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param ptr The pointer to the element the iterator points to
-         */
         constexpr explicit reverse_iterator(T *ptr_in) : ptr(ptr_in)
         {
         }
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param ptr The pointer to the element the iterator points to
-         */
         constexpr explicit reverse_iterator(const T *ptr_in)
             : ptr(const_cast<T *>(ptr_in))
         {
         }
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param other The other reverse_iterator to copy
-         */
         constexpr reverse_iterator &operator++() noexcept
         {
             ptr--;
             return *this;
         }
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param other The other reverse_reverse_iterator to copy
-         */
         constexpr reverse_iterator operator++(T) noexcept
         {
             reverse_iterator _reverse_reverse_iterator = *this;
@@ -478,32 +459,16 @@ template <typename T, tenno::size N> class array
             return _reverse_reverse_iterator;
         }
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param other The other reverse_reverse_iterator to copy
-         */
         constexpr bool operator==(const reverse_iterator &other) const noexcept
         {
             return ptr == other.ptr;
         }
 
-        /**
-         * @brief Construct a new reverse_iterator object
-         *
-         * @param other The other reverse_iterator to copy
-         */
         constexpr bool operator!=(const reverse_iterator &other) const noexcept
         {
             return !(*this == other);
         }
 
-        /**
-         * @brief dereference operator
-         *
-         * @return reference The reference to the element the reverse_Iterator
-         * points to
-         */
         constexpr reference operator*() const noexcept
         {
             return *ptr;

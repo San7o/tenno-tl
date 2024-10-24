@@ -404,7 +404,7 @@ TEST(vector_size, "vector size")
 TEST(vector_max_size, "vector max size")
 {
     tenno::vector<int> v;
-    ASSERT_EQ(v.max_size(), (tenno::size)-1);
+    ASSERT_EQ(v.max_size(), (tenno::size) -1);
 }
 
 TEST(vector_reserve, "vector reserve")
@@ -426,6 +426,16 @@ TEST(vector_reserve, "vector reserve")
     }
 }
 
+TEST(vector_capacity, "vector capacity")
+{
+    tenno::vector<int> v(5, 10);
+    ASSERT_EQ(v.capacity(), 5);
+    tenno::vector<int> v2;
+    ASSERT_EQ(v2.capacity(), 0);
+    tenno::vector<int> v3(10);
+    ASSERT_EQ(v3.capacity(), 10);
+}
+
 TEST(vector_shrink_to_fit, "vector shrink to fit")
 {
     tenno::vector<int> v(5, 10);
@@ -438,12 +448,126 @@ TEST(vector_shrink_to_fit, "vector shrink to fit")
     }
 }
 
-TEST(vector_capacity, "vector capacity")
+TEST(vector_clear, "vector clear")
 {
     tenno::vector<int> v(5, 10);
+    ASSERT(v.size() == 5);
+    ASSERT(v.capacity() == 5);
+    v.clear();
+    ASSERT(v.size() == 0);
+    ASSERT(v.capacity() == 5);
+}
+
+TEST(vector_push_back_test, "vector push back")
+{
+    tenno::vector<int> v;
+    v.push_back(10);
+    ASSERT_EQ(v.size(), 1);
+    ASSERT_EQ(v.capacity(), 1);
+    ASSERT_EQ(v[0].value(), 10);
+    v.push_back(20);
+    ASSERT_EQ(v.size(), 2);
+    ASSERT_EQ(v.capacity(), 2);
+    ASSERT_EQ(v[0].value(), 10);
+    ASSERT_EQ(v[1].value(), 20);
+}
+
+class test_emplace_back
+{
+  public:
+    int val;
+    test_emplace_back() : val(0)
+    {
+    }
+    template <class... Args> test_emplace_back(Args &&...args) : val(args...)
+    {
+    }
+
+    constexpr bool operator==(const test_emplace_back &other) const
+    {
+        return val == other.val;
+    }
+    constexpr bool operator!=(const test_emplace_back &other) const
+    {
+        return val != other.val;
+    }
+};
+
+TEST(vector_emplace_back_test, "vector emplace back")
+{
+    tenno::vector<test_emplace_back> v;
+    v.emplace_back(10);
+    ASSERT_EQ(v.size(), 1);
+    ASSERT_EQ(v.capacity(), 1);
+    ASSERT_EQ(v[0].value(), 10);
+    v.emplace_back(20);
+    ASSERT_EQ(v.size(), 2);
+    ASSERT_EQ(v.capacity(), 2);
+    ASSERT_EQ(v[0].value(), 10);
+    ASSERT_EQ(v[1].value(), 20);
+}
+
+TEST(vector_pop_back_test, "vector pop back")
+{
+    tenno::vector<int> v = {1, 2, 3, 4, 5};
+    v.pop_back();
+    ASSERT_EQ(v.size(), 4);
     ASSERT_EQ(v.capacity(), 5);
-    tenno::vector<int> v2;
-    ASSERT_EQ(v2.capacity(), 0);
-    tenno::vector<int> v3(10);
-    ASSERT_EQ(v3.capacity(), 10);
+    for (int i = 0; i < 4; i++)
+    {
+        ASSERT_EQ(v[i].value(), i + 1);
+    }
+}
+
+TEST(vector_resize_test, "vector resize")
+{
+    tenno::vector<int> v = {1, 2, 3, 4, 5};
+    v.resize(3);
+    ASSERT_EQ(v.size(), 3);
+    ASSERT_EQ(v.capacity(), 5);
+    for (int i = 0; i < 3; i++)
+    {
+        ASSERT_EQ(v[i].value(), i + 1);
+    }
+    v.resize(5);
+    ASSERT_EQ(v.size(), 5);
+    ASSERT_EQ(v.capacity(), 5);
+    for (int i = 0; i < 3; i++)
+    {
+        ASSERT_EQ(v[i].value(), i + 1);
+    }
+    for (int i = 3; i < 5; i++)
+    {
+        ASSERT_EQ(v[i].value(), 0);
+    }
+    v.resize(10, 10);
+    ASSERT_EQ(v.size(), 10);
+    ASSERT_EQ(v.capacity(), 10);
+    for (int i = 0; i < 3; i++)
+    {
+        ASSERT_EQ(v[i].value(), i + 1);
+    }
+    for (int i = 5; i < 10; i++)
+    {
+        ASSERT_EQ(v[i].value(), 10);
+    }
+}
+
+TEST(vector_swap_test, "vector swap")
+{
+    tenno::vector<int> v1 = {1, 2, 3, 4, 5};
+    tenno::vector<int> v2 = {6, 7, 8, 9, 10};
+    v1.swap(v2);
+    ASSERT_EQ(v1.size(), 5);
+    ASSERT_EQ(v1.capacity(), 5);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v1[i].value(), i + 6);
+    }
+    ASSERT_EQ(v2.size(), 5);
+    ASSERT_EQ(v2.capacity(), 5);
+    for (int i = 0; i < 5; i++)
+    {
+        ASSERT_EQ(v2[i].value(), i + 1);
+    }
 }

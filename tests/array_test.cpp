@@ -215,7 +215,6 @@ TEST(array_at_error, "tenno::array::at() error")
     ASSERT_EQ(arr.at(3).error(), tenno::error::out_of_range);
 }
 
-
 #if __cplusplus >= 202002L // C++20
 TEST(array_at_constexpr, "tenno::array::at() constexpr")
 {

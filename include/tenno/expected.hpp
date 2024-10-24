@@ -26,8 +26,8 @@
 
 #pragma once
 
+#include <tenno/functional.hpp>
 #include <tenno/utility.hpp> // tenno::move
-#include <tenno/functional.hpp> 
 
 namespace tenno
 {
@@ -58,55 +58,24 @@ template <typename E> class unexpected
 template <typename T, typename E> class expected
 {
   public:
-    /**
-     * @brief Whether the expected object has a value
-     */
     bool has_val;
-    /**
-     * @brief The value of the expected object
-     */
     const T val;
-    /**
-     * @brief The unexpected value of the expected object
-     */
     const unexpected<E> unex;
 
-    /**
-     * @brief Construct a new expected object
-     *
-     * @param val The value of the expected object
-     */
     constexpr expected(const T val_in) : has_val(true), val(val_in), unex(E())
     {
     }
-    /**
-     * @brief Construct a new expected object
-     *
-     * @param unex The unexpected value of the expected object
-     */
+
     constexpr expected(const unexpected<E> unex_val)
         : has_val(false), val(T()), unex(unex_val)
     {
     }
 
-    /**
-     * @brief Converts the expected object to a boolean
-     *
-     * @return true If the expected object has a value
-     * @return false If the expected object does not have a value
-     */
     constexpr explicit operator bool() const noexcept
     {
         return has_val;
     }
 
-    /**
-     * @brief Compares two expected objects
-     *
-     * @param other The other expected object to compare to
-     * @return true If the two expected objects are equal
-     * @return false If the two expected objects are not equal
-     */
     constexpr bool operator==(const expected<T, E> &other) const noexcept
     {
         if (has_val != other.has_val)
@@ -120,24 +89,11 @@ template <typename T, typename E> class expected
         return unex.unex == other.unex.unex;
     }
 
-    /**
-     * @brief Compares two expected objects
-     *
-     * @param other The other expected object to compare to
-     * @return false If the two expected objects are equal
-     * @return true If the two expected objects are not equal
-     */
     constexpr bool operator!=(const expected<T, E> &other) const noexcept
     {
         return !(*this == other);
     }
 
-    /**
-     * @brief Assigns an expected object to another expected object
-     *
-     * @param other The other expected object to assign to
-     * @return expected<T, E>& The assigned expected object
-     */
     constexpr auto
     operator=(const expected<T, E> &other) noexcept -> expected<T, E> &
     {
@@ -147,32 +103,16 @@ template <typename T, typename E> class expected
         return *this;
     }
 
-    /**
-     * @brief Checks if the expected object has a value
-     *
-     * @return true If the expected object has a value
-     * @return false If the expected object does not have a value
-     */
     constexpr bool has_value() const noexcept
     {
         return has_val;
     }
 
-    /**
-     * @brief Returns the value of the expected object
-     *
-     * @return T The value of the expected object
-     */
     constexpr T value() const noexcept
     {
         return val;
     }
 
-    /**
-     * @brief Returns the unexpected value of the expected object
-     *
-     * @return E The unexpected value of the expected object
-     */
     constexpr E error() const noexcept
     {
         return unex.unex;

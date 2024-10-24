@@ -46,9 +46,6 @@ template <typename T> class atomic
      * @brief The type of the atomic object.
      */
     using value_type = T;
-    /**
-     * @brief Whether the atomic object is always lock free.
-     */
     const bool is_always_lock_free = false;
 
     atomic() noexcept = default;
@@ -57,43 +54,23 @@ template <typename T> class atomic
     atomic &operator=(const atomic &) = delete;
     atomic &operator=(const atomic &) volatile = delete;
 
-    /**
-     * @brief Check if the atomic object is lock free.
-     *
-     * @return true if the atomic object is lock free, false otherwise.
-     */
     inline bool is_lock_free() const noexcept
     {
         return this->is_always_lock_free;
     }
 
-    /**
-     * @brief Store a value in the atomic object.
-     *
-     * @param desired The value to store.
-     */
     inline void store(T desired) noexcept
     {
         tenno::lock_guard<tenno::mutex> lock(this->_mutex);
         this->_value = desired;
     }
 
-    /**
-     * @brief Load the value from the atomic object.
-     *
-     * @return T The value stored in the atomic object.
-     */
     inline T load() noexcept
     {
         tenno::lock_guard<tenno::mutex> lock(this->_mutex);
         return this->_value;
     }
 
-    /**
-     * @brief Implicit conversion to the value stored in the atomic object.
-     *
-     * @return T The value stored in the atomic object.
-     */
     operator T() noexcept
     {
         return this->load();
@@ -348,7 +325,7 @@ template <> class atomic<char>
         return desired;
     }
 
-    inline bool compare_exchange_weak(char & expected, char desired) noexcept
+    inline bool compare_exchange_weak(char &expected, char desired) noexcept
     {
         bool success;
         asm volatile("lock cmpxchg %[desired], %[target]\n\t"

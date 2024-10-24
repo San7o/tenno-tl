@@ -14,6 +14,12 @@ cc_library(
         "-O3",
         "-ffast-math",
         "-march=native",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wno-unused-variable",
+        "-Wno-unused-function",
     ],
     visibility = ["//visibility:public"],
 )

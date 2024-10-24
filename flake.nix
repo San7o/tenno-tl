@@ -29,7 +29,7 @@
             cmake                   # build system
             meson                   # build system
             ninja                   # build system
-            bazelisk                # build system
+            bazel                   # build system
             ccache                  # compiler cache
             valgrind                # memory debugger
             python312               # scripting

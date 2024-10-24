@@ -1,7 +1,8 @@
 # tenno template library
 
-This library aims to be a replacement for some functionalities of the STL for c++17/20/23,
-improving on security and parallelism. You can expect all the functionalities to behave like STL.
+Tenno is a standard library implementations following the C++23 standard, compatible
+with C++17 language onwards, improving on security and parallelism. You can expect
+most of the functionalities to behave like STL.
 
 ## Design goals
 - **exceptions are NEVER thrown**, instead values are returned as `optional` or `expected`
@@ -36,22 +37,27 @@ Constexpr functions are guaranteed to work from c++20 onward.
 - [tenno::weak_ptr\<T>](./include/tenno/memory.hpp)
 - [tenno::allocator\<T>](./include/tenno/memory.hpp)
 - [tenno::default_delete\<T>](./include/tenno/memory.hpp)
-- [tenno::vector\<T>](./include/tenno/vector.hpp) (work in progress)
+- [tenno::vector\<T>](./include/tenno/vector.hpp)
 - [tenno::reference_wrapper](./include/tenno/functional.hpp)
-- tenno::mdspan
 - tenno::deque: TODO
 - tenno::map: TODO
 - tenno::unordered_map: TODO
+- tenno::mdspan: TODO
 - tenno::thread pool: TODO
 
-## Testing
+## Building
+
+### Using bazel
+```bash
+bazel build //:libtenno
+```
 
 ### Using Cmake
+Build as a library:
 ```bash
-cmake -Bbuild -DTENNO_BUILD_TESTS=ON
-cmake --build build -j 4
-./build/tests --help
+cmake -Bbuild -DTENNO_BUILD_SHARED=ON -DTENNO_BUILD_OPTIMIZED=ON
 ```
+Note that tests are enabled by default.
 
 ### Using meson
 
@@ -75,7 +81,7 @@ The library uses doxygen for documentation, to build the html documentation run:
 make docs
 ```
 
-# Differences with STL
+## Differences with STL
 
 ## array
 

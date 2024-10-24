@@ -137,8 +137,9 @@ class shared_ptr
     friend control_block;
     friend class tenno::weak_ptr<T>;
     template <class Y, class... Args>
-    friend typename std::enable_if<!std::is_array<Y>::value, shared_ptr<Y>>::type
-    make_shared(Args &&...args) noexcept;
+    friend
+        typename std::enable_if<!std::is_array<Y>::value, shared_ptr<Y>>::type
+        make_shared(Args &&...args) noexcept;
     template <class Y> friend shared_ptr<Y> make_shared() noexcept;
     template <class Y>
     friend typename std::enable_if<std::is_array<Y>::value, shared_ptr<Y>>::type
@@ -918,7 +919,7 @@ template <class T, class Deleter = tenno::default_delete<T>> class unique_ptr
 #if __cplusplus >= 202002L // C++20
     constexpr
 #endif
-    ~unique_ptr()
+        ~unique_ptr()
     {
         if (this->_value != nullptr)
             this->_deleter(this->_value);
@@ -1121,7 +1122,8 @@ template <class T> shared_ptr<T> make_shared() noexcept
  */
 template <class T, class Alloc, class... Args>
 // typename std::enable_if<!std::is_array<T>::value, shared_ptr<T>>::type
-typename tenno::shared_ptr<T> allocate_shared(Alloc &alloc, Args &&...args) noexcept
+typename tenno::shared_ptr<T> allocate_shared(Alloc &alloc,
+                                              Args &&...args) noexcept
 {
     T *t = alloc.allocate(1);
     *t = T(args...);

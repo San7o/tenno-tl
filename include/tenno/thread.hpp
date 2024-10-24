@@ -43,13 +43,11 @@ class jthread
      */
     using native_handle_type = std::thread::native_handle_type;
 
-    /**
-     * @brief The id of the thread
-     */
     std::thread::id id;
 
     jthread() noexcept = default;
     jthread(const jthread &) = delete;
+
     /**
      * @brief Construct a new jthread object by moving the other object
      *
@@ -75,9 +73,6 @@ class jthread
         this->id = this->_inner_thread.get_id();
     }
 
-    /**
-     * @brief Destroy the jthread object and join the thread
-     */
     ~jthread()
     {
         if (this->joinable())
@@ -86,21 +81,11 @@ class jthread
         }
     }
 
-    /**
-     * @brief Check if the thread is joinable
-     *
-     * @return true if the thread is joinable, false otherwise
-     */
     bool joinable() const noexcept
     {
         return this->_inner_thread.joinable();
     }
 
-    /**
-     * @brief Get the id of the thread
-     *
-     * @return std::thread::id The id of the thread
-     */
     std::thread::id get_id() const noexcept
     {
         return this->_inner_thread.get_id();
@@ -128,28 +113,17 @@ class jthread
         return std::thread::hardware_concurrency();
     }
 
-    /**
-     * @brief Join the thread
-     */
     void join()
     {
         this->_inner_thread.join();
     }
 
-    /**
-     * @brief Detach the thread
-     */
     void detach()
     {
         this->_inner_thread.detach();
     }
 
-    /**
-     * @brief Swap the current jthread object with the other object
-     *
-     * @param other The other jthread object to swap with
-     */
-    void swap([[maybe_unused]] tenno::jthread &other) noexcept
+    void swap(tenno::jthread &other) noexcept
     {
         this->_inner_thread.swap(other._inner_thread);
         this->id = this->_inner_thread.get_id();
@@ -157,31 +131,16 @@ class jthread
     }
 
 #if __cplusplus >= 202002L // C++20
-    /**
-     * @brief Get the stop source of the thread
-     *
-     * @return std::stop_source The stop source of the thread
-     */
     std::stop_source get_stop_source() noexcept
     {
         return this->_stop_source;
     }
 
-    /**
-     * @brief Get the stop token of the thread
-     *
-     * @return std::stop_token The stop token of the thread
-     */
     std::stop_token get_stop_token() const noexcept
     {
         return this->_stop_source.get_token();
     }
 
-    /**
-     * @brief Request the thread to stop
-     *
-     * @return true if the thread was requested to stop, false otherwise
-     */
     bool request_stop() noexcept
     {
         return this->_stop_source.request_stop();
