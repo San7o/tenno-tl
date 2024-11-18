@@ -31,7 +31,7 @@
 TEST(uniform_real_distribution_constexpr_test,
      "uniform_real_distribution constexpr test")
 {
-  [[maybe_unused]] constexpr int seed = 1337;
+  [[maybe_unused]] constexpr unsigned int seed = 1337;
   /*
   static_assert(uniform_real_distribution<1>(seed) == 1.0f);
   static_assert(uniform_real_distribution<2>(seed) == 1.0f);
@@ -39,14 +39,14 @@ TEST(uniform_real_distribution_constexpr_test,
   static_assert(uniform_real_distribution<4>(seed) == 1.0f);
   */
 
-  // Create vector
+  // Create array
   const tenno::size N = 100;
   [[maybe_unused]] tenno::array<float, N> vec =
-     tenno::random_vector<N>(seed, 0, 1);
+     tenno::random_array<N>(seed, 0, 1);
 
   // Print the vector 
   /*
-  std::cout << "Vector: \n";
+  std::cout << "Array: \n";
   for (const auto& c : vec)
     std::cout << c << " ";
   */

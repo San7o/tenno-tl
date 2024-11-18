@@ -53,7 +53,7 @@ constexpr unsigned int gen<0>(const unsigned int N)
 }
 
 template<const unsigned int it>
-constexpr float uniform_real_distribution(const int seed,
+constexpr float uniform_real_distribution(const unsigned int seed,
 					  const float min = 0,
 					  const float max = 1)
 {
@@ -67,7 +67,7 @@ constexpr float uniform_real_distribution(const int seed,
 
 template<const tenno::size N, const tenno::size it>
 constexpr tenno::array<float, N>
-random_vector_impl(const int seed,
+random_array_impl(const int seed,
 		const float min,
 		const float max,
 		const tenno::array<float, N> vec)
@@ -80,18 +80,18 @@ random_vector_impl(const int seed,
     {
       tenno::array<float, N> new_vec = vec;
       new_vec[it] = uniform_real_distribution<it>(seed, min, max);
-      return random_vector_impl<N, it+1>(seed, min, max, new_vec);
+      return random_array_impl<N, it+1>(seed, min, max, new_vec);
     }
 }
 
 template<const tenno::size N>
 constexpr tenno::array<float, N>
-random_vector(const int seed,
+random_array(const int seed,
 	   const float min = 0,
 	   const float max = 1)
 {
   constexpr tenno::array<float, N> vec;
-  return random_vector_impl<N,0>(seed, min, max, vec);
+  return random_array_impl<N,0>(seed, min, max, vec);
 }
 
 } // tenno
