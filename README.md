@@ -42,6 +42,7 @@ the library provides the following features:
 - [tenno::default_delete\<T>](./include/tenno/memory.hpp)
 - [tenno::vector\<T>](./include/tenno/vector.hpp)
 - [tenno::reference_wrapper](./include/tenno/functional.hpp)
+- [tenno::uniform\_real_distribution](./include/tenno/random.hpp)
 - tenno::deque: TODO
 - tenno::stack: TODO
 - tenno::map: TODO

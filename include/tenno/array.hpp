@@ -65,7 +65,7 @@ template <typename T, tenno::size N> class array
      * performance reasons. If you want to initialize the array's
      * elements, use the static `init` method.
      */
-    constexpr array() = default;
+  constexpr array() : _data() {}
 
     /**
      * @brief Construct a new array object with a list of elements
@@ -340,7 +340,7 @@ template <typename T, tenno::size N> class array
             return *this;
         }
 
-        iterator operator++(T) noexcept
+        iterator operator++(int) noexcept
         {
             iterator _iterator = *this;
             ++index;
@@ -415,14 +415,14 @@ template <typename T, tenno::size N> class array
 
         constexpr const_iterator &operator++() noexcept
         {
-            ++index;
+            index += 1;
             return *this;
         }
 
-        constexpr const_iterator operator++(T) noexcept
+        constexpr const_iterator operator++(int) noexcept
         {
             const_iterator _const_iterator = *this;
-            ++index;
+            index += 1;
             return _const_iterator;
         }
 
@@ -498,7 +498,7 @@ template <typename T, tenno::size N> class array
             return *this;
         }
 
-        reverse_iterator operator++(T) noexcept
+        reverse_iterator operator++(int) noexcept
         {
             reverse_iterator _reverse_iterator = *this;
             --index;
@@ -577,7 +577,7 @@ template <typename T, tenno::size N> class array
             return *this;
         }
 
-        constexpr const_reverse_iterator operator++(T) noexcept
+        constexpr const_reverse_iterator operator++(int) noexcept
         {
             const_reverse_iterator _const_reverse_iterator = *this;
             --index;
