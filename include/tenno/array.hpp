@@ -295,7 +295,7 @@ template <typename T, tenno::size N> class array
      * auto elem = arr[2];
      * ```
      */
-    T &operator[](const tenno::size index) noexcept
+    constexpr T &operator[](const tenno::size index) noexcept
     {
         return this->_data[index];
     }
@@ -303,7 +303,7 @@ template <typename T, tenno::size N> class array
     /**
      * @brief Access an element of the array constexpr
      */
-    constexpr T operator[](const tenno::size index) const noexcept
+    constexpr const T& operator[](const tenno::size index) const noexcept
     {
         return this->_data[index];
     }

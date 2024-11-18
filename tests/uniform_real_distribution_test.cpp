@@ -27,7 +27,6 @@
 #include <valfuzz/valfuzz.hpp>
 #include <tenno/random.hpp>
 
-
 TEST(uniform_real_distribution_constexpr_test,
      "uniform_real_distribution constexpr test")
 {
@@ -41,7 +40,7 @@ TEST(uniform_real_distribution_constexpr_test,
 
   // Create array
   const tenno::size N = 100;
-  [[maybe_unused]] tenno::array<float, N> vec =
+  [[maybe_unused]] constexpr tenno::array<float, N> vec =
      tenno::random_array<N>(seed, 0, 1);
 
   // Print the vector 
