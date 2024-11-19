@@ -88,6 +88,12 @@ make docs
 
 ## Differences with STL
 
+## random
+
+tenno implements **compile-time random number generation** through
+the `uniform_real_distribution()` and the `random_array()` dunctions,
+enabling you to use random numbers in constexpr algorithms.
+
 ## array
 
 `tenno::array<T,N>.at(n)` returns `expected<T,E>` with either the value
