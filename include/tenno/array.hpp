@@ -57,6 +57,11 @@ template <typename T, tenno::size N> class array
      * @brief The type of the elements in the array
      */
     using value_type = T;
+   
+    /* TODO: may be removed */
+    static constexpr T generate_default() {
+        return T{}; // Default-initialize T
+    }
 
     /**
      * @brief Construct a new array object
@@ -65,7 +70,13 @@ template <typename T, tenno::size N> class array
      * performance reasons. If you want to initialize the array's
      * elements, use the static `init` method.
      */
-  constexpr array() : _data() {}
+    constexpr array() : _data{}
+    {
+        for (auto i : tenno::range<tenno::size>(N))
+        {
+            this->_data[i] = generate_default();
+        }
+    }
 
     /**
      * @brief Construct a new array object with a list of elements
@@ -83,7 +94,7 @@ template <typename T, tenno::size N> class array
         tenno::copy(list.begin(), list.end(), this->_data);
     }
 
-    constexpr array(const array &other)
+    constexpr array(const array &other) : _data{}
     {
         tenno::copy(other.cbegin(), other.cend(), this->_data);
     }

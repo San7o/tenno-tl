@@ -67,10 +67,10 @@ constexpr float uniform_real_distribution(const unsigned int seed,
 
 template<const tenno::size N, const tenno::size it>
 constexpr tenno::array<float, N>
-random_array_impl(const int seed,
-		const float min,
-		const float max,
-		const tenno::array<float, N> vec)
+random_array_impl([[maybe_unused]] const int seed,
+		[[maybe_unused]] const float min,
+		[[maybe_unused]] const float max,
+		[[maybe_unused]] const tenno::array<float, N> vec)
 {
   if constexpr (it >= N)
     {

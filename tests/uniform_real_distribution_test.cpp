@@ -30,7 +30,7 @@
 TEST(uniform_real_distribution_constexpr_test,
      "uniform_real_distribution constexpr test")
 {
-  [[maybe_unused]] constexpr unsigned int seed = 1337;
+  constexpr unsigned int seed = 1337;
   /*
   static_assert(uniform_real_distribution<1>(seed) == 1.0f);
   static_assert(uniform_real_distribution<2>(seed) == 1.0f);

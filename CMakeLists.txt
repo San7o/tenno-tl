@@ -60,14 +60,16 @@ CPMAddPackage(
 CPMAddPackage(
     NAME valfuzz
     GITHUB_REPOSITORY San7o/valFuzz
-    GIT_TAG v1.0.4
+    GIT_TAG v1.1.0
     DOWNLOAD_ONLY True
 )
-if (valfuzz_ADDED)
-    list(APPEND TENNO_TEST_SOURCES ${valfuzz_SOURCE_DIR}/src/valfuzz.cpp)
-    list(APPEND TENNO_TEST_HEADERS ${valfuzz_SOURCE_DIR}/include)
-endif()
 
+if (valfuzz_ADDED)
+    message("Using valfuzz")
+    list(APPEND TENNO_TEST_HEADERS ${valfuzz_SOURCE_DIR}/include)
+    add_subdirectory(${valfuzz_SOURCE_DIR})
+    list(APPEND TENNO_LINK_LIBRARIES valfuzz_shared)
+endif()
 if(TENNO_USE_CLANG)
     set(CMAKE_CXX_COMPILER clang++)
     list(APPEND TENNO_COMPILE_OPTIONS -std=c++23 -fexperimental-library)
