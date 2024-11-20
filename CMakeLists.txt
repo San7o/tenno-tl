@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.15.4)
 project(
     tenno
-    VERSION 0.1.1
     LANGUAGES CXX
 )
 
@@ -60,7 +59,7 @@ CPMAddPackage(
 CPMAddPackage(
     NAME valfuzz
     GITHUB_REPOSITORY San7o/valFuzz
-    GIT_TAG v1.1.0
+    GIT_TAG v1.1.1
     DOWNLOAD_ONLY True
 )
 
