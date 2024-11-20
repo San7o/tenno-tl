@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.15.4)
 project(
     tenno
     VERSION 0.1.1
     LANGUAGES CXX
 )
 
-set(CMAKE_CXX_STANDARD 23 REQUIRED)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_THREAD_LIBS_INIT "-lpthread")
 set(CMAKE_HAVE_THREADS_LIBRARY 1)
 set(CMAKE_USE_WIN32_THREADS_INIT 0)

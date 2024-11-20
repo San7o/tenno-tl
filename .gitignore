@@ -4,3 +4,5 @@ builddir/
 subprojects/valfuzz
 deps/
 bazel-*
+*~
+*#
