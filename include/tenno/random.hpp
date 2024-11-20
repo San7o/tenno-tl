@@ -27,6 +27,7 @@
 #pragma once
 
 #include <tenno/array.hpp>
+#include <limits>
 
 namespace tenno
 {
