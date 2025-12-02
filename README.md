@@ -1,23 +1,29 @@
 # tenno template library
 
-Tenno is a library inspired by the C++23 standard library, compatible
-with C++17 language onwards. It aims to provide constexpr and thread-safe containers with security in mind. You can expect
-most of the apis to be similar to the standard library.
+Tenno is a replacement for the C++23 standard library, providing light
+constexpr and thread-safe containers, algorithms and data structures
+for your projects. You can expect most of the apis to be similar to
+the ones in the standard library.
+
+Tenno is implemented as a header only library, meaning that you can
+just include the files under the [include](./include) directory in
+your project, or you can just copy-paste the ones that you need.
 
 ## Design goals
-- **exceptions are NEVER thrown**, instead values are returned as `optional` or `expected`
-- **constexpr** functions and data structures
+
+- values are returned as `optional` or `expected` instead of raising
+  exceptions
+- heavy support for constexpr functions and data structures
 - thread-safe data structures
-- modern-looking and readable c++ code
+- modern-looking c++ code
 - performance
 
-The library officially supports all GCC compilers starting from gcc-8.5.0.
-Constexpr functions are guaranteed to work from c++20 onward.
+The library officially supports all GCC compilers starting from
+gcc-8.5.0.  Constexpr functions are guaranteed to work from c++20
+onward.
 
 ## Currently implemented
-The library aims to provide thread safe / constexpr containers and
-algorithms that are not provided by the standard library, currently
-the library provides the following features:
+
 - [tenno::array<T,N>](./include/tenno/array.hpp)
 - [tenno::expected<T,E>](./include/tenno/expected.hpp)
 - [tenno::range\<T>](./include/tenno/ranges.hpp)
@@ -50,29 +56,10 @@ the library provides the following features:
 - tenno::mdspan: TODO
 - tenno::thread pool: TODO
 
-## Building
-
-### Using bazel
-```bash
-bazel build //:libtenno
-```
-
-### Using Cmake
-Build as a library:
-```bash
-cmake -Bbuild -DTENNO_BUILD_SHARED=ON -DTENNO_BUILD_OPTIMIZED=ON
-```
-Note that tests are enabled by default.
-
-### Using meson
-
-```bash
-meson setup build
-ninja -C build
-./build/tests --help
-```
+## Testing
 
 The library uses [valFuzz](https://github.com/San7o/valFuzz) for testing
+
 ```c++
 ./build/tests              # run tests
 ./build/tests --fuzz       # run fuzzer
@@ -82,6 +69,7 @@ The library uses [valFuzz](https://github.com/San7o/valFuzz) for testing
 ## Documentation
 
 The library uses doxygen for documentation, to build the html documentation run:
+
 ```
 make docs
 ```
@@ -90,15 +78,15 @@ make docs
 
 ## random
 
-tenno implements **compile-time random number generation** through
-the `uniform_real_distribution()` and the `random_array()` dunctions,
+tenno implements **compile-time random number generation** through the
+`uniform_real_distribution()` and the `random_array()` dunctions,
 enabling you to use random numbers in constexpr algorithms.
 
 ## array
 
-`tenno::array<T,N>.at(n)` returns `expected<T,E>` with either the value
-or a `tenno::error` with the error `out_of_range` if the range specified
-is bigger than the size of the array.
+`tenno::array<T,N>.at(n)` returns `expected<T,E>` with either the
+value or a `tenno::error` with the error `out_of_range` if the range
+specified is bigger than the size of the array.
 
 ## vector
 
@@ -111,4 +99,5 @@ is bigger than the size of the array.
 
 ## functional
 
-- `std::reference_wrapper\<T>.get()` has beed renamed to `std::reference_wrapper\<T>.ref()`
+- `std::reference_wrapper\<T>.get()` has beed renamed to
+  `std::reference_wrapper\<T>.ref()`

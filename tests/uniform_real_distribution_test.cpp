@@ -1,31 +1,10 @@
-/*
- * MIT License
- *
- * Copyright (c) 2024 Giovanni Santini
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- */
+// SPDX-License-Identifier: MIT
+// Author:  Giovanni Santini
+// Mail:    giovanni.santini@proton.me
+// Github:  @San7o
 
-#include <valfuzz/valfuzz.hpp>
 #include <tenno/random.hpp>
+#include <valfuzz/valfuzz.hpp>
 
 TEST(uniform_real_distribution_constexpr_test,
      "uniform_real_distribution constexpr test")
@@ -41,26 +20,24 @@ TEST(uniform_real_distribution_constexpr_test,
   // Create array
   const tenno::size N = 100;
   [[maybe_unused]] constexpr tenno::array<float, N> vec =
-     tenno::random_array<N>(seed, 0, 1);
+    tenno::random_array<N>(seed, 0, 1);
 
-  // Print the vector 
+  // Print the vector
   /*
   std::cout << "Array: \n";
   for (const auto& c : vec)
     std::cout << c << " ";
   */
-} 
+}
 
 /*
 
-Notes:
-I want to write a constexpr uniform random number
-generator, It seems like an interesting problem.
+Notes: I want to write a constexpr uniform random number generator, It
+seems like an interesting problem.
 
-First, I need to write some sort of function to
-gen the next generation from a previous one.
-Remember that anything needs to be constant
-so I'll take inspiration from functional programming.
+First, I need to write some sort of function to gen the next
+generation from a previous one.  Remember that anything needs to be
+constant so I'll take inspiration from functional programming.
 
 The following code applies a function N times:
 
@@ -88,12 +65,11 @@ TEST(uniform_real_distribution_constexpr_test,
   constexpr int a = 0;
   constexpr int b = gen<3>(a);
   static_assert(b == 3);
-} 
+}
 ```
 
-Now I need to change that add_one function to
-get some sort of random distribution.
-I used lcg like so
+Now I need to change that add_one function to get some sort of random
+distribution.  I used lcg like so
 
 ```cpp
 constexpr int lcg(const int seed)
@@ -107,13 +83,12 @@ constexpr int lcg(const int seed)
 }
 ```
 
-And at the end I need to to normalize and cast
-the values:
+And at the end I need to to normalize and cast the values:
 
 template<const unsigned int it>
 constexpr float uniform_real_distribution(const int seed,
-					  const float min = 0,
-					  const float max = 20)
+                                          const float min = 0,
+                                          const float max = 20)
 {
   constexpr unsigned int m =
     std::numeric_limits<unsigned int>::max();

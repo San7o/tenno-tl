@@ -5,6 +5,7 @@
 ```
 
 Use `perf` for profiling
+
 ```bash
 perf stat -d ./build/tests --benchmark
 ```

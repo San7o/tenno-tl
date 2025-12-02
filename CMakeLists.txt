@@ -1,106 +1,101 @@
-cmake_minimum_required(VERSION 3.15.4)
-project(
-    tenno
-    LANGUAGES CXX
-)
+# ====================================================================
+# Project:   Brenta Engine
+# Author:    Giovanni Santini
+# Mail:      giovanni.santini@proton.me
+# Github:    @San7o
+# License:   MIT
+# ====================================================================
+
+cmake_minimum_required(VERSION 3.16)
+
+project(tenno
+  VERSION 0.2.0
+  DESCRIPTION "C++ data structures and containers"
+  LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)  # no gnu extensions
 set(CMAKE_THREAD_LIBS_INIT "-lpthread")
 set(CMAKE_HAVE_THREADS_LIBRARY 1)
 set(CMAKE_USE_WIN32_THREADS_INIT 0)
 set(CMAKE_USE_PTHREADS_INIT 1)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-set(TENNO_SOURCES
-        src/tenno.cpp
-)
+find_program(CCACHE_PROGRAM ccache) # use ccache if available
+if(CCACHE_PROGRAM)
+  message(STATUS "Using ccache: ${CCACHE_PROGRAM}")
+  set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+endif()
+
 set(TENNO_HEADERS include)
-set(TENNO_COMPILE_OPTIONS -Wall -Wextra -Wpedantic -Werror
-			  -Wconversion -Wshadow
-)
-set(TENNO_TEST_SOURCES
-        tests/array_test.cpp
-        tests/ranges_test.cpp
-        tests/expected_test.cpp
-        tests/algorithm_test.cpp
-        tests/atomic_test.cpp
-        tests/mutex_test.cpp
-        tests/optional_test.cpp
-        tests/shared_ptr_test.cpp
-        tests/utility_test.cpp
-        tests/memory_test.cpp
-        tests/unique_ptr_test.cpp
-        tests/thread_test.cpp
-        tests/weak_ptr_test.cpp
-        tests/vector_test.cpp
-        tests/functional_test.cpp
-	tests/uniform_real_distribution_test.cpp
-        fuzz/array_fuzz.cpp
-        benchmarks/array_benchmark.cpp
-)
+set(TENNO_COMPILE_OPTIONS
+  -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow)
+
+file(GLOB TENNO_TEST_SOURCES
+  tests/*.cpp
+  fuzz/*.cpp
+  benchmarks/*.cpp)
+
 set(TENNO_TEST_HEADERS)
 set(TENNO_LINK_LIBRARIES)
 
-option(TENNO_USE_CLANG "Use clang" OFF)
+#
+# Options
+#
+
 option(TENNO_BUILD_TESTS "Build tests" ON)
-option(TENNO_BUILD_SHARED "Build shared library" OFF)
-option(TENNO_BUILD_STATIC "Build static library" OFF)
+option(TENNO_USE_CLANG "Use clang" OFF)
 option(TENNO_OPTIMIZE "O3 optimization" OFF)
 option(TENNO_OPTIMIE_AGGRESSIVE "Highest possible optimizations" OFF)
 
-set(ENV{CPM_SOURCE_CACHE} ${CMAKE_CURRENT_SOURCE_DIR}/deps)
-include(cmake/CPM.cmake) # <3
-CPMUsePackageLock(package-lock.cmake)
-CPMAddPackage(
-  NAME Ccache.cmake
-  GITHUB_REPOSITORY TheLartians/Ccache.cmake
-  VERSION 1.2
-)
-CPMAddPackage(
-    NAME valfuzz
-    GITHUB_REPOSITORY San7o/valFuzz
-    GIT_TAG v1.1.2
-    DOWNLOAD_ONLY True
-)
-
-if (valfuzz_ADDED)
-    message("Using valfuzz")
-    list(APPEND TENNO_TEST_HEADERS ${valfuzz_SOURCE_DIR}/include)
-    add_subdirectory(${valfuzz_SOURCE_DIR})
-    list(APPEND TENNO_LINK_LIBRARIES valfuzz_shared)
-endif()
 if(TENNO_USE_CLANG)
-    set(CMAKE_CXX_COMPILER clang++)
-    list(APPEND TENNO_COMPILE_OPTIONS -std=c++23 -fexperimental-library)
-    list(APPEND TENNO_LINK_LIBRARIES -fexperimental-library)
+  set(CMAKE_CXX_COMPILER clang++)
+  list(APPEND TENNO_COMPILE_OPTIONS -std=c++23 -fexperimental-library)
+  list(APPEND TENNO_LINK_LIBRARIES -fexperimental-library)
 endif()
 if(TENNO_OPTIMIZE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 endif()
 if(TENNO_OPTIMIZE_AGGRESSIVE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -march=native")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -march=native")
 endif()
 if (TENNO_BUILD_TESTS)
-    list(APPEND TENNO_COMPILE_OPTIONS -DTENNO_DEBUG -g)
+  list(APPEND TENNO_COMPILE_OPTIONS -DTENNO_DEBUG -g)
 endif()
 
-if(TENNO_BUILD_SHARED)
-    add_library(tenno_shared SHARED ${TENNO_SOURCES})
-    target_include_directories(tenno_shared PRIVATE ${TENNO_HEADERS})
-    target_compile_options(tenno_shared PRIVATE ${TENNO_COMPILE_OPTIONS})
-    target_link_libraries(tenno_shared PRIVATE ${TENNO_LINK_LIBRARIES})
-endif()
+#
+# Dependencies
+#
 
-if(TENNO_BUILD_STATIC)
-    add_library(tenno_static STATIC ${TENNO_SOURCES})
-    target_include_directories(tenno_static PRIVATE ${TENNO_HEADERS})
-    target_compile_options(tenno_static PRIVATE ${TENNO_COMPILE_OPTIONS})
-    target_link_libraries(tenno_static PRIVATE ${TENNO_LINK_LIBRARIES})
-endif()
+# Use CPM for dependency management
+include(cmake/CPM.cmake)
+CPMUsePackageLock(package-lock.cmake)
+
+CPMAddPackage(
+  NAME valfuzz
+  GITHUB_REPOSITORY San7o/valFuzz
+  GIT_TAG origin/main)
+list(APPEND TENNO_LINK_LIBRARIES valfuzz)
+
+#
+# Targets
+#
 
 if(TENNO_BUILD_TESTS AND valfuzz_ADDED)
-    add_executable(tests ${TENNO_SOURCES} ${TENNO_TEST_SOURCES})
-    target_include_directories(tests PRIVATE ${TENNO_HEADERS} ${TENNO_TEST_HEADERS})
-    target_compile_options(tests PRIVATE ${TENNO_COMPILE_OPTIONS})
-    target_link_libraries(tests PRIVATE ${TENNO_LINK_LIBRARIES})
+  add_executable(${PROJECT_NAME}_tests
+    ${TENNO_TEST_SOURCES})
+  target_include_directories(${PROJECT_NAME}_tests PRIVATE
+    ${TENNO_HEADERS}
+    ${valfuzz_SOURCE_DIR}/include
+    ${TENNO_TEST_HEADERS})
+  target_compile_options(${PROJECT_NAME}_tests PRIVATE
+    ${TENNO_COMPILE_OPTIONS})
+  target_link_libraries(${PROJECT_NAME}_tests PRIVATE
+    valfuzz
+    ${TENNO_LINK_LIBRARIES})
 endif()
+
+#
+# End of CMakeLists.txt
+# ====================================================================

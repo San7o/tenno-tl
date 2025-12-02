@@ -1,29 +1,3 @@
-/*
- * MIT License
- *
- * Copyright (c) 2024 Giovanni Santini
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- */
-
 // vim: set filetype=cpp :
 /// 
 /// \mainpage tenno-tl documentation
@@ -39,10 +13,11 @@
 ///
 /// The library is designed with the following goals in mind:
 ///
-/// - exceptions are NEVER thrown, instead values are returned as optional or expected
-/// - constexpr functions and data structures
+/// - values are returned as `optional` or `expected` instead of raising
+///   exceptions
+/// - heavy support for constexpr functions and data structures
 /// - thread-safe data structures
-/// - modern-looking and readable c++ code
+/// - modern-looking c++ code
 /// - performance
 ///
 /// ## Features
@@ -50,6 +25,7 @@
 /// The library aims to provide thread safe / constexpr containers
 /// and algorithms that are not provided by the standard library,
 /// currently the library provides the following features:
+///
 /// - `tenno::array` a fixed-size array with constexpr support
 /// - `tenno::shared_ptr` shared pointer implementation
 /// - `tenno::unique_ptr` unique pointer implementation
@@ -64,6 +40,7 @@
 /// - `tenno::jthread` a joinable thread implementation
 ///
 /// And lots of other utilities and algorithms like:
+///
 /// - tenno::range
 /// - tenno::error
 /// - tenno::copy
@@ -75,5 +52,6 @@
 /// - tenno::allocator
 /// - tenno::default_delete
 /// - tenno::reference_wrapper
+/// - ...
 ///
 /// You can browse the API documentation for more details.
