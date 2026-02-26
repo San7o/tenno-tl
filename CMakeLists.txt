@@ -45,9 +45,9 @@ set(TENNO_LINK_LIBRARIES)
 #
 
 option(TENNO_BUILD_TESTS "Build tests" ON)
-option(TENNO_USE_CLANG "Use clang" OFF)
-option(TENNO_OPTIMIZE "O3 optimization" OFF)
-option(TENNO_OPTIMIE_AGGRESSIVE "Highest possible optimizations" OFF)
+option(TENNO_TESTS_USE_CLANG "Use clang" OFF)
+option(TENNO_TESTS_OPTIMIZE "O3 optimization" OFF)
+option(TENNO_TESTS_OPTIMIE_AGGRESSIVE "Highest possible optimizations" OFF)
 
 if(TENNO_USE_CLANG)
   set(CMAKE_CXX_COMPILER clang++)

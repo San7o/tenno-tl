@@ -60,10 +60,10 @@ onward.
 
 The library uses [valFuzz](https://github.com/San7o/valFuzz) for testing
 
-```c++
-./build/tests              # run tests
-./build/tests --fuzz       # run fuzzer
-./build/tests --benchmark  # run benchmarks
+```bash
+./build/tenno_tests              # run tests
+./build/tenno_tests --fuzz       # run fuzzer
+./build/tenno_tests --benchmark  # run benchmarks
 ```
 
 ## Documentation
