@@ -15,6 +15,16 @@ TEST(make_shared, "tenno::make_shared")
   ASSERT_EQ(*sp, 5);
 }
 
+class A {};
+class B : public A {};
+
+TEST(make_shared_inheritance, "tenno::make_shared_inheritance")
+{
+  auto sp = tenno::make_shared<A>(B());
+  ASSERT_EQ(sp.use_count(), 1);
+}
+
+
 TEST(make_shared_array, "tenno::make_shared T[]")
 {
   auto sp = tenno::make_shared<int[10]>(10);

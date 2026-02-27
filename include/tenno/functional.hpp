@@ -26,10 +26,10 @@ public:
    *
    * @param x
    */
-  constexpr reference_wrapper(T &&x) noexcept : _ptr(std::addressof(x))
-  {
-  }
+  constexpr reference_wrapper(T &x) noexcept : _ptr(std::addressof(x)) {}
 
+  reference_wrapper(T &&) = delete;
+  
   constexpr reference_wrapper() noexcept : _ptr(nullptr)
   {
   }
@@ -50,7 +50,7 @@ public:
     return *_ptr;
   }
 
-  constexpr T &ref() const noexcept
+  constexpr T &get() const noexcept
   {
     return *_ptr;
   }
@@ -65,10 +65,15 @@ public:
     return *_ptr != other;
   }
 
-  // TODO: operator()
+  constexpr T* operator->() noexcept
+  {
+    return _ptr;
+  }
 
 private:
   T *_ptr;
 };
 
+
+  
 } // namespace tenno

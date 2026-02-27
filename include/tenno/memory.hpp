@@ -38,6 +38,7 @@ template <class T> struct allocator
   using size_type = tenno::size;
 
   allocator() noexcept = default;
+  
   template <class U> allocator(const allocator<U> &) noexcept
   {
   }
@@ -66,10 +67,12 @@ template <class T> struct allocator
 template <typename T> struct default_delete
 {
   default_delete() noexcept = default;
+  
   void operator()(T *ptr) const noexcept
   {
     delete ptr;
   }
+  
   template <typename U> void operator()(U *ptr) const noexcept
   {
     delete ptr;
@@ -77,6 +80,19 @@ template <typename T> struct default_delete
 };
 
 template <class T> class weak_ptr;
+
+struct control_block_base
+{
+  long num_ptrs      = 0;
+  long num_weak_ptrs = 0;
+  tenno::mutex cb_mutex = {};
+
+  // Deallocate this control block
+  // Only call this when num_ptrs == 0 AND num_weak_ptrs == 0
+  virtual void deallocate() = 0;
+  virtual void dispose_object() = 0;
+  virtual ~control_block_base() = default;
+};
 
 /**
  * @brief A shared pointer
@@ -88,27 +104,49 @@ template <class T, class Deleter = tenno::default_delete<T>,
 class shared_ptr
 {
 public:
+
   /**
    * @brief The type of the object to point to
    */
   using element_type = T;
 
-  struct control_block
+  struct control_block : control_block_base
   {
-    T *object;
-    Alloc allocator;
-    Deleter deleter;
-    long num_ptrs;
-    long num_weak_ptrs;
-    tenno::mutex cb_mutex;
+    T            *object;
+    Alloc         allocator;
+    Deleter       deleter;
+
     control_block() = default;
-    void deallocate()
+
+    control_block(T* obj) : object(obj)
     {
-      this->deleter(this->object);
-      if (this->num_weak_ptrs == 0)
-        this->allocator.deallocate(
-          (T *) this, sizeof(control_block) / sizeof(T)
-                        + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
+      this->num_ptrs = 1;
+      this->num_num_ptrs = 0;
+    }
+    
+    control_block(T&& obj)
+    {
+      void* raw_mem   = tenno::allocator<T>().allocate(1);
+      T* new_object   = new (raw_mem) T(tenno::move(obj));
+      
+      this->object = new_object;
+      this->num_ptrs = 1;
+      this->num_num_ptrs = 0;
+    }
+    
+    void dispose_object() override
+    {
+      if (this->object)
+      {
+        this->deleter(this->object);
+        this->object = nullptr;
+      }
+    }
+
+    void deallocate() override
+    {
+      this->~control_block();
+      operator delete(this); 
     }
   };
 
@@ -118,10 +156,15 @@ public:
   friend typename std::enable_if<!std::is_array<Y>::value, shared_ptr<Y>>::type
   make_shared(Args &&...args) noexcept;
   template <class Y> friend shared_ptr<Y> make_shared() noexcept;
+  template <class Y> friend shared_ptr<Y> make_shared(Y&&) noexcept;
   template <class Y>
   friend typename std::enable_if<std::is_array<Y>::value, shared_ptr<Y>>::type
   make_shared(tenno::size n) noexcept;
-
+  // Make sure that all versions of shared_ptr are friends with each
+  // other
+  template <typename U, typename D, typename A>
+  friend class shared_ptr;
+  
   /**
    * @brief Default constructor
    */
@@ -136,19 +179,41 @@ public:
    */
   shared_ptr(T *ptr)
   {
-    auto *cb = (control_block *) tenno::allocator<T>().allocate(
-      sizeof(control_block) / sizeof(T)
-      + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
-    cb->object = ptr;
-    cb->num_ptrs = 1;
-    cb->num_weak_ptrs = 0;
-    cb->allocator = tenno::allocator<T>();
-    cb->deleter = tenno::default_delete<T>();
-    cb->cb_mutex = tenno::mutex();
-    this->_element = cb->object;
+    size_t         size_in_ts = (sizeof(control_block) + sizeof(T) - 1) / sizeof(T);
+    void*          raw_mem    = tenno::allocator<T>().allocate(size_in_ts);
+    control_block* cb         = new (raw_mem) control_block();
+    
+    cb->object           = ptr;
+    cb->num_ptrs         = 1;
+    cb->num_weak_ptrs    = 0;
+    cb->allocator        = tenno::allocator<T>();
+    cb->deleter          = tenno::default_delete<T>();
+    cb->cb_mutex         = tenno::mutex();
+    this->_element       = cb->object;
     this->_control_block = cb;
   }
 
+  /**
+   * @brief Construct a shared pointer object by move
+   *
+   * @param obj Move reference to the object
+   */
+  shared_ptr(T&& obj)
+  {
+    size_t         size_in_ts = (sizeof(control_block) + sizeof(T) - 1) / sizeof(T);
+    void*          raw_mem    = tenno::allocator<T>().allocate(size_in_ts);
+    control_block* cb         = new (raw_mem) control_block(tenno::move(obj));
+
+    cb->num_ptrs         = 1;
+    cb->num_weak_ptrs    = 0;
+    cb->allocator        = tenno::allocator<T>();
+    cb->deleter          = tenno::default_delete<T>();
+    cb->cb_mutex         = tenno::mutex();
+    this->_element       = cb->object;
+    this->_control_block = cb;
+  }
+
+  
   /**
    * @brief Construct a new shared pointer object
    *
@@ -157,16 +222,17 @@ public:
    */
   shared_ptr(T *ptr, Deleter deleter)
   {
-    auto *cb = (control_block *) tenno::allocator<T>().allocate(
-      sizeof(control_block) / sizeof(T)
-      + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
-    cb->object = ptr;
-    cb->num_ptrs = 1;
-    cb->num_weak_ptrs = 0;
-    cb->allocator = tenno::allocator<T>();
-    cb->deleter = deleter;
-    cb->cb_mutex = tenno::mutex();
-    this->_element = cb->object;
+    size_t         size_in_ts = (sizeof(control_block) + sizeof(T) - 1) / sizeof(T);
+    void*          raw_mem    = tenno::allocator<T>().allocate(size_in_ts);
+    control_block* cb         = new (raw_mem) control_block();
+    
+    cb->object           = ptr;
+    cb->num_ptrs         = 1;
+    cb->num_weak_ptrs    = 0;
+    cb->allocator        = tenno::allocator<T>();
+    cb->deleter          = deleter;
+    cb->cb_mutex         = tenno::mutex();
+    this->_element       = cb->object;
     this->_control_block = cb;
   }
 
@@ -179,16 +245,17 @@ public:
    */
   shared_ptr(T *ptr, Deleter deleter, Alloc alloc)
   {
-    control_block *cb = (control_block *) alloc.allocate(
-      sizeof(control_block) / sizeof(T)
-      + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
-    cb->object = ptr;
-    cb->num_ptrs = 1;
-    cb->num_weak_ptrs = 0;
-    cb->allocator = alloc;
-    cb->deleter = deleter;
-    cb->cb_mutex = tenno::mutex();
-    this->_element = cb->object;
+    size_t         size_in_ts = (sizeof(control_block) + sizeof(T) - 1) / sizeof(T);
+    void*          raw_mem    = alloc.allocate(size_in_ts);
+    control_block* cb         = new (raw_mem) control_block();
+    
+    cb->object           = ptr;
+    cb->num_ptrs         = 1;
+    cb->num_weak_ptrs    = 0;
+    cb->allocator        = alloc;
+    cb->deleter          = deleter;
+    cb->cb_mutex         = tenno::mutex();
+    this->_element       = cb->object;
     this->_control_block = cb;
   }
 
@@ -200,6 +267,8 @@ public:
   shared_ptr(const shared_ptr &other) noexcept
       : _element(other._element), _control_block(other._control_block)
   {
+    if (!this->_control_block) return;
+    
     tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
     this->_control_block->num_ptrs++;
   }
@@ -212,7 +281,32 @@ public:
   shared_ptr(shared_ptr &&other) noexcept
       : _element(other._element), _control_block(other._control_block)
   {
-    other._element = nullptr;
+    other._element       = nullptr;
+    other._control_block = nullptr;
+  }
+
+  /**
+   * @brief Conversion constructor
+   * This allows shared_ptr<Derived> to be passed where shared_ptr<Base> is expected.
+   */
+  template <typename U>
+  shared_ptr(const shared_ptr<U>& other) noexcept 
+    : _element(other._element), _control_block(other._control_block) 
+  {
+    if (_control_block)
+    {
+      _control_block->num_ptrs++;
+    }
+  }
+
+  /**
+   * @brief Conversion move constructor
+   */
+  template <typename U>
+  shared_ptr(shared_ptr<U>&& other) noexcept 
+    : _element(other._element), _control_block(other._control_block) 
+  {
+    other._element       = nullptr;
     other._control_block = nullptr;
   }
 
@@ -221,17 +315,7 @@ public:
    */
   ~shared_ptr()
   {
-    if (!this->_control_block)
-      return;
-
-    {
-      tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
-      this->_control_block->num_ptrs--;
-    }
-    if (this->_control_block->num_ptrs == 0)
-    {
-      this->_control_block->deallocate();
-    }
+    this->reset();
   }
 
   /**
@@ -245,8 +329,11 @@ public:
     if (this == &other)
       return *this;
 
-    this->_element = other._element;
+    this->reset();
+    this->_element       = other._element;
     this->_control_block = other._control_block;
+    other._element       = nullptr;
+    other._control_block = nullptr;
     return *this;
   }
 
@@ -258,24 +345,50 @@ public:
    */
   shared_ptr &operator=(const shared_ptr &other) noexcept
   {
-    if (this == &other)
-      return *this;
-
+    this->reset();
+    this->_element       = other._element;
+    this->_control_block = other._control_block;
+    
     if (this->_control_block)
     {
-      {
-        tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
-        this->_control_block->num_ptrs--;
-      }
-      if (this->_control_block->num_ptrs == 0)
-      {
-        this->_control_block->deallocate();
-      }
+      tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
+      this->_control_block->num_ptrs++;
     }
+    return *this;
+  }
 
-    this->_element = other._element;
+  /**
+   * @brief Templated Move Assignment
+   * Allows shared_ptr<Base> = shared_ptr<Derived>
+   */
+  template<class Y>
+  shared_ptr& operator=(shared_ptr<Y>&& other) noexcept
+  {
+    this->reset(); 
+
+    this->_element       = other._element; // This works if U* converts to T*
     this->_control_block = other._control_block;
-    other._control_block->num_ptrs++;
+    other._element       = nullptr;
+    other._control_block = nullptr;
+    return *this;
+  }
+
+  /**
+   * @brief Templated Copy Assignment
+   */
+  template<class Y>
+  shared_ptr& operator=(const shared_ptr<Y>& other) noexcept
+  {
+    this->reset();
+
+    this->_element       = other._element;
+    this->_control_block = other._control_block;
+    
+    if (this->_control_block)
+    {
+      tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
+      this->_control_block->num_ptrs++;
+    }
     return *this;
   }
 
@@ -287,121 +400,34 @@ public:
     if (!this->_control_block)
       return;
 
+    bool destroy_object = false;
+    bool destroy_control_block = false;
+
     {
       tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
       this->_control_block->num_ptrs--;
-    }
-    if (this->_control_block->num_ptrs == 0)
-    {
-      this->_control_block->deallocate();
+
+      if (this->_control_block->num_ptrs == 0)
+      {
+        destroy_object = true;
+        
+        if (this->_control_block->num_weak_ptrs == 0)
+        {
+          destroy_control_block = true;
+        }
+      }
     }
 
-    this->_element = nullptr;
+    if (destroy_object)
+      this->_control_block->dispose_object();
+
+    if (destroy_control_block)
+      this->_control_block->deallocate();
+
+    this->_element       = nullptr;
     this->_control_block = nullptr;
   }
-
-  /**
-   * @brief Reset the shared pointer to point to the object managed by the
-   * control block cb
-   *
-   * @param cb The control block to manage the object
-   */
-  void reset(T *ptr) noexcept
-  {
-    if (!this->_control_block)
-      return;
-
-    {
-      tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
-      this->_control_block->num_ptrs--;
-    }
-    if (this->_control_block->num_ptrs == 0)
-    {
-      this->_control_block->deallocate();
-    }
-
-    auto *cb = (control_block *) tenno::allocator<T>().allocate(
-      sizeof(control_block) / sizeof(T)
-      + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
-    cb->object = ptr;
-    cb->num_ptrs = 1;
-    cb->num_weak_ptrs = 0;
-    cb->allocator = tenno::allocator<T>();
-    cb->deleter = tenno::default_delete<T>();
-    cb->cb_mutex = tenno::mutex();
-    this->_element = cb->object;
-    this->_control_block = cb;
-  }
-
-  /**
-   * @brief Reset the shared pointer to point to the object managed by the
-   * control block cb
-   *
-   * @param cb The control block to manage the object
-   * @param deleter The deleter to use to delete the object
-   */
-  void reset(T *ptr, Deleter deleter) noexcept
-  {
-    if (!this->_control_block)
-      return;
-
-    {
-      tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
-      this->_control_block->num_ptrs--;
-    }
-    if (this->_control_block->num_ptrs == 0)
-    {
-      this->_control_block->deallocate();
-    }
-
-    auto *cb = (control_block *) tenno::allocator<T>().allocate(
-      sizeof(control_block) / sizeof(T)
-      + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
-    cb->object = ptr;
-    cb->num_ptrs = 1;
-    cb->num_weak_ptrs = 0;
-    cb->allocator = tenno::allocator<T>();
-    cb->deleter = deleter;
-    cb->cb_mutex = tenno::mutex();
-    this->_element = cb->object;
-    this->_control_block = cb;
-  }
-
-  /**
-   * @brief Reset the shared pointer to point to the object managed by the
-   * control block cb
-   *
-   * @param cb The control block to manage the object
-   * @param deleter The deleter to use to delete the object
-   * @param allocator The allocator to use to allocate the object
-   */
-  void reset(T *ptr, Deleter deleter, Alloc alloc) noexcept
-  {
-    if (!this->_control_block)
-      return;
-
-    {
-      tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
-      this->_control_block->num_ptrs--;
-    }
-    if (this->_control_block->num_ptrs == 0)
-    {
-      this->_control_block->deallocate();
-    }
-
-    control_block *cb = (control_block *) alloc.allocate(
-      sizeof(control_block) / sizeof(T)
-      + (sizeof(control_block) % sizeof(T) != 0 ? 1 : 0));
-    cb->object = ptr;
-    cb->num_ptrs = 1;
-    cb->num_weak_ptrs = 0;
-    cb->allocator = alloc;
-    cb->deleter = deleter;
-    cb->cb_mutex = tenno::mutex();
-    this->_element = cb->object;
-    this->_control_block = cb;
-  }
-
+  
   /**
    * @brief Swap the shared pointer with another shared pointer
    *
@@ -409,13 +435,13 @@ public:
    */
   void swap(shared_ptr &other) noexcept
   {
-    T *tmp_element = this->_element;
-    control_block *tmp_control_block = this->_control_block;
+    T                  *tmp_element       = this->_element;
+    control_block_base *tmp_control_block = this->_control_block;
 
-    this->_element = other._element;
+    this->_element       = other._element;
     this->_control_block = other._control_block;
 
-    other._element = tmp_element;
+    other._element       = tmp_element;
     other._control_block = tmp_control_block;
   }
 
@@ -519,7 +545,7 @@ public:
 private:
 #endif
   T *_element;
-  control_block *_control_block;
+  control_block_base *_control_block;
 };
 
 /**
@@ -541,7 +567,7 @@ public:
   constexpr weak_ptr() noexcept
   {
     this->_control_block = nullptr;
-    this->_ptr = nullptr;
+    this->_ptr           = nullptr;
   }
 
   /**
@@ -554,11 +580,13 @@ public:
     if (!r._control_block)
     {
       this->_control_block = nullptr;
-      this->_ptr = nullptr;
+      this->_ptr           = nullptr;
       return;
     }
+    
+    tenno::lock_guard<tenno::mutex> lock(r._control_block->cb_mutex);
     this->_control_block = r._control_block;
-    this->_ptr = r._ptr;
+    this->_ptr           = r._ptr;
     this->_control_block->num_weak_ptrs++;
   }
 
@@ -572,13 +600,15 @@ public:
     if (!r._control_block)
     {
       this->_control_block = nullptr;
-      this->_ptr = nullptr;
+      this->_ptr           = nullptr;
       return;
     }
+
+    tenno::lock_guard<tenno::mutex> lock(r._control_block->cb_mutex);
     this->_control_block = r._control_block;
-    this->_ptr = r._ptr;
-    r._control_block = nullptr;
-    r._ptr = nullptr;
+    this->_ptr           = r._ptr;
+    r._control_block     = nullptr;
+    r._ptr               = nullptr;
   }
 
   /**
@@ -591,11 +621,12 @@ public:
     if (!r._control_block)
     {
       this->_control_block = nullptr;
-      this->_ptr = nullptr;
+      this->_ptr           = nullptr;
       return;
     }
+    
     tenno::lock_guard<tenno::mutex> lock(r._control_block->cb_mutex);
-    this->_ptr = r._element;
+    this->_ptr           = r._element;
     this->_control_block = r._control_block;
     this->_control_block->num_weak_ptrs++;
   }
@@ -605,15 +636,23 @@ public:
    */
   ~weak_ptr()
   {
-    if (this->_control_block)
+    if (!this->_control_block) return;
+
+    bool should_delete_block = false;
     {
+      tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
+      this->_control_block->num_weak_ptrs--;
+
+      if (this->_control_block->num_ptrs == 0 && 
+          this->_control_block->num_weak_ptrs == 0)
       {
-        tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
-        this->_control_block->num_weak_ptrs--;
+        should_delete_block = true;
       }
-      if (this->_control_block->num_ptrs == 0
-          && this->_control_block->num_weak_ptrs == 0)
-        this->_control_block->deallocate();
+    }
+
+    if (should_delete_block)
+    {
+      this->_control_block->deallocate();
     }
   }
 
@@ -625,25 +664,18 @@ public:
    */
   weak_ptr &operator=(const weak_ptr &r) noexcept
   {
-    if (this->_control_block)
-    {
-      {
-        tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
-        this->_control_block->num_weak_ptrs--;
-      }
-      if (this->_control_block->num_ptrs == 0
-          && this->_control_block->num_weak_ptrs == 0)
-        this->_control_block->deallocate();
-    }
+    if (this == &r) return *this;
+    
     if (!r._control_block)
     {
       this->_control_block = nullptr;
-      this->_ptr = nullptr;
+      this->_ptr           = nullptr;
       return *this;
     }
+
     tenno::lock_guard<tenno::mutex> lock(r._control_block->cb_mutex);
     this->_control_block = r._control_block;
-    this->_ptr = r._ptr;
+    this->_ptr           = r._ptr;
     this->_control_block->num_weak_ptrs++;
     return *this;
   }
@@ -656,24 +688,15 @@ public:
    */
   weak_ptr &operator=(const shared_ptr<T> &r) noexcept
   {
-    if (this->_control_block)
-    {
-      {
-        tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
-        this->_control_block->num_weak_ptrs--;
-      }
-      if (this->_control_block->num_ptrs == 0
-          && this->_control_block->num_weak_ptrs == 0)
-        this->_control_block->deallocate();
-    }
     if (!r._control_block)
     {
       this->_control_block = nullptr;
-      this->_ptr = nullptr;
+      this->_ptr           = nullptr;
       return *this;
     }
+    
     tenno::lock_guard<tenno::mutex> lock(r._control_block->cb_mutex);
-    this->_ptr = r._element;
+    this->_ptr           = r._element;
     this->_control_block = r._control_block;
     this->_control_block->num_weak_ptrs++;
     return *this;
@@ -687,26 +710,17 @@ public:
    */
   weak_ptr &operator=(weak_ptr &&r) noexcept
   {
-    if (this->_control_block)
-    {
-      {
-        tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
-        this->_control_block->num_weak_ptrs--;
-      }
-      if (this->_control_block->num_ptrs == 0
-          && this->_control_block->num_weak_ptrs == 0)
-        this->_control_block->deallocate();
-    }
     if (!r._control_block)
     {
       this->_control_block = nullptr;
-      this->_ptr = nullptr;
+      this->_ptr           = nullptr;
       return *this;
     }
+
     this->_control_block = r._control_block;
-    this->_ptr = r._ptr;
-    r._control_block = nullptr;
-    r._ptr = nullptr;
+    this->_ptr           = r._ptr;
+    r._control_block     = nullptr;
+    r._ptr               = nullptr;
     return *this;
   }
 
@@ -715,10 +729,20 @@ public:
    */
   void reset() noexcept
   {
+    bool should_deallocate = false;
     if (this->_control_block)
+    {
+      tenno::lock_guard<tenno::mutex> lock(this->_control_block->cb_mutex);
       this->_control_block->num_weak_ptrs--;
+      if (this->_control_block->num_ptrs == 0
+          && this->_control_block->num_weak_ptrs == 0)
+        should_deallocate = true;
+    }
+    if (should_deallocate)
+      this->_control_block->deallocate();
+
     this->_control_block = nullptr;
-    this->_ptr = nullptr;
+    this->_ptr           = nullptr;
   }
 
   /**
@@ -728,12 +752,12 @@ public:
    */
   void swap(weak_ptr &r) noexcept
   {
-    auto cb_tmp = this->_control_block;
-    auto ptr_tmp = this->_ptr;
+    auto cb_tmp          = this->_control_block;
+    auto ptr_tmp         = this->_ptr;
     this->_control_block = r._control_block;
-    this->_ptr = r._ptr;
-    r._control_block = cb_tmp;
-    r._ptr = ptr_tmp;
+    this->_ptr           = r._ptr;
+    r._control_block     = cb_tmp;
+    r._ptr               = ptr_tmp;
   }
 
   /**
@@ -768,10 +792,11 @@ public:
    */
   tenno::shared_ptr<T> lock() const noexcept
   {
-    if (this->_control_block->num_ptrs == 0)
-      return tenno::shared_ptr<T>();
-    auto sp = tenno::shared_ptr<T>();
-    sp._element = this->_ptr;
+    if (!this->_control_block || this->_control_block->num_ptrs == 0)
+      return nullptr;
+
+    auto sp           = tenno::shared_ptr<T>();
+    sp._element       = this->_ptr;
     sp._control_block = this->_control_block;
     sp._control_block->num_ptrs++;
     return sp;
@@ -835,7 +860,7 @@ public:
 
 private:
   element_type *_ptr;
-  typename tenno::shared_ptr<T>::control_block *_control_block;
+  control_block_base *_control_block;
 };
 
 /**
@@ -1019,15 +1044,18 @@ make_shared(Args &&...args) noexcept
   using cb_t = typename tenno::shared_ptr<T>::control_block;
   tenno::shared_ptr<T> sp;
   T *t = new T(args...);
-  cb_t *cb = (cb_t *) tenno::allocator<T>().allocate(
-    sizeof(cb_t) / sizeof(T) + (sizeof(cb_t) % sizeof(T) != 0 ? 1 : 0));
-  cb->object = t;
-  cb->num_ptrs = 1;
+
+  size_t         size_in_ts = (sizeof(cb_t) + sizeof(T) - 1) / sizeof(T);
+  void*          raw_mem    = tenno::allocator<T>().allocate(size_in_ts);
+  cb_t* cb                  = new (raw_mem) cb_t();
+    
+  cb->object        = t;
+  cb->num_ptrs      = 1;
   cb->num_weak_ptrs = 0;
-  cb->allocator = tenno::allocator<T>();
-  cb->deleter = tenno::default_delete<T>();
-  cb->cb_mutex = tenno::mutex();
-  sp._element = t;
+  cb->allocator     = tenno::allocator<T>();
+  cb->deleter       = tenno::default_delete<T>();
+  cb->cb_mutex      = tenno::mutex();
+  sp._element       = t;
   sp._control_block = cb;
   return tenno::move(sp);
 }
@@ -1039,15 +1067,18 @@ make_shared(tenno::size n) noexcept
   using cb_t = typename tenno::shared_ptr<T>::control_block;
   tenno::shared_ptr<T> sp;
   T *t = new T[n];
-  cb_t *cb = (cb_t *) tenno::allocator<T>().allocate(
-    sizeof(cb_t) / sizeof(T) + (sizeof(cb_t) % sizeof(T) != 0 ? 1 : 0));
-  cb->object = t;
-  cb->num_ptrs = 1;
+
+  size_t         size_in_ts = (sizeof(cb_t) + sizeof(T) - 1) / sizeof(T);
+  void*          raw_mem    = tenno::allocator<T>().allocate(size_in_ts);
+  cb_t* cb                  = new (raw_mem) cb_t();
+
+  cb->object        = t;
+  cb->num_ptrs      = 1;
   cb->num_weak_ptrs = 0;
-  cb->allocator = tenno::allocator<T>();
-  cb->deleter = tenno::default_delete<T>();
-  cb->cb_mutex = tenno::mutex();
-  sp._element = t;
+  cb->allocator     = tenno::allocator<T>();
+  cb->deleter       = tenno::default_delete<T>();
+  cb->cb_mutex      = tenno::mutex();
+  sp._element       = t;
   sp._control_block = cb;
   return tenno::move(sp);
 }
@@ -1063,15 +1094,39 @@ template <class T> shared_ptr<T> make_shared() noexcept
   using cb_t = typename tenno::shared_ptr<T>::control_block;
   tenno::shared_ptr<T> sp;
   T *t = new T();
-  cb_t *cb = (cb_t *) tenno::allocator<T>().allocate(
-    sizeof(cb_t) / sizeof(T) + (sizeof(cb_t) % sizeof(T) != 0 ? 1 : 0));
-  cb->object = t;
-  cb->num_ptrs = 1;
+
+  size_t         size_in_ts = (sizeof(cb_t) + sizeof(T) - 1) / sizeof(T);
+  void*          raw_mem    = tenno::allocator<T>().allocate(size_in_ts);
+  cb_t* cb                  = new (raw_mem) cb_t();
+
+  cb->object        = t;
+  cb->num_ptrs      = 1;
   cb->num_weak_ptrs = 0;
-  cb->allocator = tenno::allocator<T>();
-  cb->deleter = tenno::default_delete<T>();
-  cb->cb_mutex = tenno::mutex();
-  sp._element = t;
+  cb->allocator     = tenno::allocator<T>();
+  cb->deleter       = tenno::default_delete<T>();
+  cb->cb_mutex      = tenno::mutex();
+  sp._element       = t;
+  sp._control_block = cb;
+  return tenno::move(sp);
+}
+
+template <class T> shared_ptr<T> make_shared(T&& val) noexcept
+{
+  using cb_t = typename tenno::shared_ptr<T>::control_block;
+  tenno::shared_ptr<T> sp;
+  T *t = new T(tenno::move(val));
+
+  size_t         size_in_ts = (sizeof(cb_t) + sizeof(T) - 1) / sizeof(T);
+  void*          raw_mem    = tenno::allocator<T>().allocate(size_in_ts);
+  cb_t* cb                  = new (raw_mem) cb_t();
+
+  cb->object        = t;
+  cb->num_ptrs      = 1;
+  cb->num_weak_ptrs = 0;
+  cb->allocator     = tenno::allocator<T>();
+  cb->deleter       = tenno::default_delete<T>();
+  cb->cb_mutex      = tenno::mutex();
+  sp._element       = t;
   sp._control_block = cb;
   return tenno::move(sp);
 }
@@ -1091,8 +1146,8 @@ template <class T, class Alloc, class... Args>
 typename tenno::shared_ptr<T> allocate_shared(Alloc &alloc,
                                               Args &&...args) noexcept
 {
-  T *t = alloc.allocate(1);
-  *t = T(args...);
+  void* raw_mem = alloc.allocate(1);
+  T *t = new (raw_mem) T(args...);
   return tenno::shared_ptr<T>(t);
 }
 
@@ -1107,8 +1162,8 @@ typename tenno::shared_ptr<T> allocate_shared(Alloc &alloc,
 template <class T, class Alloc>
 shared_ptr<T> allocate_shared(Alloc &alloc) noexcept
 {
-  T *t = alloc.allocate(1);
-  *t = T();
+  void* raw_mem = alloc.allocate(1);
+  T *t = new (raw_mem) T();
   return tenno::shared_ptr<T>(t);
 }
 

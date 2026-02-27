@@ -79,7 +79,7 @@ make docs
 ## random
 
 tenno implements **compile-time random number generation** through the
-`uniform_real_distribution()` and the `random_array()` dunctions,
+`uniform_real_distribution()` and the `random_array()` functions,
 enabling you to use random numbers in constexpr algorithms.
 
 ## array
@@ -93,11 +93,3 @@ specified is bigger than the size of the array.
 - `tenno::vector<T>.at(n)` returns `expected<T,E>`
 - `tenno::vector<T>.front()` return `expected<const T&,E>`
 - `tenno::vector<T>.back()` returns `expected<const T&,E>`
-- `tenno::vector<T>.operator[]` returns `expected<T,E>`
-- all iterator access methods return `expected<T,E>`
-- iterator is divided into `iterator` and `iterator_mut`
-
-## functional
-
-- `std::reference_wrapper\<T>.get()` has beed renamed to
-  `std::reference_wrapper\<T>.ref()`

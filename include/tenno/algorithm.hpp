@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <functional> // std::function
 #include <tenno/utility.hpp>
 
 namespace tenno
@@ -103,4 +104,17 @@ template <class T> void swap(T &a, T &b) noexcept
   b = tenno::move(tmp);
 }
 
+template<class T>
+constexpr const T& max(const T& a, const T& b)
+{
+  return (a > b) ? a : b;
+}
+
+template<class T, class Compare>
+constexpr const T& max(const T& a, const T& b, Compare comp)
+{
+  using CompareFunc = std::function<bool(const T&, const T&)>;
+  return (static_cast<CompareFunc>(comp))(a, b) ? a : b;
+}
+  
 } // namespace tenno

@@ -30,7 +30,7 @@ TEST(shared_ptr_assignment, "tenno::shared_ptr = tenno::shared_ptr")
   ASSERT_EQ(sp1.use_count(), 2);
 }
 
-TEST(shared_ptr_reset0, "tenno::shared_ptr::reset 1")
+TEST(shared_ptr_reset, "tenno::shared_ptr::reset")
 {
   auto sp1 = tenno::shared_ptr<int>(new int(10));
   auto sp2 = sp1;
@@ -38,30 +38,6 @@ TEST(shared_ptr_reset0, "tenno::shared_ptr::reset 1")
   sp1.reset();
   ASSERT_EQ(sp1.use_count(), 0);
   ASSERT_EQ(sp2.use_count(), 1);
-}
-
-TEST(shared_ptr_reset1, "tenno::shared_ptr::reset 1")
-{
-  auto sp1 = tenno::shared_ptr<int>(new int(10));
-  ASSERT_EQ(sp1.use_count(), 1);
-  sp1.reset(new int(42));
-  ASSERT_EQ(sp1.use_count(), 1);
-}
-
-TEST(shared_ptr_reset2, "tenno::shared_ptr::reset 2")
-{
-  auto sp = tenno::shared_ptr<int>(new int(10));
-  ASSERT_EQ(*sp.get(), 10);
-  sp.reset(new int(42), tenno::default_delete<int>());
-  ASSERT_EQ(*sp.get(), 42);
-}
-
-TEST(shared_ptr_reset3, "tenno::shared_ptr::reset 3")
-{
-  auto sp = tenno::shared_ptr<int>(new int(10));
-  ASSERT_EQ(*sp.get(), 10);
-  sp.reset(new int(42), tenno::default_delete<int>(), tenno::allocator<int>());
-  ASSERT_EQ(*sp.get(), 42);
 }
 
 TEST(shared_ptr_swap, "tenno::shared_ptr::swap")

@@ -30,71 +30,68 @@ public:
   using const_pointer = typename Allocator::const_pointer;
   using difference_type = T;
 
-  vector()
+  constexpr vector()
       : _size(0), _capacity(0), _data(nullptr),
         _allocator(tenno::allocator<T>()) {};
 
-  explicit vector(size_type count,
-
+  explicit constexpr vector(size_type count,
                   const T &value, const Allocator &alloc = Allocator())
-      : _size(count), _capacity(count), _data(_allocator.allocate(count)),
-        _allocator(alloc)
+    : _size(0),
+      _capacity(count),
+      _allocator(alloc)
   {
-    for (size_type i = 0; i < count; ++i)
+    _data = _allocator.allocate(_capacity);
+    for (; _size < count; ++_size)
     {
-      _data[i] = value;
+      new (&_data[_size]) T(value);
     }
   }
-  explicit vector(size_type count, const Allocator &alloc = Allocator())
-      : _size(count), _capacity(count), _data(_allocator.allocate(count)),
-        _allocator(alloc)
+  explicit constexpr vector(size_type count, const Allocator &alloc = Allocator())
+    : _size(0),
+      _capacity(count),
+      _allocator(alloc)
   {
+    _data = _allocator.allocate(_capacity);
+    for (; _size < count; ++_size)
+    {
+      new (&_data[_size]) T();
+    }
   }
 
-  vector(const vector &other)
+  // Copy constructor
+  constexpr vector(const vector &other, const Allocator &alloc = Allocator())
+    : _size(0),
+      _capacity(other._capacity),
+      _allocator(alloc)
+
+  {
+    _data = _allocator.allocate(_capacity);
+    for (; _size < other._size; ++_size)
+    {
+      new (&_data[_size]) T(other._data[_size]);
+    }
+  }
+
+  // Move constructor
+  constexpr vector(vector &&other)
       : _size(other._size), _capacity(other._capacity),
-        _data(_allocator.allocate(other._size)), _allocator(other._allocator)
+        _data(other._data), _allocator(tenno::move(other._allocator))
   {
-    for (size_type i = 0; i < other._size; ++i)
-    {
-      _data[i] = other._data[i];
-    }
+    other._data      = nullptr;
+    other._size      = 0;
+    other._capacity  = 0;
   }
 
-  vector(const vector &other, const Allocator &alloc)
-      : _size(other._size), _capacity(other._capacity),
-        _data(_allocator.allocate(other._size)), _allocator(alloc)
-  {
-    for (size_type i = 0; i < other._size; ++i)
-    {
-      _data[i] = other._data[i];
-    }
-  }
-
-  vector(vector &&other)
-      : _size(other._size), _capacity(other._capacity), _data(other._data),
-        _allocator(other._allocator)
-  {
-    other._size = 0;
-    other._data = nullptr;
-  }
-
-  vector(vector &&other, const Allocator &alloc)
-      : _size(other._size), _capacity(other._capacity), _data(other._data),
+  // Initializer list constructor
+  constexpr vector(std::initializer_list<T> init,
+                   const Allocator &alloc = Allocator())
+      : _size(0), _capacity(init.size()),
         _allocator(alloc)
   {
-    other._size = 0;
-    other._data = nullptr;
-  }
-  vector(std::initializer_list<T> init, const Allocator &alloc = Allocator())
-      : _size(init.size()), _capacity(init.size()),
-        _data(_allocator.allocate(init.size())), _allocator(alloc)
-  {
-    size_type i = 0;
-    for (auto it = init.begin(); it != init.end(); ++it)
-    {
-      _data[i] = *it;
-      ++i;
+    _data = _allocator.allocate(_capacity);
+    for (const auto& item : init) {
+      new (&_data[_size]) T(item);
+      ++_size;
     }
   }
 
@@ -102,54 +99,60 @@ public:
   {
     if (_data == nullptr)
       return;
-    _allocator.deallocate(_data, _size);
-  }
 
-  vector &operator=(const vector &other)
-  {
-    if (this != &other)
+    for (size_type i = 0; i < _size; ++i)
     {
-      _allocator.deallocate(_data, _capacity);
-      _size = other._size;
-      _capacity = other._size;
-      _allocator = other._allocator;
-      _data = _allocator.allocate(_size);
-      for (size_type i = 0; i < _size; ++i)
-      {
-        _data[i] = other._data[i];
-      }
+      _data[i].~T();
     }
-    return *this;
-  }
-
-  vector &operator=(vector &&other) noexcept
-  {
-    if (this != &other)
-    {
-      _allocator.deallocate(_data, _capacity);
-      _size = other._size;
-      _capacity = other._capacity;
-      _data = other._data;
-      _allocator = other._allocator;
-
-      other._size = 0;
-      other._data = nullptr;
-      other._capacity = 0;
-    }
-    return *this;
-  }
-
-  vector &operator=(std::initializer_list<value_type> ilist)
-  {
     _allocator.deallocate(_data, _capacity);
-    _size = ilist.size();
-    _capacity = ilist.size();
-    _data = _allocator.allocate(_size);
-    size_type i = 0;
-    for (auto it = ilist.begin(); it != ilist.end(); ++it)
+  }
+
+  constexpr vector &operator=(const vector &other)
+  {
+    if (this != &other)
     {
-      _data[i] = *it;
-      ++i;
+      vector temp(other);
+      this->swap(temp);
+    }
+    
+    return *this;
+  }
+
+  constexpr vector &operator=(vector &&other) noexcept
+  {
+    if (this != &other)
+    {
+      this->clear();
+      _allocator.deallocate(_data, _capacity);
+      
+      _size      = other._size;
+      _capacity  = other._capacity;
+      _data      = other._data;
+      _allocator = std::move(other._allocator);
+
+      other._size     = 0;
+      other._capacity = 0;
+      other._data     = nullptr;
+    }
+    return *this;
+  }
+
+  constexpr vector &operator=(std::initializer_list<value_type> ilist)
+  {
+    this->clear();
+
+    if (ilist.size() > _capacity)
+    {
+      _allocator.deallocate(_data, _capacity);
+      _data = _allocator.allocate(ilist.size());  
+      _capacity = ilist.size();
+    }
+
+    _size = 0;
+    for (const auto& item : ilist)
+    {
+      new (&_data[_size]) T(item);
+      ++_size;
     }
     return *this;
   }
@@ -158,57 +161,49 @@ public:
   {
     if (count > _capacity)
     {
+      T* new_data = _allocator.allocate(count);
+      
+      this->clear();
       _allocator.deallocate(_data, _capacity);
-      _size = count;
+      
+      _data     = new_data;
       _capacity = count;
-      _data = _allocator.allocate(_size);
     }
+    else
+    {
+      this->clear();
+    }
+
+    _size = 0;
     for (size_type i = 0; i < count; ++i)
     {
-      _data[i] = value;
+      new (&_data[_size]) T(value);
+      ++_size;
     }
   }
-
-  /*
-  // this overwrites the previous assign method
-  template< class InputIt >
-  void assign( InputIt first, InputIt last )
-  {
-      size_type count = 0;
-      InputIt tmp = first;
-      while (tmp != last)
-      {
-          count++;
-          tmp++;
-      }
-
-      if (count > _capacity)
-      {
-          _allocator.deallocate(_data, _capacity);
-          _size = count;
-          _capacity = count;
-          _data = _allocator.allocate(_size);
-      }
-      size_type i = 0;
-      for (auto it = first; it != last; ++it)
-      {
-          _data[i] = *it;
-          ++i;
-      }
-  }
-  */
 
   void assign(std::initializer_list<T> ilist)
   {
-    _allocator.deallocate(_data, _capacity);
-    _size = ilist.size();
-    _capacity = ilist.size();
-    _data = _allocator.allocate(_size);
-    size_type i = 0;
-    for (auto it = ilist.begin(); it != ilist.end(); ++it)
+    if (ilist.size() > _capacity)
     {
-      _data[i] = *it;
-      ++i;
+      T* new_data = _allocator.allocate(ilist.size());
+      
+      this->clear();
+      _allocator.deallocate(_data, _capacity);
+      
+      _data     = new_data;
+      _capacity = ilist.size();
+    }
+    else
+    {
+      this->clear();
+    }
+
+    _size = 0;
+    for (const auto& i : ilist)
+    {
+      new (&_data[_size]) T(i);
+      ++_size;
     }
   }
 
@@ -216,16 +211,24 @@ public:
   {
     if (r.size() > _capacity)
     {
+      T* new_data = _allocator.allocate(r.size());
+      
+      this->clear();
       _allocator.deallocate(_data, _capacity);
-      _size = r.size();
+      
+      _data     = new_data;
       _capacity = r.size();
-      _data = _allocator.allocate(_size);
     }
-    size_type i = 0;
-    for (auto it = r.begin(); it != r.end(); ++it)
+    else
     {
-      _data[i] = *it;
-      ++i;
+      this->clear();
+    }
+
+    _size = 0;
+    for (const auto& i : r)
+    {
+      new (&_data[_size]) T(i);
+      ++_size;
     }
   }
 
@@ -240,34 +243,19 @@ public:
     {
       return tenno::unexpected(tenno::error::out_of_range);
     }
-    return tenno::reference_wrapper<T>(tenno::move(_data[pos]));
+    return tenno::reference_wrapper<T>(_data[pos]);
   }
 
-  expected<tenno::reference_wrapper<T>, tenno::error> operator[](size_type pos)
+  // Unsafe!
+  T& operator[](size_type pos)
   {
-    if (pos >= _size)
-    {
-      return tenno::unexpected(tenno::error::out_of_range);
-    }
-    if (_data == nullptr)
-    {
-      return tenno::unexpected(tenno::error::not_initialized);
-    }
-    return tenno::reference_wrapper<T>(tenno::move(_data[pos]));
+    return _data[pos];
   }
 
-  expected<tenno::reference_wrapper<const T>, tenno::error>
-  operator[](size_type pos) const
+  // Unsafe!
+  const T& operator[](size_type pos) const
   {
-    if (pos >= _size)
-    {
-      return tenno::unexpected(tenno::error::out_of_range);
-    }
-    if (_data == nullptr)
-    {
-      return tenno::unexpected(tenno::error::not_initialized);
-    }
-    return tenno::reference_wrapper<const T>(tenno::move(_data[pos]));
+    return _data[pos];
   }
 
   expected<tenno::reference_wrapper<const T>, tenno::error> front() const
@@ -280,7 +268,7 @@ public:
     {
       return tenno::unexpected(tenno::error::not_initialized);
     }
-    return tenno::reference_wrapper<const T>(tenno::move(_data[0]));
+    return tenno::reference_wrapper<const T>(_data[0]);
   }
 
   expected<tenno::reference_wrapper<const T>, tenno::error> back() const
@@ -293,7 +281,7 @@ public:
     {
       return tenno::unexpected(tenno::error::not_initialized);
     }
-    return tenno::reference_wrapper<const T>(tenno::move(_data[_size - 1]));
+    return tenno::reference_wrapper<const T>(_data[_size - 1]);
   }
 
   tenno::expected<pointer, tenno::error> data() noexcept
@@ -340,7 +328,7 @@ public:
       return *this;
     }
 
-    iterator operator++(T) noexcept
+    iterator operator++(int) noexcept
     {
       iterator _iterator = *this;
       ++index;
@@ -357,19 +345,32 @@ public:
       return !(index == other.index);
     }
 
-    tenno::expected<tenno::reference_wrapper<T>, tenno::error>
-    operator*() noexcept
+    T& operator*() noexcept
     {
       return vec[index];
     }
 
-    tenno::expected<tenno::reference_wrapper<T>, tenno::error>
-    operator->() noexcept
+    T* operator->() noexcept
     {
-      return vec[index];
+      return &vec[index];
     }
 
-    tenno::expected<tenno::reference_wrapper<T>, tenno::error> get() noexcept
+    iterator operator-(iterator &other) const noexcept
+    {
+      return this->index - other;
+    }
+
+    iterator operator+(const size_type &other) const noexcept
+    {
+      return this->index + other;
+    }
+
+    operator tenno::size() const noexcept 
+    {
+      return this->index;
+    }
+
+    T& get() noexcept
     {
       return vec[index];
     }
@@ -407,6 +408,104 @@ public:
   }
 
   /**
+   * @brief An iterator to iterate over the data
+   */
+  struct const_iterator
+  {
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = const T;
+    using pointer = const T *;
+    using reference = const T &;
+
+    tenno::size index;
+    const tenno::vector<T, Allocator> &vec;
+
+    const_iterator(const iterator& other) 
+      : index(other.index), vec(other.vec) {}
+    
+    explicit const_iterator(const tenno::vector<T, Allocator> &_vec,
+                            const tenno::size _index)
+        : index(_index), vec(_vec)
+    {
+    }
+
+    const_iterator &operator++() noexcept
+    {
+      index++;
+      return *this;
+    }
+
+    const_iterator operator++(int) noexcept
+    {
+      const_iterator _iterator = *this;
+      ++index;
+      return _iterator;
+    }
+
+    bool operator==(const const_iterator &other) const noexcept
+    {
+      return index == other.index;
+    }
+
+    bool operator!=(const const_iterator &other) const noexcept
+    {
+      return !(index == other.index);
+    }
+
+    const T& operator*() const noexcept
+    {
+      return vec[index];
+    }
+
+    T* operator->() const noexcept
+    {
+      return &vec[index];
+    }
+
+    size_type operator-(const_iterator &other) const noexcept
+    {
+      return other.index - this->index;
+    }
+    
+    const T& get() const noexcept
+    {
+      return vec[index];
+    }
+  };
+
+  /**
+   * @brief Get a const_iterator to the beginning of the data
+   *
+   * @return const_iterator The const_iterator to the beginning of the data
+   *
+   * # Example
+   * ```cpp
+   * tenno::vector<int> vec = {1, 2, 3};
+   * auto begin = vec.begin();
+   * ```
+   */
+  const_iterator begin() const noexcept
+  {
+    return const_iterator(*this, tenno::size(0));
+  }
+
+  /**
+   * @brief Get a const_iterator to the end of the data
+   *
+   * @return const_iterator The const_iterator to the end of the data
+   *
+   * # Example
+   * ```cpp
+   * tenno::for_each(vec.begin(), vec.end(), [](int& elem) { elem = 0; });
+   * ```
+   */
+  const_iterator end() const noexcept
+  {
+    return const_iterator(*this, this->_size);
+  }
+
+  /**
    * @brief An reverse_iterator to iterate over the data
    */
   struct reverse_iterator
@@ -432,7 +531,7 @@ public:
       return *this;
     }
 
-    reverse_iterator operator++(T) noexcept
+    reverse_iterator operator++(int) noexcept
     {
       reverse_iterator _iterator = *this;
       --index;
@@ -449,19 +548,17 @@ public:
       return !(index == other.index);
     }
 
-    tenno::expected<tenno::reference_wrapper<T>, tenno::error>
-    operator*() noexcept
+    T& operator*() noexcept
     {
       return vec[index];
     }
 
-    tenno::expected<tenno::reference_wrapper<T>, tenno::error>
-    operator->() noexcept
+    T* operator->() noexcept
     {
-      return vec[index];
+      return &vec[index];
     }
 
-    tenno::expected<tenno::reference_wrapper<T>, tenno::error> get() noexcept
+    T& get() noexcept
     {
       return vec[index];
     }
@@ -519,13 +616,23 @@ public:
     {
       return;
     }
+    
     pointer new_data = _allocator.allocate(new_cap);
+
+    // Move elements into the new memory
     for (size_type i = 0; i < _size; ++i)
     {
-      new_data[i] = _data[i];
+      new (&new_data[i]) T(std::move(_data[i]));
     }
+    
+    // Explicitly destroy the old objects
+    for (size_type i = 0; i < _size; ++i)
+    {
+      _data[i].~T();
+    }
+    
     _allocator.deallocate(_data, _capacity);
-    _data = new_data;
+    _data     = new_data;
     _capacity = new_cap;
   }
 
@@ -541,39 +648,65 @@ public:
       return;
     }
     pointer new_data = _allocator.allocate(_size);
+    
+    // Move elements into the new memory
     for (size_type i = 0; i < _size; ++i)
     {
-      new_data[i] = _data[i];
+      new (&new_data[i]) T(std::move(_data[i]));
     }
+    
+    // Explicitly destroy the old objects
+    for (size_type i = 0; i < _size; ++i)
+    {
+      _data[i].~T();
+    }
+    
     _allocator.deallocate(_data, _capacity);
+    
     _data = new_data;
     _capacity = _size;
   }
 
   void clear() noexcept
   {
+    for (size_type i = 0; i < _size; ++i)
+    {
+      _data[i].~T();
+    }
     this->_size = 0;
   }
 
-  void push_back(const T &value) noexcept
+  constexpr void push_back(const T &value) noexcept
   {
     if (_size == _capacity)
     {
       reserve(_capacity == 0 ? 1 : _capacity * 2);
     }
-    _data[_size] = value;
+    
+    new (&_data[_size]) T(value);
     _size++;
   }
 
-  void push_back(const T &&value) noexcept
+  constexpr void push_back(T &&value) noexcept
   {
-    push_back(value);
+    if (_size == _capacity)
+    {
+      reserve(_capacity == 0 ? 1 : _capacity * 2);
+    }
+    new (&_data[_size]) T(std::move(value)); 
+    _size++;
   }
 
   template <class... Args> reference emplace_back(Args &&...args) noexcept
   {
-    push_back(T(std::forward<Args>(args)...));
-    return _data[_size - 1];
+    if (_size >= _capacity)
+    {
+      size_type new_cap = (_capacity == 0) ? 1 : _capacity * 2;
+      this->reserve(new_cap);
+    }
+
+    new (&_data[_size]) T(std::forward<Args>(args)...);
+    return _data[_size++];
   }
 
   void pop_back() noexcept
@@ -582,27 +715,47 @@ public:
     {
       return;
     }
+
+    _data[_size - 1].~T();
     _size--;
   }
 
   void resize(size_type count) noexcept
   {
-    reserve(count);
-    while (_size < count)
+    if (count < _size)
     {
-      _data[_size] = T();
-      ++_size;
+      for (size_type i = count; i < _size; ++i)
+      {
+        _data[i].~T();
+      }
+    }
+    else if (count > _size)
+    {
+      reserve(count);
+      for (size_type i = _size; i < count; ++i)
+      {
+        new (&_data[i]) T();
+      }
     }
     _size = count;
   }
 
   void resize(size_type count, const value_type &value) noexcept
   {
-    reserve(count);
-    while (_size < count)
+    if (count < _size)
     {
-      _data[_size] = value;
-      ++_size;
+      for (size_type i = count; i < _size; ++i)
+      {
+        _data[i].~T();
+      }
+    }
+    else if (count > _size)
+    {
+      reserve(count);
+      for (size_type i = _size; i < count; ++i)
+      {
+        new (&_data[i]) T(value);
+      }
     }
     _size = count;
   }
@@ -615,11 +768,67 @@ public:
     tenno::swap(_allocator, other._allocator);
   }
 
+  template<class InputIt>
+  iterator insert(const_iterator pos, InputIt first, InputIt last)
+  {
+    size_type insert_idx = pos.index;
+    size_type count = 0;
+    for (InputIt it = first; it != last; ++it)
+    {
+      count++;
+    }
+
+    if (count == 0) return iterator(*this, insert_idx);
+
+    if (_size + count > _capacity)
+    {
+      reserve(tenno::max(_size + count, _capacity * 2));
+    }
+
+    size_type old_size = _size;
+    _size += count;
+
+    for (size_type i = old_size; i > insert_idx; --i)
+    {
+      size_type src_idx = i - 1;
+      size_type dst_idx = i + count - 1;
+
+      if (dst_idx >= old_size)
+      {
+        new (&_data[dst_idx]) T(tenno::move(_data[src_idx]));
+      }
+      else
+      {
+        _data[dst_idx] = tenno::move(_data[src_idx]);
+      }
+    }
+
+    InputIt current_input = first;
+    for (size_type i = 0; i < count; ++i)
+    {
+      size_type dst_idx = insert_idx + i;
+        
+      if (dst_idx >= old_size)
+      {
+        new (&_data[dst_idx]) T(*current_input);
+      }
+      else
+      {
+        _data[dst_idx] = *current_input;
+      }
+      ++current_input;
+    }
+
+    return iterator(*this, insert_idx);
+  }
+  
 private:
+  
   size_type _size;
   size_type _capacity;
-  pointer _data;
+  pointer   _data;
   Allocator _allocator;
+  
 };
 
 } // namespace tenno
