@@ -60,6 +60,11 @@ public:
     return val;
   }
 
+  constexpr const T& operator->() const noexcept
+  {
+    return val;
+  }
+
   constexpr bool operator==(const expected<T, E> &other) const noexcept
   {
     if (has_val != other.has_val)
