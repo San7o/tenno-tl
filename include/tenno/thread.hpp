@@ -35,6 +35,9 @@ public:
   jthread(jthread &&other) noexcept
   {
     this->_inner_thread = std::move(other._inner_thread);
+#if __cplusplus >= 202002L // C++20
+    this->_stop_source = tenno::move(other._stop_source);
+#endif
     this->id = this->_inner_thread.get_id();
   }
 
@@ -59,7 +62,17 @@ public:
       this->_inner_thread.join();
     }
   }
-
+  
+  jthread& operator=(tenno::jthread&& other) noexcept
+  {
+    this->_inner_thread = tenno::move(other._inner_thread);
+#if __cplusplus >= 202002L // C++20
+    this->_stop_source = tenno::move(other._stop_source);
+#endif
+    this->id = this->_inner_thread.get_id();
+    return *this;
+  }
+  
   bool joinable() const noexcept
   {
     return this->_inner_thread.joinable();
