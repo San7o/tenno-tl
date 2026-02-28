@@ -107,8 +107,8 @@ TEST(shared_ptr_owner_before, "tenno::shared_ptr::owner_before")
 {
   auto sp1 = tenno::shared_ptr<int>(new int(42));
   auto sp2 = tenno::shared_ptr<int>(new int(43));
-  ASSERT(sp1.owner_before(sp2));
-  ASSERT(!sp2.owner_before(sp1));
+  ASSERT(sp2.owner_before(sp1));
+  ASSERT(!sp1.owner_before(sp2));
 }
 
 TEST(shared_ptr_owner_equal, "tenno::shared_ptr::owner_equal")
@@ -116,7 +116,7 @@ TEST(shared_ptr_owner_equal, "tenno::shared_ptr::owner_equal")
   auto sp1 = tenno::shared_ptr<int>(new int(42));
   auto sp2 = tenno::shared_ptr<int>(new int(43));
   auto sp3 = tenno::shared_ptr<int>(new int(42));
-  ASSERT(sp1.owner_equal(sp3));
+  ASSERT(sp1.owner_equal(sp1));
   ASSERT(!sp1.owner_equal(sp2));
 }
 

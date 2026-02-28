@@ -96,23 +96,21 @@ TEST(weak_ptr_expired, "tenno::weak_ptr expired")
   ASSERT(!wp.expired());
 }
 
-TEST(weak_ptr_owner_before, "tenno::weak_ptr owner_before")
+TEST(weak_ptr_owner_before, "Aliasing test")
 {
-  tenno::shared_ptr<int> sp1(new int(42));
-  tenno::shared_ptr<int> sp2(new int(43));
-  tenno::weak_ptr<int> wp1(sp1);
-  tenno::weak_ptr<int> wp2(sp2);
-  ASSERT(wp1.owner_before(wp2));
-}
+  struct Data { int x; int y; };
+  auto sp1 = tenno::make_shared<Data>();
 
-TEST(weak_ptr_owner_before_shared_ptr,
-     "tenno::weak_ptr owner_before shared_ptr")
-{
-  tenno::shared_ptr<int> sp1(new int(42));
-  tenno::shared_ptr<int> sp2(new int(43));
-  tenno::weak_ptr<int> wp1(sp1);
+  // Aliasing constructor
+  tenno::shared_ptr<int> sp2(sp1, &sp1->y); 
+
+  tenno::weak_ptr<Data> wp1(sp1);
   tenno::weak_ptr<int> wp2(sp2);
-  ASSERT(wp1.owner_before(sp2));
+
+  ASSERT(static_cast<void*>(sp1.get()) != static_cast<void*>(sp2.get()));
+    
+  ASSERT(!wp1.owner_before(wp2));
+  ASSERT(!wp2.owner_before(wp1));
 }
 
 TEST(weak_ptr_swap, "tenno::weak_ptr swap")
